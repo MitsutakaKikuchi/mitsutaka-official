@@ -17,7 +17,7 @@ export const SITE = {
    * 問い合わせフォーム送信先（Formspree）。
    * TODO: https://formspree.io でフォームを作成し、発行された ID に置き換える
    */
-  formspreeEndpoint: 'https://formspree.io/f/YOUR_FORM_ID',
+  formspreeEndpoint: 'https://formspree.io/f/xqeoloab',
   /** SNS は Instagram のみ運用。追加する場合はここに URL を足し、Footer.astro に項目を追加する */
   sns: {
     instagram: 'https://www.instagram.com/_mitsu_yoshi_taka/',
