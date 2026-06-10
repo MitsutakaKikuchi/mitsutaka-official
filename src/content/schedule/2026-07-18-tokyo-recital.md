@@ -9,6 +9,7 @@ cityEn: 'Tokyo'
 country: 'JP'
 ticketUrl: 'https://example.com/tickets'
 soldOut: false
+flyerUrl: 'flyers/sample-flyer.svg'
 ---
 
 サンプルの公演データです。このファイルをコピーして実際の公演情報に書き換えてください。

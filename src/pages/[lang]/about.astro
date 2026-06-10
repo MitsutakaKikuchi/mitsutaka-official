@@ -1,6 +1,8 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
+import portraitPhoto from '../../assets/photos/portrait.jpg';
 import { SITE } from '../../config/site';
 import { useTranslations, type Lang } from '../../i18n/ui';
 
@@ -11,31 +13,21 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
 
-// TODO: 以下は仮テキスト。正式なプロフィール文（日英）に差し替える
+// TODO: 英訳中の人名ローマ字表記（若柳宏晃・若柳歓峰）は本人に要確認
 const profile = {
   ja: [
-    'X歳より長唄三味線を始め、〇〇に師事。東京藝術大学（仮）にて長唄三味線を専攻。',
-    '歌舞伎公演・長唄演奏会をはじめ、舞踊公演・式典・海外公演など幅広い舞台で三味線方を務める。',
-    '古典の伝統を深く受け継ぎながら、長唄の魅力を次世代と世界に伝えるべく、演奏活動とともに普及活動にも力を注いでいる。',
+    '東京都出身。',
+    '幼少より父 若柳宏晃に日本舞踊の手ほどきを受け、直派分家若柳流へ入門。若柳歓峰の名を許される。',
+    '長唄三味線を成田涼子氏に師事。',
+    '長唄・三味線の演奏会・舞踊会への出演の他、東京都台東区立浅草中学校三味線部の指導を務める等、学校教育における和楽器指導へも尽力。',
+    '現在、東京藝術大学音楽学部邦楽科に在学中。',
   ],
   en: [
-    'Began studying the nagauta shamisen at the age of X under the tutelage of XX, and majored in nagauta shamisen at Tokyo University of the Arts (placeholder).',
-    'Performs as a shamisen player on a wide range of stages, including kabuki productions, nagauta concerts, classical dance performances, ceremonies, and international tours.',
-    'Deeply rooted in classical tradition, MITSUTAKA is dedicated to passing on the art of nagauta to the next generation and sharing it with audiences around the world.',
-  ],
-} as const;
-
-// TODO: 実際の受賞歴・実績に差し替える
-const achievements = {
-  ja: [
-    '20XX年 歌舞伎座〇〇公演 出演（サンプル）',
-    '20XX年 〇〇演奏会 タテ三味線を務める（サンプル）',
-    '20XX年 〇〇国際芸術祭 招聘出演（サンプル）',
-  ],
-  en: [
-    '20XX — Performed at the Kabuki-za Theatre, XX production (sample)',
-    '20XX — Lead shamisen (tate-jamisen) at the XX concert (sample)',
-    '20XX — Invited performance, XX International Arts Festival (sample)',
+    'Born in Tokyo.',
+    'Introduced to classical Japanese dance (nihon buyo) in early childhood by his father Wakayagi Hiroaki, he entered the Jikiha-Bunke Wakayagi school and was granted the stage name Wakayagi Kanpo.',
+    'He studies nagauta shamisen under Ryoko Narita.',
+    'In addition to appearing in nagauta concerts and classical dance recitals, he is devoted to traditional instrument education in schools, including coaching the shamisen club at Asakusa Junior High School in Taito City, Tokyo.',
+    'He is currently enrolled in the Department of Traditional Japanese Music, Faculty of Music, at the Tokyo University of the Arts.',
   ],
 } as const;
 
@@ -48,31 +40,28 @@ const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
 
     <div class="grid gap-12 md:grid-cols-[1fr_minmax(16rem,24rem)]">
       <div class="space-y-6 leading-loose" data-reveal>
-        <p class="font-serif text-2xl tracking-[0.2em]">{SITE.artistNameEn}</p>
+        <p class="font-serif text-2xl tracking-[0.2em]">
+          {lang === 'ja' ? SITE.artistNameJa : SITE.artistNameEn}
+          <span class="ml-4 align-middle text-xs tracking-[0.3em] text-muted">
+            {lang === 'ja' ? SITE.artistNameDisplay : SITE.artistNameJa}
+          </span>
+        </p>
         {profile[lang].map((paragraph) => <p>{paragraph}</p>)}
       </div>
 
-      <!-- ポートレート写真のプレースホルダー（撮影後に <img> へ差し替え） -->
-      <figure
-        class="flex aspect-3/4 items-center justify-center border border-line bg-white/60 text-muted"
-        data-reveal
-      >
-        <figcaption class="px-6 text-center text-xs tracking-widest leading-relaxed">
-          {lang === 'ja' ? 'ポートレート写真（準備中）' : 'Portrait photo (coming soon)'}
-        </figcaption>
+      <figure class="self-start" data-mask-reveal>
+        <Image
+          src={portraitPhoto}
+          alt={lang === 'ja' ? '菊池光峰 ポートレート' : 'Portrait of KIKUCHI Mitsutaka'}
+          widths={[400, 800]}
+          sizes="(min-width: 768px) 24rem, 90vw"
+          class="w-full object-cover"
+          loading="eager"
+        />
       </figure>
     </div>
 
-    <section class="mt-20">
-      <SectionHeading en="Awards" label={lang === 'ja' ? '受賞歴・主な実績' : 'Awards & Highlights'} />
-      <ul class="space-y-4" data-reveal>
-        {
-          achievements[lang].map((item) => (
-            <li class="border-b border-line pb-4 tracking-wider">{item}</li>
-          ))
-        }
-      </ul>
-    </section>
+    <!-- TODO: 受賞歴・主な実績が確定したらセクションとして追加する -->
 
     <section class="mt-20">
       <SectionHeading en="Press Kit" label={lang === 'ja' ? 'プレス向け資料' : 'Press Kit'} />

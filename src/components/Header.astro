@@ -26,7 +26,7 @@ const navItems = [
       href={localePath(lang)}
       class="font-serif text-lg tracking-[0.2em] hover:text-accent transition-colors"
     >
-      {SITE.artistNameEn}
+      {lang === 'ja' ? SITE.artistNameJa : SITE.artistNameDisplay}
     </a>
 
     <nav class="hidden items-center gap-7 md:flex" aria-label="Main">
@@ -34,7 +34,7 @@ const navItems = [
         navItems.map((item) => (
           <a
             href={item.href}
-            class="text-sm tracking-widest text-ink/80 hover:text-accent transition-colors"
+            class="nav-link text-[0.8125rem] tracking-[0.18em] text-ink/80 hover:text-accent transition-colors"
           >
             {item.label}
           </a>
@@ -105,14 +105,19 @@ const navItems = [
 <div class="h-16" aria-hidden="true"></div>
 
 <script>
-  const toggleButton = document.getElementById('menu-toggle');
-  const mobileMenu = document.getElementById('mobile-menu');
+  // View Transitions でページが入れ替わるたびに再バインドする
+  function bindMobileMenu() {
+    const toggleButton = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
 
-  toggleButton?.addEventListener('click', () => {
-    const isOpen = toggleButton.getAttribute('aria-expanded') === 'true';
-    toggleButton.setAttribute('aria-expanded', String(!isOpen));
-    mobileMenu?.classList.toggle('hidden', isOpen);
-    mobileMenu?.classList.toggle('flex', !isOpen);
-    document.body.classList.toggle('overflow-hidden', !isOpen);
-  });
+    toggleButton?.addEventListener('click', () => {
+      const isOpen = toggleButton.getAttribute('aria-expanded') === 'true';
+      toggleButton.setAttribute('aria-expanded', String(!isOpen));
+      mobileMenu?.classList.toggle('hidden', isOpen);
+      mobileMenu?.classList.toggle('flex', !isOpen);
+      document.body.classList.toggle('overflow-hidden', !isOpen);
+    });
+  }
+
+  document.addEventListener('astro:page-load', bindMobileMenu);
 </script>

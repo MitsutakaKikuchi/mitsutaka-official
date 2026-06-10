@@ -2,17 +2,18 @@
  * サイト全体の設定。アーティスト情報の変更はこのファイル1箇所で完結する。
  */
 export const SITE = {
-  // TODO: 日本語の正式表記（漢字等）が決まったら artistNameJa を変更する
-  artistNameJa: 'MITSUTAKA',
-  artistNameEn: 'MITSUTAKA',
-  /** 縦書きロゴ・ヒーローで使う和文表記（仮: 決定後に変更） */
-  artistNameVertical: 'みつたか',
-  titleJa: 'MITSUTAKA | 長唄三味線方 公式サイト',
-  titleEn: 'MITSUTAKA | Nagauta Shamisen Player — Official Website',
+  artistNameJa: '菊池光峰',
+  artistNameEn: 'KIKUCHI Mitsutaka',
+  /** ヘッダー・ヒーローで使う欧文大文字表記 */
+  artistNameDisplay: 'KIKUCHI MITSUTAKA',
+  /** 縦書きロゴ・ヒーローで使う和文表記 */
+  artistNameVertical: '菊池光峰',
+  titleJa: '菊池光峰 | 長唄三味線方 公式サイト',
+  titleEn: 'KIKUCHI Mitsutaka | Nagauta Shamisen Player — Official Website',
   descriptionJa:
-    '長唄三味線方 MITSUTAKA の公式ウェブサイト。プロフィール、公演スケジュール、出演依頼の受付はこちら。',
+    '長唄三味線方・菊池光峰の公式ウェブサイト。プロフィール、公演スケジュール、出演依頼の受付はこちら。',
   descriptionEn:
-    'Official website of MITSUTAKA, Nagauta shamisen player. Profile, performance schedule, and booking inquiries.',
+    'Official website of KIKUCHI Mitsutaka, Nagauta shamisen player. Profile, performance schedule, and booking inquiries.',
   /**
    * 問い合わせフォーム送信先（Formspree）。
    * TODO: https://formspree.io でフォームを作成し、発行された ID に置き換える

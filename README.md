@@ -1,13 +1,22 @@
-# MITSUTAKA 公式ウェブサイト
+# 菊池光峰（KIKUCHI Mitsutaka）公式ウェブサイト
 
-長唄三味線方 MITSUTAKA の公式サイト。日英2言語対応の静的サイトで、GitHub Pages で公開する。
+長唄三味線方・菊池光峰の公式サイト。日英2言語対応の静的サイトで、GitHub Pages で公開する。
 
 - フレームワーク: [Astro](https://astro.build/)（静的出力）
 - スタイリング: Tailwind CSS v4
 - 多言語: `/ja/` `/en/` のURL分割 + hreflang
 - 公演データ: Markdown（`src/content/schedule/`）
-- フォーム: Formspree（要設定）
+- フォーム: Formspree
 - デプロイ: GitHub Actions → GitHub Pages（`main` への push で自動）
+- モーション演出:
+  - Lenis（慣性スクロール）
+  - GSAP + ScrollTrigger（スクロール連動フェード／パララックス／マスク演出／キネティックタイポ／SVGドローイング）
+  - Three.js（ヒーローのWebGLパーティクル。ホームのみ動的読込）
+  - Astro View Transitions（シームレスなページ遷移）
+  - カスタムカーソル（バニラJS）
+  - すべて `prefers-reduced-motion` 対応（無効時は静的表示）
+
+> **注意**: CSS の `scroll-behavior: smooth` は ScrollTrigger と干渉してページが勝手にスクロールする不具合を起こすため使用しないこと（詳細は `src/styles/global.css` のコメント参照）。
 
 ## 開発コマンド
 
@@ -36,34 +45,48 @@ npm run preview    # ビルド結果の確認
 
 | 項目 | 場所 |
 |------|------|
-| GitHubユーザー名（`YOUR-GITHUB-USERNAME` を置換） | `astro.config.mjs` の `site` / `public/robots.txt` |
-| Formspree のフォームID（`YOUR_FORM_ID` を置換） | `src/config/site.ts` の `formspreeEndpoint` |
-| アーティスト名の正式表記 | `src/config/site.ts` |
-| YouTube 動画ID（なければ空配列に） | `src/config/site.ts` の `youtubeVideoIds` |
-| プロフィール文・受賞歴（現在は仮テキスト） | `src/pages/[lang]/about.astro` |
+| YouTube 動画ID（現在はダミー。なければ空配列に） | `src/config/site.ts` の `youtubeVideoIds` |
 | 公演データ（現在はサンプル3件） | `src/content/schedule/*.md` |
-| 写真素材（ポートレート・ギャラリー・OGP画像） | `src/pages/[lang]/about.astro` / `media.astro` / `public/ogp.svg` |
+| 英語プロフィール内の人名ローマ字表記（若柳宏晃・若柳歓峰）の確認 | `src/pages/[lang]/about.astro` |
 
-## 公演スケジュールの更新方法
+設定済み: GitHubユーザー名（MitsutakaKikuchi）／Formspree ID／アーティスト名／プロフィール文／写真（`src/assets/photos/`）／OGP画像（`public/ogp.jpg`）
 
-`src/content/schedule/` に Markdown ファイルを1公演1ファイルで追加する（GitHub のWeb画面からも編集可能。コミットすると自動で再デプロイされる）。
+## 公演スケジュールの更新方法（Google スプレッドシート）
 
-```markdown
----
-titleJa: '長唄演奏会 2026'
-titleEn: 'Nagauta Concert 2026'
-date: 2026-07-18
-venueJa: '紀尾井ホール'
-venueEn: 'Kioi Hall'
-cityJa: '東京'
-cityEn: 'Tokyo'
-country: 'JP'                          # ISO 3166-1 国コード
-ticketUrl: 'https://example.com/'      # 任意
-soldOut: false                         # 完売時は true
----
-```
+普段の更新は**スプレッドシートに1行追加するだけ**。サイトには毎朝6時に自動反映される（すぐ反映したい場合は GitHub の Actions タブ → Deploy to GitHub Pages → Run workflow）。
 
-開催日を過ぎた公演は自動的に「過去の公演」アーカイブへ移動する。
+### 初回セットアップ（1回だけ）
+
+1. Google スプレッドシートを新規作成し、1行目に次のヘッダーを入れる
+
+   ```
+   date | titleJa | titleEn | venueJa | venueEn | cityJa | cityEn | country | ticketUrl | soldOut | flyerUrl | photoUrl
+   ```
+
+2. メニューの **ファイル → 共有 → ウェブに公開** で、対象シートを **カンマ区切り形式（.csv）** で公開し、URLをコピー
+3. GitHub リポジトリの **Settings → Secrets and variables → Actions → Variables** で
+   `SCHEDULE_CSV_URL` という名前の変数を作成し、コピーしたURLを貼り付ける
+
+### 入力ルール
+
+| 列 | 内容 |
+|----|------|
+| `date` | `2026-07-18` の形式（必須） |
+| `titleJa` / `titleEn` | 公演名。英語名が空なら日本語名を流用（titleJaは必須） |
+| `venueJa` 〜 `cityEn` | 会場・都市名（日英） |
+| `country` | 国コード2文字（`JP` `FR` など。空なら `JP`） |
+| `ticketUrl` | チケットページURL（任意） |
+| `soldOut` | 完売なら `TRUE` |
+| `flyerUrl` | チラシ画像（任意）。画像URLを貼る |
+| `photoUrl` | 演奏時の写真（任意）。画像URLを貼る |
+
+- チラシ・写真が無い公演は空欄でOK（テキストのみで表示される）
+- 開催日を過ぎた公演は自動的に「過去の公演」アーカイブへ移動する
+- 画像はリポジトリの `public/flyers/` `public/photos/` にアップロードして `flyers/xxx.jpg` のようにパス指定するか、外部の画像URLをそのまま貼る
+
+### フォールバック（Markdown）
+
+`SCHEDULE_CSV_URL` 未設定の間は `src/content/schedule/*.md`（1公演1ファイル）が使われる。ローカル開発やシート障害時の代替手段。フィールドはシートの列と同じ。
 
 ## 独自ドメインへの移行（将来）
 

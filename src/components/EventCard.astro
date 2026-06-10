@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { formatEventDate } from '../i18n/utils';
+import { formatEventDate, withBase } from '../i18n/utils';
 import { useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -18,6 +18,15 @@ const venue = lang === 'ja' ? data.venueJa : data.venueEn;
 const city = lang === 'ja' ? data.cityJa : data.cityEn;
 const regionNames = new Intl.DisplayNames([lang], { type: 'region' });
 const countryName = regionNames.of(data.country) ?? data.country;
+
+/** 完全URLはそのまま、サイト内パスは base を付与する */
+function resolveImageUrl(url: string): string {
+  return /^https?:\/\//.test(url) ? url : withBase(url);
+}
+
+// チラシ優先、なければ演奏写真（どちらも無い公演はテキストのみ）
+const imageUrl = data.flyerUrl ?? data.photoUrl;
+const imageLabel = data.flyerUrl ? t('schedule.flyer') : t('schedule.photo');
 ---
 
 <article
@@ -30,11 +39,31 @@ const countryName = regionNames.of(data.country) ?? data.country;
   <time datetime={data.date.toISOString().slice(0, 10)} class="text-sm tracking-wider text-accent">
     {formatEventDate(data.date, lang)}
   </time>
-  <div>
-    <h3 class="font-serif text-lg tracking-wider">{title}</h3>
-    <p class="mt-1 text-sm text-muted">
-      {venue} — {city}{data.country !== 'JP' || lang === 'en' ? `, ${countryName}` : ''}
-    </p>
+  <div class="flex items-start gap-4">
+    {
+      imageUrl && (
+        <a
+          href={resolveImageUrl(imageUrl)}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="shrink-0"
+          aria-label={`${imageLabel}: ${title}`}
+        >
+          <img
+            src={resolveImageUrl(imageUrl)}
+            alt={`${imageLabel}: ${title}`}
+            loading="lazy"
+            class="h-24 w-[4.5rem] border border-line object-cover transition-opacity hover:opacity-80"
+          />
+        </a>
+      )
+    }
+    <div>
+      <h3 class="font-serif text-lg tracking-wider">{title}</h3>
+      <p class="mt-1 text-sm text-muted">
+        {venue} — {city}{data.country !== 'JP' || lang === 'en' ? `, ${countryName}` : ''}
+      </p>
+    </div>
   </div>
   {
     !past &&

@@ -35,7 +35,13 @@ const thumbnail = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
 </button>
 
 <script>
-  document.querySelectorAll<HTMLButtonElement>('.yt-lite').forEach((button) => {
+  function bindLiteEmbeds() {
+    document.querySelectorAll<HTMLButtonElement>('.yt-lite').forEach(bindButton);
+  }
+
+  function bindButton(button: HTMLButtonElement) {
+    if (button.dataset.bound) return;
+    button.dataset.bound = 'true';
     button.addEventListener('click', () => {
       const { videoId, title } = button.dataset;
       if (!videoId) return;
@@ -47,5 +53,7 @@ const thumbnail = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
       iframe.className = 'aspect-video w-full';
       button.replaceWith(iframe);
     });
-  });
+  }
+
+  document.addEventListener('astro:page-load', bindLiteEmbeds);
 </script>

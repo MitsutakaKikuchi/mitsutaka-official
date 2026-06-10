@@ -9,22 +9,42 @@
   --color-muted: #8a8580;
   --color-line: #dedad2;
 
-  /* タイポグラフィ（仕様書②-3）: 和欧混植 */
+  /*
+   * タイポグラフィ（仕様書②-3）: 和欧混植
+   * - 見出し: Cormorant（欧文セリフ）+ しっぽり明朝B1（和文ディスプレイ明朝）
+   * - 本文: Inter + Noto Sans JP
+   */
   --font-sans: 'Inter Variable', 'Noto Sans JP Variable', system-ui, sans-serif;
-  --font-serif: 'Cormorant Variable', 'Noto Serif JP Variable', 'Hiragino Mincho ProN', serif;
+  --font-serif:
+    'Cormorant Variable', 'Shippori Mincho B1', 'Noto Serif JP Variable',
+    'Hiragino Mincho ProN', serif;
 
   --tracking-widest-jp: 0.25em;
 }
 
+/*
+ * 注意: scroll-behavior: smooth は ScrollTrigger.refresh() のスクロール位置計測と
+ * 干渉してページが勝手にスクロールするため使用しない（スムーススクロールは Lenis が担当）。
+ */
 html {
-  scroll-behavior: smooth;
   background-color: var(--color-base);
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
 }
 
 body {
   font-family: var(--font-sans);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'palt' 1; /* 和文のプロポーショナル詰め */
+}
+
+/* 明朝見出しは中量ウェイトで凛とした印象に */
+.font-serif {
+  font-weight: 500;
 }
 
 /* 縦書き（仕様書②-4: 見出し・キャッチコピーの部分活用） */
@@ -33,30 +53,109 @@ body {
   text-orientation: mixed;
 }
 
-/* スクロール連動フェードイン: JS 有効時のみ初期非表示にする（プログレッシブエンハンスメント） */
+/*
+ * モーション演出の初期状態（JS 有効時のみ非表示にするプログレッシブエンハンスメント）。
+ * アニメーション本体は GSAP（src/scripts/effects.ts）が担当する。
+ */
 html.js [data-reveal] {
   opacity: 0;
-  translate: 0 1.5rem;
-  transition:
-    opacity 0.9s ease,
-    translate 0.9s ease;
 }
 
-html.js [data-reveal].is-visible {
-  opacity: 1;
-  translate: 0 0;
+html.js [data-mask-reveal] {
+  clip-path: inset(0 0 100% 0);
+}
+
+html.js .k-char {
+  display: inline-block;
+  opacity: 0;
+}
+
+/* ナビゲーションリンクの下線アニメーション */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 1px;
+  width: 100%;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/*
+ * カスタムカーソル（マウスストーカー）。
+ * 中央合わせは JS の translate(-50%, -50%) で行う（margin + scale の組み合わせは
+ * ホバー拡大時に円がずれる原因になるため使わない）。拡大も JS が lerp で行う。
+ */
+html.fx-cursor,
+html.fx-cursor a,
+html.fx-cursor button {
+  cursor: none;
+}
+
+#cursor-dot,
+#cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 9999px;
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+
+#cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+}
+
+#cursor-ring {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgb(255 255 255 / 0.8);
+}
+
+/* ハンバーガーメニューのモーフィング */
+#menu-toggle[aria-expanded='true'] .menu-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+#menu-toggle[aria-expanded='true'] .menu-bar:nth-child(2) {
+  opacity: 0;
+}
+
+#menu-toggle[aria-expanded='true'] .menu-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
 }
 
 /* モーション無効設定を尊重（仕様書②-5 / WCAG） */
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  html.js [data-reveal],
+  html.js .k-char {
+    opacity: 1;
   }
 
-  html.js [data-reveal] {
-    opacity: 1;
-    translate: 0 0;
-    transition: none;
+  html.js [data-mask-reveal] {
+    clip-path: none;
+  }
+
+  #cursor-dot,
+  #cursor-ring {
+    display: none;
   }
 
   *,

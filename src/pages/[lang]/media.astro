@@ -1,7 +1,12 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import YouTubeEmbed from '../../components/YouTubeEmbed.astro';
+import performancePhoto from '../../assets/photos/performance.jpg';
+import concertPhoto from '../../assets/photos/concert-ensemble.jpg';
+import workshopPhoto from '../../assets/photos/workshop.jpg';
+import rehearsalPhoto from '../../assets/photos/rehearsal.jpg';
 import { SITE } from '../../config/site';
 import { useTranslations, type Lang } from '../../i18n/ui';
 
@@ -12,7 +17,13 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
 
-const GALLERY_PLACEHOLDER_COUNT = 6;
+const photos = [
+  { src: performancePhoto, ja: '演奏会にて', en: 'In concert' },
+  { src: concertPhoto, ja: '共演ステージ', en: 'Ensemble stage' },
+  { src: workshopPhoto, ja: 'レクチャー・ワークショップ', en: 'Lecture & workshop' },
+  { src: rehearsalPhoto, ja: '合同稽古', en: 'Ensemble rehearsal' },
+] as const;
+
 const pageTitle = lang === 'ja' ? 'メディア' : 'Media';
 ---
 
@@ -37,13 +48,22 @@ const pageTitle = lang === 'ja' ? 'メディア' : 'Media';
       <h2 class="mb-6 text-sm tracking-[0.3em] uppercase text-accent" data-reveal>
         {t('media.gallery')}
       </h2>
-      <!-- 撮影素材が揃ったら <img loading="lazy"> に差し替えるプレースホルダーグリッド -->
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3" data-reveal>
+      <div class="grid gap-4 sm:grid-cols-2">
         {
-          Array.from({ length: GALLERY_PLACEHOLDER_COUNT }, (_, index) => (
-            <div class="flex aspect-square items-center justify-center border border-line bg-white/60 text-xs tracking-widest text-muted">
-              {lang === 'ja' ? `写真 ${index + 1}（準備中）` : `Photo ${index + 1} (soon)`}
-            </div>
+          photos.map((photo) => (
+            <figure class="group overflow-hidden" data-mask-reveal>
+              <Image
+                src={photo.src}
+                alt={lang === 'ja' ? photo.ja : photo.en}
+                widths={[480, 960]}
+                sizes="(min-width: 640px) 50vw, 100vw"
+                class="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                loading="lazy"
+              />
+              <figcaption class="px-1 py-3 text-xs tracking-[0.2em] text-muted">
+                {lang === 'ja' ? photo.ja : photo.en}
+              </figcaption>
+            </figure>
           ))
         }
       </div>

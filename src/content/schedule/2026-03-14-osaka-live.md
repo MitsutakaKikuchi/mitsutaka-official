@@ -8,6 +8,7 @@ cityJa: '大阪'
 cityEn: 'Osaka'
 country: 'JP'
 soldOut: true
+photoUrl: 'photos/sample-stage.jpg'
 ---
 
 サンプルの過去公演データです。開催日を過ぎた公演は自動的にアーカイブに表示されます。

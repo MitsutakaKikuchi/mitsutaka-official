@@ -15,7 +15,9 @@ const snsLinks = [{ label: 'Instagram', url: SITE.sns.instagram }].filter((link)
 
 <footer class="border-t border-line bg-ink text-base/90">
   <div class="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 py-12 sm:px-6">
-    <p class="font-serif text-xl tracking-[0.3em]">{SITE.artistNameEn}</p>
+    <p class="font-serif text-xl tracking-[0.3em]">
+      {lang === 'ja' ? SITE.artistNameJa : SITE.artistNameDisplay}
+    </p>
     <nav class="flex gap-6" aria-label="Social media">
       {
         snsLinks.map((link) => (

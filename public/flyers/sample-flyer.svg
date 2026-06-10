@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 848">
+  <!-- サンプルの公演チラシ（実際のチラシ画像 JPG/PNG に差し替えて使う） -->
+  <rect width="600" height="848" fill="#1b3a5b"/>
+  <rect x="24" y="24" width="552" height="800" fill="none" stroke="#f7f5f0" stroke-opacity="0.4" stroke-width="1"/>
+  <circle cx="300" cy="300" r="160" fill="none" stroke="#f7f5f0" stroke-opacity="0.25" stroke-width="1.5"/>
+  <text x="300" y="180" text-anchor="middle" font-family="serif" font-size="40" letter-spacing="14" fill="#f7f5f0">長唄演奏会</text>
+  <text x="300" y="240" text-anchor="middle" font-family="serif" font-size="22" letter-spacing="8" fill="#f7f5f0" opacity="0.8">二〇二六</text>
+  <text x="300" y="480" text-anchor="middle" font-family="serif" font-size="56" letter-spacing="18" fill="#f7f5f0">菊池光峰</text>
+  <text x="300" y="560" text-anchor="middle" font-family="sans-serif" font-size="16" letter-spacing="6" fill="#f7f5f0" opacity="0.7">KIKUCHI MITSUTAKA</text>
+  <text x="300" y="760" text-anchor="middle" font-family="sans-serif" font-size="18" letter-spacing="4" fill="#f7f5f0" opacity="0.8">SAMPLE FLYER</text>
+</svg>
