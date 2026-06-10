@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://YOUR-GITHUB-USERNAME.github.io/mitsutaka-official/sitemap-index.xml
+Sitemap: https://MitsutakaKikuchi.github.io/mitsutaka-official/sitemap-index.xml
