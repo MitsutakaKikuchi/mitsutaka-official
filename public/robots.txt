@@ -1,0 +1,5 @@
+# TODO: GitHub ユーザー名に合わせて Sitemap の URL を変更すること
+User-agent: *
+Allow: /
+
+Sitemap: https://YOUR-GITHUB-USERNAME.github.io/mitsutaka-official/sitemap-index.xml

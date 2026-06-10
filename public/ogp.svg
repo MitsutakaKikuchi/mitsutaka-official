@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <!-- OGP 画像（仮: 演奏写真が用意できたら 1200x630 の JPG/PNG に差し替え、Base.astro の og:image も更新） -->
+  <rect width="1200" height="630" fill="#f7f5f0"/>
+  <circle cx="950" cy="315" r="260" fill="none" stroke="#1b3a5b" stroke-opacity="0.1" stroke-width="100"/>
+  <line x1="120" y1="560" x2="1080" y2="70" stroke="#1b3a5b" stroke-opacity="0.15" stroke-width="2"/>
+  <text x="110" y="300" font-family="Georgia, serif" font-size="84" letter-spacing="12" fill="#1a1a1a">MITSUTAKA</text>
+  <text x="114" y="370" font-family="sans-serif" font-size="30" letter-spacing="8" fill="#1b3a5b">NAGAUTA SHAMISEN PLAYER</text>
+</svg>

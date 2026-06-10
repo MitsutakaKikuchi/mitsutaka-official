@@ -1,0 +1,102 @@
+---
+import Base from '../../layouts/Base.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import { SITE } from '../../config/site';
+import { useTranslations, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'ja' } }, { params: { lang: 'en' } }];
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+
+const pageTitle = lang === 'ja' ? 'お問い合わせ' : 'Contact';
+const inputClass =
+  'w-full border border-line bg-white/70 px-4 py-3 text-sm tracking-wider focus:border-accent focus:outline-none transition-colors';
+---
+
+<Base lang={lang} subpath="contact/" title={pageTitle}>
+  <div class="mx-auto max-w-3xl px-4 py-20 sm:px-6">
+    <SectionHeading en="Contact / Booking" label={pageTitle} id="booking" />
+
+    <p class="leading-relaxed text-muted" data-reveal>{t('contact.lead')}</p>
+
+    <!--
+      Formspree による静的サイト用フォーム。
+      TODO: src/config/site.ts の formspreeEndpoint を実際の ID に置き換えるまで送信は動作しない。
+    -->
+    <form action={SITE.formspreeEndpoint} method="POST" class="mt-12 space-y-8" data-reveal>
+      <input type="hidden" name="_language" value={lang} />
+
+      <fieldset>
+        <legend class="mb-3 block text-xs tracking-[0.25em] uppercase text-accent">
+          {t('contact.type')}
+        </legend>
+        <div class="flex flex-col gap-3 sm:flex-row sm:gap-6">
+          {
+            [
+              { value: 'booking', label: t('contact.typeBooking') },
+              { value: 'general', label: t('contact.typeGeneral') },
+              { value: 'press', label: t('contact.typePress') },
+            ].map((option, index) => (
+              <label class="flex items-center gap-2 text-sm tracking-wider">
+                <input
+                  type="radio"
+                  name="inquiryType"
+                  value={option.value}
+                  checked={index === 0}
+                  class="accent-accent"
+                />
+                {option.label}
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div class="grid gap-8 sm:grid-cols-2">
+        <label class="block">
+          <span class="mb-2 block text-xs tracking-[0.25em] uppercase text-accent">
+            {t('contact.name')} *
+          </span>
+          <input type="text" name="name" required autocomplete="name" class={inputClass} />
+        </label>
+        <label class="block">
+          <span class="mb-2 block text-xs tracking-[0.25em] uppercase text-accent">
+            {t('contact.email')} *
+          </span>
+          <input type="email" name="email" required autocomplete="email" class={inputClass} />
+        </label>
+      </div>
+
+      <label class="block">
+        <span class="mb-2 block text-xs tracking-[0.25em] uppercase text-accent">
+          {t('contact.org')}
+        </span>
+        <input type="text" name="organization" autocomplete="organization" class={inputClass} />
+      </label>
+
+      <label class="block">
+        <span class="mb-2 block text-xs tracking-[0.25em] uppercase text-accent">
+          {t('contact.message')} *
+        </span>
+        <textarea
+          name="message"
+          required
+          rows={8}
+          placeholder={t('contact.messagePlaceholder')}
+          class={inputClass}></textarea>
+      </label>
+
+      <button
+        type="submit"
+        class="bg-accent hover:bg-accent-dark w-full px-10 py-4 text-sm tracking-[0.25em] text-white transition-colors sm:w-auto"
+      >
+        {t('contact.submit')}
+      </button>
+    </form>
+
+    <p class="mt-8 text-xs leading-relaxed text-muted" data-reveal>{t('contact.note')}</p>
+  </div>
+</Base>

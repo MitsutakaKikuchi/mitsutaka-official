@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import EventCard from '../../components/EventCard.astro';
+import { useTranslations, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'ja' } }, { params: { lang: 'en' } }];
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+
+const now = new Date();
+const allEvents = await getCollection('schedule');
+const upcomingEvents = allEvents
+  .filter((event) => event.data.date >= now)
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+const pastEvents = allEvents
+  .filter((event) => event.data.date < now)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// 構造化データ: 公演イベント（仕様書④-2）
+const eventsJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': upcomingEvents.map((event) => ({
+    '@type': 'MusicEvent',
+    name: lang === 'ja' ? event.data.titleJa : event.data.titleEn,
+    startDate: event.data.date.toISOString().slice(0, 10),
+    location: {
+      '@type': 'Place',
+      name: lang === 'ja' ? event.data.venueJa : event.data.venueEn,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: lang === 'ja' ? event.data.cityJa : event.data.cityEn,
+        addressCountry: event.data.country,
+      },
+    },
+    ...(event.data.ticketUrl ? { offers: { '@type': 'Offer', url: event.data.ticketUrl } } : {}),
+  })),
+};
+
+const pageTitle = lang === 'ja' ? '公演スケジュール' : 'Schedule';
+---
+
+<Base lang={lang} subpath="schedule/" title={pageTitle}>
+  <script type="application/ld+json" set:html={JSON.stringify(eventsJsonLd)} />
+
+  <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <SectionHeading en="Schedule" label={pageTitle} />
+
+    <section>
+      <h2 class="mb-2 text-sm tracking-[0.3em] uppercase text-accent" data-reveal>
+        {t('schedule.upcoming')}
+      </h2>
+      {
+        upcomingEvents.length > 0 ? (
+          upcomingEvents.map((event) => <EventCard event={event} lang={lang} />)
+        ) : (
+          <p class="py-6 text-muted" data-reveal>
+            {t('home.noUpcoming')}
+          </p>
+        )
+      }
+    </section>
+
+    {
+      pastEvents.length > 0 && (
+        <section class="mt-20">
+          <h2 class="mb-2 text-sm tracking-[0.3em] uppercase text-muted" data-reveal>
+            {t('schedule.past')}
+          </h2>
+          {pastEvents.map((event) => (
+            <EventCard event={event} lang={lang} past />
+          ))}
+        </section>
+      )
+    }
+  </div>
+</Base>

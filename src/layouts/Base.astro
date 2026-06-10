@@ -1,0 +1,99 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/cormorant';
+import '@fontsource-variable/noto-sans-jp';
+import '@fontsource-variable/noto-serif-jp';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../config/site';
+import { localePath, withBase } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** 言語プレフィックス以降のパス（例: 'about/'。トップは ''） */
+  subpath?: string;
+  title?: string;
+  description?: string;
+}
+
+const { lang, subpath = '', title, description } = Astro.props;
+
+const siteTitle = lang === 'ja' ? SITE.titleJa : SITE.titleEn;
+const pageTitle = title ? `${title} | ${SITE.artistNameEn}` : siteTitle;
+const pageDescription =
+  description ?? (lang === 'ja' ? SITE.descriptionJa : SITE.descriptionEn);
+
+const canonicalUrl = new URL(localePath(lang, subpath), Astro.site);
+const jaUrl = new URL(localePath('ja', subpath), Astro.site);
+const enUrl = new URL(localePath('en', subpath), Astro.site);
+
+// 構造化データ: アーティスト情報（仕様書④-2）
+const personJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: SITE.artistNameEn,
+  alternateName: SITE.artistNameJa,
+  jobTitle: lang === 'ja' ? '長唄三味線方' : 'Nagauta Shamisen Player',
+  url: new URL(withBase('/'), Astro.site).href,
+  sameAs: Object.values(SITE.sns).filter(Boolean),
+};
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="canonical" href={canonicalUrl.href} />
+    <link rel="alternate" hreflang="ja" href={jaUrl.href} />
+    <link rel="alternate" hreflang="en" href={enUrl.href} />
+    <link rel="alternate" hreflang="x-default" href={jaUrl.href} />
+    <link rel="sitemap" href={withBase('sitemap-index.xml')} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonicalUrl.href} />
+    <meta property="og:image" content={new URL(withBase('ogp.svg'), Astro.site).href} />
+    <meta property="og:locale" content={lang === 'ja' ? 'ja_JP' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
+    <script is:inline>
+      // JS 有効時のみフェードイン演出を適用するためのフラグ
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body class="bg-base text-ink min-h-screen flex flex-col">
+    <Header lang={lang} subpath={subpath} />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <script>
+      // スクロール連動フェードイン（prefers-reduced-motion を尊重）
+      const targets = document.querySelectorAll('[data-reveal]');
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (prefersReduced || !('IntersectionObserver' in window)) {
+        targets.forEach((el) => el.classList.add('is-visible'));
+      } else {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15 }
+        );
+        targets.forEach((el) => observer.observe(el));
+      }
+    </script>
+  </body>
+</html>

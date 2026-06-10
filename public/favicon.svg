@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 撥（ばち）をモチーフにしたシンボル（仮: 正式ロゴ完成後に差し替え） -->
+  <rect width="64" height="64" rx="8" fill="#1b3a5b"/>
+  <path d="M32 10 L44 48 L32 54 L20 48 Z" fill="#f7f5f0"/>
+</svg>

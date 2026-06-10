@@ -1,0 +1,58 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatEventDate } from '../i18n/utils';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  event: CollectionEntry<'schedule'>;
+  lang: Lang;
+  past?: boolean;
+}
+
+const { event, lang, past = false } = Astro.props;
+const t = useTranslations(lang);
+const { data } = event;
+
+const title = lang === 'ja' ? data.titleJa : data.titleEn;
+const venue = lang === 'ja' ? data.venueJa : data.venueEn;
+const city = lang === 'ja' ? data.cityJa : data.cityEn;
+const regionNames = new Intl.DisplayNames([lang], { type: 'region' });
+const countryName = regionNames.of(data.country) ?? data.country;
+---
+
+<article
+  class:list={[
+    'grid gap-3 border-b border-line py-6 sm:grid-cols-[10rem_1fr_auto] sm:items-center',
+    past && 'opacity-60',
+  ]}
+  data-reveal
+>
+  <time datetime={data.date.toISOString().slice(0, 10)} class="text-sm tracking-wider text-accent">
+    {formatEventDate(data.date, lang)}
+  </time>
+  <div>
+    <h3 class="font-serif text-lg tracking-wider">{title}</h3>
+    <p class="mt-1 text-sm text-muted">
+      {venue} — {city}{data.country !== 'JP' || lang === 'en' ? `, ${countryName}` : ''}
+    </p>
+  </div>
+  {
+    !past &&
+      (data.soldOut ? (
+        <span class="justify-self-start text-xs tracking-widest text-muted border border-line px-4 py-2 sm:justify-self-end">
+          {t('schedule.soldOut')}
+        </span>
+      ) : (
+        data.ticketUrl && (
+          <a
+            href={data.ticketUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="justify-self-start border border-accent text-accent hover:bg-accent hover:text-white transition-colors text-xs tracking-widest px-4 py-2 sm:justify-self-end"
+          >
+            {t('schedule.tickets')}
+          </a>
+        )
+      ))
+  }
+</article>

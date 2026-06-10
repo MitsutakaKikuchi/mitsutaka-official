@@ -1,0 +1,88 @@
+---
+import Base from '../../layouts/Base.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import { SITE } from '../../config/site';
+import { useTranslations, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'ja' } }, { params: { lang: 'en' } }];
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+
+// TODO: 以下は仮テキスト。正式なプロフィール文（日英）に差し替える
+const profile = {
+  ja: [
+    'X歳より長唄三味線を始め、〇〇に師事。東京藝術大学（仮）にて長唄三味線を専攻。',
+    '歌舞伎公演・長唄演奏会をはじめ、舞踊公演・式典・海外公演など幅広い舞台で三味線方を務める。',
+    '古典の伝統を深く受け継ぎながら、長唄の魅力を次世代と世界に伝えるべく、演奏活動とともに普及活動にも力を注いでいる。',
+  ],
+  en: [
+    'Began studying the nagauta shamisen at the age of X under the tutelage of XX, and majored in nagauta shamisen at Tokyo University of the Arts (placeholder).',
+    'Performs as a shamisen player on a wide range of stages, including kabuki productions, nagauta concerts, classical dance performances, ceremonies, and international tours.',
+    'Deeply rooted in classical tradition, MITSUTAKA is dedicated to passing on the art of nagauta to the next generation and sharing it with audiences around the world.',
+  ],
+} as const;
+
+// TODO: 実際の受賞歴・実績に差し替える
+const achievements = {
+  ja: [
+    '20XX年 歌舞伎座〇〇公演 出演（サンプル）',
+    '20XX年 〇〇演奏会 タテ三味線を務める（サンプル）',
+    '20XX年 〇〇国際芸術祭 招聘出演（サンプル）',
+  ],
+  en: [
+    '20XX — Performed at the Kabuki-za Theatre, XX production (sample)',
+    '20XX — Lead shamisen (tate-jamisen) at the XX concert (sample)',
+    '20XX — Invited performance, XX International Arts Festival (sample)',
+  ],
+} as const;
+
+const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
+---
+
+<Base lang={lang} subpath="about/" title={pageTitle}>
+  <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <SectionHeading en="About" label={pageTitle} />
+
+    <div class="grid gap-12 md:grid-cols-[1fr_minmax(16rem,24rem)]">
+      <div class="space-y-6 leading-loose" data-reveal>
+        <p class="font-serif text-2xl tracking-[0.2em]">{SITE.artistNameEn}</p>
+        {profile[lang].map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+
+      <!-- ポートレート写真のプレースホルダー（撮影後に <img> へ差し替え） -->
+      <figure
+        class="flex aspect-3/4 items-center justify-center border border-line bg-white/60 text-muted"
+        data-reveal
+      >
+        <figcaption class="px-6 text-center text-xs tracking-widest leading-relaxed">
+          {lang === 'ja' ? 'ポートレート写真（準備中）' : 'Portrait photo (coming soon)'}
+        </figcaption>
+      </figure>
+    </div>
+
+    <section class="mt-20">
+      <SectionHeading en="Awards" label={lang === 'ja' ? '受賞歴・主な実績' : 'Awards & Highlights'} />
+      <ul class="space-y-4" data-reveal>
+        {
+          achievements[lang].map((item) => (
+            <li class="border-b border-line pb-4 tracking-wider">{item}</li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="mt-20">
+      <SectionHeading en="Press Kit" label={lang === 'ja' ? 'プレス向け資料' : 'Press Kit'} />
+      <p class="leading-relaxed text-muted" data-reveal>
+        {
+          lang === 'ja'
+            ? '高解像度の宣材写真・プロフィール文（日英）をご用意しています。お問い合わせフォームよりご請求ください。'
+            : 'High-resolution photos and an official biography (Japanese / English) are available upon request via the contact form.'
+        }
+      </p>
+    </section>
+  </div>
+</Base>

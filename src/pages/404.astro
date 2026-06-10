@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import { localePath } from '../i18n/utils';
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations('ja');
+const tEn = useTranslations('en');
+---
+
+<Base lang="ja" title="404">
+  <div class="mx-auto flex max-w-3xl flex-col items-center gap-8 px-4 py-32 text-center sm:px-6">
+    <p class="font-serif text-7xl tracking-widest text-accent">404</p>
+    <div class="space-y-2">
+      <h1 class="font-serif text-2xl tracking-[0.2em]">{t('404.title')}</h1>
+      <p class="text-sm tracking-wider text-muted">{tEn('404.title')}</p>
+    </div>
+    <p class="leading-relaxed text-muted">{t('404.lead')}</p>
+    <div class="flex gap-6">
+      <a
+        href={localePath('ja')}
+        class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+      >
+        {t('404.back')}
+      </a>
+      <a
+        href={localePath('en')}
+        class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+      >
+        {tEn('404.back')}
+      </a>
+    </div>
+  </div>
+</Base>

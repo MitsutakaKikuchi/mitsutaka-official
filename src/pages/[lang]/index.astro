@@ -1,0 +1,90 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import EventCard from '../../components/EventCard.astro';
+import { localePath } from '../../i18n/utils';
+import { useTranslations, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'ja' } }, { params: { lang: 'en' } }];
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+
+const now = new Date();
+const HOME_EVENT_COUNT = 3;
+const upcomingEvents = (await getCollection('schedule'))
+  .filter((event) => event.data.date >= now)
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
+  .slice(0, HOME_EVENT_COUNT);
+---
+
+<Base lang={lang}>
+  <Hero lang={lang} />
+
+  <div id="content">
+    <!-- プロフィール導入 -->
+    <section class="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+      <SectionHeading en="About" label={t('home.aboutTitle')} />
+      <div class="grid gap-10 md:grid-cols-2 md:items-center" data-reveal>
+        <p class="font-serif text-xl leading-loose tracking-wider sm:text-2xl">
+          {t('home.aboutLead')}
+        </p>
+        <div class="flex md:justify-end">
+          <a
+            href={localePath(lang, 'about/')}
+            class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+          >
+            {t('home.aboutMore')} →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 直近の公演 -->
+    <section class="border-y border-line bg-white/50">
+      <div class="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+        <SectionHeading en="Schedule" label={t('home.scheduleTitle')} />
+        {
+          upcomingEvents.length > 0 ? (
+            upcomingEvents.map((event) => <EventCard event={event} lang={lang} />)
+          ) : (
+            <p class="text-muted" data-reveal>
+              {t('home.noUpcoming')}
+            </p>
+          )
+        }
+        <div class="mt-10" data-reveal>
+          <a
+            href={localePath(lang, 'schedule/')}
+            class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+          >
+            {t('home.scheduleMore')} →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 出演依頼 CTA（仕様書③: 全ページから Booking へ） -->
+    <section class="bg-ink text-base">
+      <div class="mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 py-24 text-center sm:px-6">
+        <h2 class="font-serif text-3xl tracking-[0.2em] sm:text-4xl" data-reveal>
+          {t('home.bookingTitle')}
+        </h2>
+        <p class="max-w-xl leading-relaxed text-base/80" data-reveal>
+          {t('home.bookingLead')}
+        </p>
+        <a
+          href={`${localePath(lang, 'contact/')}#booking`}
+          class="bg-accent hover:bg-accent-dark px-10 py-4 text-sm tracking-[0.25em] text-white transition-colors"
+          data-reveal
+        >
+          {t('home.bookingCta')}
+        </a>
+      </div>
+    </section>
+  </div>
+</Base>

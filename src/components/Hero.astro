@@ -1,0 +1,61 @@
+---
+import { SITE } from '../config/site';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<!--
+  ヒーローセクション（仕様書②-5）。
+  実際の演奏動画/写真が用意できたら、装飾 SVG を <video> または背景画像に差し替える。
+  動画の場合: <video autoplay muted loop playsinline poster="..."> + prefers-reduced-motion 時は poster 表示。
+-->
+<section class="relative flex min-h-[calc(100svh-4rem)] items-center justify-center overflow-hidden">
+  <!-- 背景の装飾: 撥の軌跡をイメージした円弧（プレースホルダー） -->
+  <svg
+    class="pointer-events-none absolute inset-0 h-full w-full"
+    viewBox="0 0 1200 800"
+    preserveAspectRatio="xMidYMid slice"
+    aria-hidden="true"
+  >
+    <circle cx="850" cy="380" r="300" fill="none" stroke="#1b3a5b" stroke-opacity="0.08" stroke-width="120"></circle>
+    <circle cx="850" cy="380" r="180" fill="none" stroke="#1a1a1a" stroke-opacity="0.05" stroke-width="2"></circle>
+    <line x1="150" y1="700" x2="1050" y2="60" stroke="#1b3a5b" stroke-opacity="0.12" stroke-width="1"></line>
+    <line x1="190" y1="720" x2="1090" y2="80" stroke="#1a1a1a" stroke-opacity="0.06" stroke-width="1"></line>
+  </svg>
+
+  <div class="relative mx-auto flex max-w-6xl items-center justify-center gap-10 px-4 sm:gap-16">
+    <h1 class="flex flex-col items-center gap-8">
+      <span
+        class="vertical-text font-serif text-3xl leading-loose tracking-[0.4em] sm:text-4xl md:text-5xl"
+      >
+        {t('hero.catchcopy')}
+      </span>
+      <span class="sr-only">{SITE.artistNameEn}</span>
+    </h1>
+    <div class="flex flex-col items-start gap-3">
+      <p class="text-xs tracking-[0.35em] text-accent sm:text-sm">{t('hero.sub')}</p>
+      <p class="font-serif text-4xl tracking-[0.15em] sm:text-5xl md:text-6xl" aria-hidden="true">
+        {SITE.artistNameEn}
+      </p>
+      {
+        lang === 'ja' && SITE.artistNameVertical !== SITE.artistNameEn && (
+          <p class="text-sm tracking-[0.5em] text-muted">{SITE.artistNameVertical}</p>
+        )
+      }
+    </div>
+  </div>
+
+  <a
+    href="#content"
+    class="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-muted hover:text-accent transition-colors"
+  >
+    <span class="text-[10px] tracking-[0.3em] uppercase">{t('hero.scroll')}</span>
+    <span class="block h-10 w-px bg-current"></span>
+  </a>
+</section>

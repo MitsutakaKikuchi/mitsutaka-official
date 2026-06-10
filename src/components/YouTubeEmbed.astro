@@ -1,0 +1,51 @@
+---
+/**
+ * パフォーマンス配慮の YouTube 埋め込み（クリックで初めて iframe を読み込む）。
+ * サムネイルのみ先に表示することで LCP への影響を避ける（仕様書④-2）。
+ */
+interface Props {
+  videoId: string;
+  title?: string;
+}
+
+const { videoId, title = 'YouTube video' } = Astro.props;
+const thumbnail = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+---
+
+<button
+  type="button"
+  class="yt-lite group relative block aspect-video w-full overflow-hidden bg-ink"
+  data-video-id={videoId}
+  data-title={title}
+  aria-label={`Play: ${title}`}
+>
+  <img
+    src={thumbnail}
+    alt={title}
+    loading="lazy"
+    class="h-full w-full object-cover opacity-80 transition-opacity group-hover:opacity-60"
+  />
+  <span
+    class="absolute inset-0 m-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent/90 transition-transform group-hover:scale-110"
+  >
+    <svg viewBox="0 0 24 24" class="ml-1 h-7 w-7 fill-white" aria-hidden="true">
+      <path d="M8 5v14l11-7z"></path>
+    </svg>
+  </span>
+</button>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.yt-lite').forEach((button) => {
+    button.addEventListener('click', () => {
+      const { videoId, title } = button.dataset;
+      if (!videoId) return;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+      iframe.title = title ?? 'YouTube video';
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.className = 'aspect-video w-full';
+      button.replaceWith(iframe);
+    });
+  });
+</script>

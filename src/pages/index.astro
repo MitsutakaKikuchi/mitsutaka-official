@@ -1,0 +1,31 @@
+---
+import { localePath } from '../i18n/utils';
+import { SITE } from '../config/site';
+
+// ルートアクセス時はブラウザ言語に応じて /ja/ または /en/ へ振り分ける
+const jaUrl = localePath('ja');
+const enUrl = localePath('en');
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>{SITE.artistNameEn}</title>
+    <meta name="robots" content="noindex" />
+    <link rel="alternate" hreflang="ja" href={jaUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <noscript>
+      <meta http-equiv="refresh" content={`0;url=${jaUrl}`} />
+    </noscript>
+    <script is:inline define:vars={{ jaUrl, enUrl }}>
+      const prefersJapanese = navigator.language.toLowerCase().startsWith('ja');
+      location.replace(prefersJapanese ? jaUrl : enUrl);
+    </script>
+  </head>
+  <body>
+    <p style="font-family: sans-serif; padding: 2rem;">
+      <a href={jaUrl}>日本語</a> / <a href={enUrl}>English</a>
+    </p>
+  </body>
+</html>
