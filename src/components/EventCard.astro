@@ -17,7 +17,14 @@ const title = lang === 'ja' ? data.titleJa : data.titleEn;
 const venue = lang === 'ja' ? data.venueJa : data.venueEn;
 const city = lang === 'ja' ? data.cityJa : data.cityEn;
 const regionNames = new Intl.DisplayNames([lang], { type: 'region' });
-const countryName = regionNames.of(data.country) ?? data.country;
+// 国コードが無効な場合は那存在するもとの値を使用（スプレッドシート側での修正が必要）
+let countryName = data.country || 'JP';
+try {
+  const name = regionNames.of(countryName);
+  countryName = name || countryName;
+} catch {
+  // 無効な国コードの場合はそのまま使用
+}
 
 /** 完全URLはそのまま、サイト内パスは base を付与する */
 function resolveImageUrl(url: string): string {
