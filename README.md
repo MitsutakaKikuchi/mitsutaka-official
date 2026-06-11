@@ -69,6 +69,7 @@ npm run preview    # ビルド結果の確認
 2. メニューの **ファイル → 共有 → ウェブに公開** で、対象シートを **カンマ区切り形式（.csv）** で公開し、URLをコピー
 3. GitHub リポジトリの **Settings → Secrets and variables → Actions → Variables** で
    `SCHEDULE_CSV_URL` という名前の変数を作成し、コピーしたURLを貼り付ける
+   - この変数は GitHub Actions の build 時に参照される
 
 ### 入力ルール
 
