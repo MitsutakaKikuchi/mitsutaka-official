@@ -11,6 +11,6 @@ const { en, label, id } = Astro.props;
 ---
 
 <div class="mb-10 flex items-baseline gap-4" data-reveal id={id}>
-  <h2 class="font-serif text-3xl tracking-[0.15em] sm:text-4xl">{label}</h2>
+  <h2 class="font-serif text-title tracking-[0.15em]">{label}</h2>
   {en !== label && <p class="text-xs tracking-[0.3em] uppercase text-accent">{en}</p>}
 </div>

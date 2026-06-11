@@ -57,7 +57,7 @@ const catchChars = [...t('hero.catchcopy')];
         <div class="flex flex-col items-center gap-8">
           {/* 縦書き: 右のキャッチコピー → 左の名前 の順に読む */}
           <div class="flex flex-row-reverse items-start justify-center gap-8 sm:gap-12">
-            <h1 class="vertical-text max-h-[min(34rem,calc(100svh-14rem))] font-serif text-xl leading-loose tracking-[0.42em] text-ink/80 sm:text-2xl">
+            <h1 class="vertical-text max-h-[min(34rem,calc(100svh-14rem))] font-serif text-lead leading-loose tracking-[0.42em] text-ink/80">
               {catchChars.map((char) => (
                 <span class="k-char">{char}</span>
               ))}
@@ -68,7 +68,7 @@ const catchChars = [...t('hero.catchcopy')];
                 {t('hero.sub')}
               </p>
               <p
-                class="vertical-text font-serif text-5xl tracking-[0.3em] sm:text-6xl md:text-7xl"
+                class="vertical-text font-serif text-display tracking-[0.3em]"
                 aria-hidden="true"
               >
                 {SITE.artistNameJa}
@@ -81,7 +81,7 @@ const catchChars = [...t('hero.catchcopy')];
         </div>
       ) : (
         <div class="flex flex-col gap-6">
-          <h1 class="font-serif text-3xl leading-snug tracking-[0.1em] sm:text-4xl md:text-5xl">
+          <h1 class="font-serif text-headline tracking-[0.1em]">
             {catchChars.map((char) => (
               <span class="k-char">{char === ' ' ? ' ' : char}</span>
             ))}
@@ -89,7 +89,7 @@ const catchChars = [...t('hero.catchcopy')];
           </h1>
           <div class="flex flex-col gap-2" data-reveal>
             <p class="text-xs tracking-[0.35em] text-accent">{t('hero.sub')}</p>
-            <p class="font-serif text-3xl tracking-[0.15em] sm:text-4xl" aria-hidden="true">
+            <p class="font-serif text-title tracking-[0.15em]" aria-hidden="true">
               {SITE.artistNameDisplay}
             </p>
             <p class="font-serif text-base tracking-[0.5em] text-muted">{SITE.artistNameJa}</p>
@@ -119,6 +119,6 @@ const catchChars = [...t('hero.catchcopy')];
     class="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-muted hover:text-accent transition-colors"
   >
     <span class="text-[10px] tracking-[0.3em] uppercase">{t('hero.scroll')}</span>
-    <span class="block h-10 w-px bg-current"></span>
+    <span class="scroll-hint-line block h-10 w-px bg-current"></span>
   </a>
 </section>

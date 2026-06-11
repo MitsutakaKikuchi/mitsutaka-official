@@ -35,12 +35,12 @@ const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
 ---
 
 <Base lang={lang} subpath="about/" title={pageTitle}>
-  <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+  <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
     <SectionHeading en="About" label={pageTitle} />
 
     <div class="grid gap-12 md:grid-cols-[1fr_minmax(16rem,24rem)]">
       <div class="space-y-6 leading-loose" data-reveal>
-        <p class="font-serif text-2xl tracking-[0.2em]">
+        <p class="font-serif text-lead tracking-[0.2em]">
           {lang === 'ja' ? SITE.artistNameJa : SITE.artistNameEn}
           <span class="ml-4 align-middle text-xs tracking-[0.3em] text-muted">
             {lang === 'ja' ? SITE.artistNameDisplay : SITE.artistNameJa}
@@ -63,7 +63,7 @@ const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
 
     <!-- TODO: 受賞歴・主な実績が確定したらセクションとして追加する -->
 
-    <section class="mt-20">
+    <section class="mt-section">
       <SectionHeading en="Press Kit" label={lang === 'ja' ? 'プレス向け資料' : 'Press Kit'} />
       <p class="leading-relaxed text-muted" data-reveal>
         {
