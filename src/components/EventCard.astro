@@ -17,13 +17,18 @@ const title = lang === 'ja' ? data.titleJa : data.titleEn;
 const venue = lang === 'ja' ? data.venueJa : data.venueEn;
 const city = lang === 'ja' ? data.cityJa : data.cityEn;
 const regionNames = new Intl.DisplayNames([lang], { type: 'region' });
-// 国コードが無効な場合は那存在するもとの値を使用（スプレッドシート側での修正が必要）
-let countryName = data.country || 'JP';
+// 国コードが無効な場合は元の値を使用（スプレッドシート側での修正が必要）
+let countryName = data.country?.trim() || 'JP';
+// 国コードが2文字でない場合はJPをデフォルト
+if (!countryName || countryName.length !== 2 || countryName.trim() === '') {
+  countryName = 'JP';
+}
 try {
   const name = regionNames.of(countryName);
   countryName = name || countryName;
-} catch {
+} catch (error) {
   // 無効な国コードの場合はそのまま使用
+  console.warn(`Invalid country code: "${data.country}"`, error);
 }
 
 /** 完全URLはそのまま、サイト内パスは base を付与する */
