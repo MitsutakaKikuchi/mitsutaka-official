@@ -13,9 +13,9 @@ const year = new Date().getFullYear();
 const snsLinks = [{ label: 'Instagram', url: SITE.sns.instagram }].filter((link) => link.url);
 ---
 
-<footer class="border-t border-line bg-ink text-base/90">
+<footer class="border-t border-line bg-ink text-paper/90">
   <div class="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 py-12 sm:px-6">
-    <p class="font-serif text-xl tracking-[0.3em]">
+    <p class="font-display text-xl tracking-[0.3em]">
       {lang === 'ja' ? SITE.artistNameJa : SITE.artistNameDisplay}
     </p>
     <nav class="flex gap-6" aria-label="Social media">
@@ -25,14 +25,14 @@ const snsLinks = [{ label: 'Instagram', url: SITE.sns.instagram }].filter((link)
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            class="text-sm tracking-widest text-base/70 hover:text-white transition-colors"
+            class="text-sm tracking-widest text-paper/70 hover:text-white transition-colors"
           >
             {link.label}
           </a>
         ))
       }
     </nav>
-    <p class="text-xs tracking-wider text-base/50">
+    <p class="text-xs tracking-wider text-paper/50">
       &copy; {year} {SITE.artistNameEn}. {t('footer.copyright')}
     </p>
   </div>

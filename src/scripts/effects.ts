@@ -20,6 +20,23 @@ const prefersReducedMotion = (): boolean =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const hasFinePointer = (): boolean => window.matchMedia('(pointer: fine)').matches;
 
+/*
+ * ページ単位で登録する gsap.ticker コールバック。
+ * View Transitions で要素が破棄されても ticker は残り続けるため、
+ * astro:before-swap でまとめて解除する。
+ */
+const pageTickers: gsap.TickerCallback[] = [];
+
+function addPageTicker(callback: gsap.TickerCallback): void {
+  gsap.ticker.add(callback);
+  pageTickers.push(callback);
+}
+
+function clearPageTickers(): void {
+  pageTickers.forEach((callback) => gsap.ticker.remove(callback));
+  pageTickers.length = 0;
+}
+
 /* ---------- 慣性スクロール ---------- */
 let lenis: Lenis | null = null;
 
@@ -55,12 +72,17 @@ function initReveals(): void {
   });
 }
 
-/* ---------- マスク演出（画像のクリップ表示） ---------- */
+/* ---------- マスク演出（画像のクリップ表示 + ズームリビール） ---------- */
+const ZOOM_REVEAL_FROM = 1.25;
+const ZOOM_REVEAL_TO = 1.08; // パララックス移動による見切れを防ぐため少し拡大したまま残す
+
 function initMaskReveals(): void {
   const reduced = prefersReducedMotion();
   document.querySelectorAll<HTMLElement>('[data-mask-reveal]').forEach((el) => {
+    const zoomTarget = el.querySelector<HTMLElement>('[data-zoom]');
     if (reduced) {
       gsap.set(el, { clipPath: 'inset(0% 0% 0% 0%)' });
+      if (zoomTarget) gsap.set(zoomTarget, { scale: ZOOM_REVEAL_TO });
       return;
     }
     gsap.fromTo(
@@ -73,6 +95,19 @@ function initMaskReveals(): void {
         scrollTrigger: { trigger: el, start: 'top 85%', once: true },
       }
     );
+    // マスクが開くのと同時に画像がゆっくり引いていく（ズームリビール）
+    if (zoomTarget) {
+      gsap.fromTo(
+        zoomTarget,
+        { scale: ZOOM_REVEAL_FROM },
+        {
+          scale: ZOOM_REVEAL_TO,
+          duration: 1.8,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+        }
+      );
+    }
   });
 }
 
@@ -104,9 +139,69 @@ function initKineticType(): void {
   }
   gsap.fromTo(
     chars,
-    { autoAlpha: 0, y: '0.5em' },
-    { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.07, delay: 0.35 }
+    { autoAlpha: 0, y: '0.5em', filter: 'blur(10px)' },
+    {
+      autoAlpha: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      duration: 0.9,
+      ease: 'power3.out',
+      stagger: 0.07,
+      delay: 0.35,
+    }
   );
+}
+
+/* ---------- 無限マーキー（スクロール速度・方向に反応） ---------- */
+const MARQUEE_BASE_SPEED = 0.7; // px/frame
+const MARQUEE_VELOCITY_GAIN = 0.25;
+const MARQUEE_MAX_BOOST = 9;
+const MARQUEE_DIR_LERP = 0.06;
+
+function initMarquee(): void {
+  if (prefersReducedMotion()) return;
+  document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
+    const track = el.querySelector<HTMLElement>('.marquee-track');
+    if (!track) return;
+    // トラックは同一グループ2周分。半周分進んだら巻き戻して無限ループに見せる
+    const wrapX = gsap.utils.wrap(-track.scrollWidth / 2, 0);
+    let x = 0;
+    let direction = 1;
+    let lastScrollY = window.scrollY;
+
+    addPageTicker(() => {
+      const velocity = window.scrollY - lastScrollY;
+      lastScrollY = window.scrollY;
+      // スクロール方向で流れる向きを反転（急反転しないよう lerp で馴染ませる）
+      const targetDirection = velocity === 0 ? direction : Math.sign(velocity);
+      direction += (targetDirection - direction) * MARQUEE_DIR_LERP;
+      const boost = Math.min(Math.abs(velocity) * MARQUEE_VELOCITY_GAIN, MARQUEE_MAX_BOOST);
+      x = wrapX(x - (MARQUEE_BASE_SPEED + boost) * direction);
+      track.style.transform = `translate3d(${x}px, 0, 0)`;
+    });
+  });
+}
+
+/* ---------- マグネティックボタン（カーソルに吸い付く） ---------- */
+const MAGNET_STRENGTH = 0.32;
+
+function initMagnetic(): void {
+  if (!hasFinePointer() || prefersReducedMotion()) return;
+  document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => {
+    const xTo = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3.out' });
+    const yTo = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3.out' });
+
+    el.addEventListener('mousemove', (event) => {
+      const rect = el.getBoundingClientRect();
+      xTo((event.clientX - (rect.left + rect.width / 2)) * MAGNET_STRENGTH);
+      yTo((event.clientY - (rect.top + rect.height / 2)) * MAGNET_STRENGTH);
+    });
+
+    el.addEventListener('mouseleave', () => {
+      xTo(0);
+      yTo(0);
+    });
+  });
 }
 
 /* ---------- SVG ラインドローイング ---------- */
@@ -205,6 +300,8 @@ function initPage(): void {
   initMaskReveals();
   initParallax();
   initKineticType();
+  initMarquee();
+  initMagnetic();
   initSvgDraw();
   initCursor();
   void initParticles();
@@ -213,6 +310,7 @@ function initPage(): void {
 
 document.addEventListener('astro:page-load', initPage);
 document.addEventListener('astro:before-swap', () => {
+  clearPageTickers();
   destroyParticles?.();
   destroyParticles = null;
 });

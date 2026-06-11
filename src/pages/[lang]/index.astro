@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
+import Marquee from '../../components/Marquee.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import EventCard from '../../components/EventCard.astro';
 import { localePath } from '../../i18n/utils';
@@ -44,8 +45,11 @@ const upcomingEvents = (await getCollection('schedule'))
       </div>
     </section>
 
+    <!-- スクロール速度に反応する無限マーキー（装飾） -->
+    <Marquee />
+
     <!-- 直近の公演 -->
-    <section class="border-y border-line bg-white/50">
+    <section class="border-b border-line bg-white/50">
       <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
         <SectionHeading en="Schedule" label={t('home.scheduleTitle')} />
         {
@@ -69,18 +73,19 @@ const upcomingEvents = (await getCollection('schedule'))
     </section>
 
     <!-- 出演依頼 CTA（仕様書③: 全ページから Booking へ） -->
-    <section class="bg-ink text-base">
+    <section class="bg-ink text-paper">
       <div class="mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 py-section text-center sm:px-6">
-        <h2 class="font-serif text-title tracking-[0.2em]" data-reveal>
+        <h2 class="font-display text-title tracking-[0.2em]" data-reveal>
           {t('home.bookingTitle')}
         </h2>
-        <p class="max-w-xl leading-relaxed text-base/80" data-reveal>
+        <p class="max-w-xl leading-relaxed text-paper/80" data-reveal>
           {t('home.bookingLead')}
         </p>
         <a
           href={`${localePath(lang, 'contact/')}#booking`}
           class="btn-cta bg-accent hover:bg-accent-dark px-10 py-4 text-sm tracking-[0.25em] text-white"
           data-reveal
+          data-magnetic
         >
           {t('home.bookingCta')}
         </a>

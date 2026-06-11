@@ -1,0 +1,32 @@
+---
+/**
+ * スクロール速度・方向に反応して流れる無限マーキー（アウトライン文字）。
+ * 移動ロジックは src/scripts/effects.ts の initMarquee が担当する。
+ * 装飾要素のため aria-hidden で支援技術からは隠す。
+ */
+interface Props {
+  text?: string;
+}
+
+const { text = 'Nagauta Shamisen — Kikuchi Mitsutaka' } = Astro.props;
+
+// トラックは同一グループを2周分並べ、半周分スクロールしたら巻き戻して無限ループさせる
+const REPEAT_PER_GROUP = 3;
+const items = Array.from({ length: REPEAT_PER_GROUP * 2 }, () => text);
+---
+
+<div
+  class="overflow-hidden border-y border-line py-5 select-none"
+  aria-hidden="true"
+  data-marquee
+>
+  <div class="marquee-track flex w-max items-center gap-16 pr-16 will-change-transform">
+    {
+      items.map((item) => (
+        <span class="marquee-text shrink-0 font-display text-[clamp(2.5rem,1.5rem+4.5vw,5rem)] uppercase tracking-[0.12em] whitespace-nowrap">
+          {item}
+        </span>
+      ))
+    }
+  </div>
+</div>

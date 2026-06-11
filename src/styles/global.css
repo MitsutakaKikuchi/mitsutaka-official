@@ -1,19 +1,27 @@
 @import 'tailwindcss';
 
 @theme {
-  /* カラーパレット（仕様書②-2）: アクセントは藍系で統一 */
-  --color-base: #f7f5f0;
+  /*
+   * カラーパレット（仕様書②-2）: アクセントは藍系で統一。
+   * 地色は「paper」と命名する（「base」だと Tailwind の text-base
+   * （フォントサイズ）と衝突し、文字色のつもりがサイズに解釈されるため）。
+   */
+  --color-paper: #f7f5f0;
   --color-ink: #1a1a1a;
   --color-accent: #1b3a5b;
   --color-accent-dark: #122b46;
   --color-muted: #8a8580;
   --color-line: #dedad2;
+  --color-seal: #9d3b2c; /* 落款（朱印）の朱色 */
 
   /*
    * タイポグラフィ（仕様書②-3）: 和欧混植
+   * - ディスプレイ: Italiana（欧文・ハイコントラスト）+ Yuji Syuku（和文・筆文字）
+   *   → 名前・セクション見出しなど「顔」になる箇所のみに使用
    * - 見出し: Cormorant（欧文セリフ）+ しっぽり明朝B1（和文ディスプレイ明朝）
    * - 本文: Inter + Noto Sans JP
    */
+  --font-display: 'Italiana', 'Yuji Syuku', 'Shippori Mincho B1', serif;
   --font-sans: 'Inter Variable', 'Noto Sans JP Variable', system-ui, sans-serif;
   --font-serif:
     'Cormorant Variable', 'Shippori Mincho B1', 'Noto Serif JP Variable',
@@ -47,7 +55,7 @@
  * 干渉してページが勝手にスクロールするため使用しない（スムーススクロールは Lenis が担当）。
  */
 html {
-  background-color: var(--color-base);
+  background-color: var(--color-paper);
 }
 
 html.lenis,
@@ -66,6 +74,20 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
+}
+
+/*
+ * 和紙のような質感を出すフィルムグレイン（SVG フラクタルノイズ）。
+ * カーソル（z-index: 9999）より下、コンテンツより上に固定で重ねる。
+ */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* 明朝見出しは中量ウェイトで凛とした印象に */
@@ -94,6 +116,7 @@ html.js [data-mask-reveal] {
 html.js .k-char {
   display: inline-block;
   opacity: 0;
+  filter: blur(10px); /* GSAP がブラー解除しながらステージング表示する */
 }
 
 /* ナビゲーションリンクの下線アニメーション */
@@ -118,6 +141,29 @@ html.js .k-char {
 .nav-link:focus-visible::after {
   transform: scaleX(1);
   transform-origin: left center;
+}
+
+/* ナビゲーションのローリングテキスト（ホバーで文字が上にスライドして入れ替わる） */
+.nav-link .roll {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.6em;
+}
+
+.nav-link .roll-inner {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.45s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.nav-link .roll-inner > span {
+  display: block;
+  line-height: 1.6;
+}
+
+.nav-link:hover .roll-inner,
+.nav-link:focus-visible .roll-inner {
+  transform: translateY(-1.6em);
 }
 
 /*
@@ -202,30 +248,50 @@ html.fx-cursor button {
   box-shadow: 0 8px 20px rgb(18 43 70 / 0.25);
 }
 
+/* マグネティック要素は GSAP が transform を毎フレーム書くため CSS 側の transform 遷移を外す */
+[data-magnetic] {
+  transition-property: background-color, box-shadow, color;
+}
+
+[data-magnetic]:hover,
+[data-magnetic]:focus-visible {
+  transform: none;
+}
+
 /*
- * モバイルメニュー: フェード + 項目のスタッガー表示。
+ * 無限マーキー（スクロール速度・方向に反応して流れるアウトライン文字）。
+ * 移動は GSAP ticker（src/scripts/effects.ts の initMarquee）が行う。
+ */
+.marquee-text {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(27 58 91 / 0.4);
+}
+
+/*
+ * モバイルメニュー: 藍黒の全画面オーバーレイ + 項目のスタッガー表示。
  * display 切替ではなく visibility/opacity で遷移させ、閉じる時もフェードさせる。
+ * 開いている間は html.menu-open でヘッダーを反転（透過 + 白文字）させる。
  */
 #mobile-menu {
   visibility: hidden;
   opacity: 0;
   transition:
-    opacity 0.35s ease,
-    visibility 0s linear 0.35s;
+    opacity 0.4s ease,
+    visibility 0s linear 0.4s;
 }
 
 #mobile-menu.is-open {
   visibility: visible;
   opacity: 1;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.4s ease;
 }
 
 #mobile-menu > * {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(18px);
   transition:
-    opacity 0.4s ease,
-    transform 0.4s ease;
+    opacity 0.45s ease,
+    transform 0.45s ease;
 }
 
 #mobile-menu.is-open > * {
@@ -234,19 +300,49 @@ html.fx-cursor button {
 }
 
 #mobile-menu.is-open > *:nth-child(2) {
-  transition-delay: 0.06s;
+  transition-delay: 0.07s;
 }
 
 #mobile-menu.is-open > *:nth-child(3) {
-  transition-delay: 0.12s;
+  transition-delay: 0.14s;
 }
 
 #mobile-menu.is-open > *:nth-child(4) {
-  transition-delay: 0.18s;
+  transition-delay: 0.21s;
 }
 
 #mobile-menu.is-open > *:nth-child(5) {
-  transition-delay: 0.24s;
+  transition-delay: 0.28s;
+}
+
+#mobile-menu.is-open > *:nth-child(6) {
+  transition-delay: 0.35s;
+}
+
+/* メニュー展開中: 背面のスクロールを止め、ヘッダーをオーバーレイに馴染ませる */
+html.menu-open,
+html.menu-open body {
+  overflow: hidden;
+}
+
+html.menu-open #site-header {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+html.menu-open #site-logo {
+  color: var(--color-paper);
+}
+
+html.menu-open #site-header .menu-bar {
+  background-color: var(--color-paper);
+}
+
+html.menu-open #header-lang {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ハンバーガーメニューのモーフィング */
@@ -267,6 +363,7 @@ html.fx-cursor button {
   html.js [data-reveal],
   html.js .k-char {
     opacity: 1;
+    filter: none;
   }
 
   html.js [data-mask-reveal] {

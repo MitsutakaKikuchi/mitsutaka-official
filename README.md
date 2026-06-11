@@ -8,12 +8,15 @@
 - 公演データ: Markdown（`src/content/schedule/`）
 - フォーム: Formspree
 - デプロイ: GitHub Actions → GitHub Pages（`main` への push で自動）
+- タイポグラフィ: フルードサイズ（`clamp()`）+ ディスプレイ書体（Italiana / Yuji Syuku 筆文字）
 - モーション演出:
   - Lenis（慣性スクロール）
-  - GSAP + ScrollTrigger（スクロール連動フェード／パララックス／マスク演出／キネティックタイポ／SVGドローイング）
+  - GSAP + ScrollTrigger（スクロール連動フェード／パララックス／マスク+ズームリビール／キネティックタイポ（ブラー付き）／SVGドローイング）
+  - スクロール速度・方向に反応する無限マーキー（アウトライン文字）
+  - マグネティックボタン（CTA がカーソルに吸い付く）
   - Three.js（ヒーローのWebGLパーティクル。ホームのみ動的読込）
   - Astro View Transitions（シームレスなページ遷移）
-  - カスタムカーソル（バニラJS）
+  - カスタムカーソル（バニラJS）／フィルムグレイン（SVGノイズ）
   - すべて `prefers-reduced-motion` 対応（無効時は静的表示）
 
 > **注意**: CSS の `scroll-behavior: smooth` は ScrollTrigger と干渉してページが勝手にスクロールする不具合を起こすため使用しないこと（詳細は `src/styles/global.css` のコメント参照）。

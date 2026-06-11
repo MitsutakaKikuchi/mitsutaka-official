@@ -49,15 +49,16 @@ const catchChars = [...t('hero.catchcopy')];
       stroke-width="1"></line>
   </svg>
 
+  <!-- pb はスクロールインジケーター（absolute bottom）との重なりを防ぐ余白 -->
   <div
-    class="relative mx-auto grid w-full max-w-6xl items-center justify-items-center gap-12 px-4 py-12 sm:px-6 md:grid-cols-[1fr_auto]"
+    class="relative mx-auto grid w-full max-w-6xl items-center justify-items-center gap-12 px-4 pt-10 pb-28 sm:px-6 sm:pb-32 md:grid-cols-[1fr_auto]"
   >
     {
       lang === 'ja' ? (
         <div class="flex flex-col items-center gap-8">
           {/* 縦書き: 右のキャッチコピー → 左の名前 の順に読む */}
           <div class="flex flex-row-reverse items-start justify-center gap-8 sm:gap-12">
-            <h1 class="vertical-text max-h-[min(34rem,calc(100svh-14rem))] font-serif text-lead leading-loose tracking-[0.42em] text-ink/80">
+            <h1 class="vertical-text max-h-[min(34rem,calc(100svh-18rem))] font-serif text-lead leading-loose tracking-[0.42em] text-ink/80">
               {catchChars.map((char) => (
                 <span class="k-char">{char}</span>
               ))}
@@ -68,7 +69,7 @@ const catchChars = [...t('hero.catchcopy')];
                 {t('hero.sub')}
               </p>
               <p
-                class="vertical-text font-serif text-display tracking-[0.3em]"
+                class="vertical-text font-display text-display tracking-[0.3em]"
                 aria-hidden="true"
               >
                 {SITE.artistNameJa}
@@ -89,7 +90,7 @@ const catchChars = [...t('hero.catchcopy')];
           </h1>
           <div class="flex flex-col gap-2" data-reveal>
             <p class="text-xs tracking-[0.35em] text-accent">{t('hero.sub')}</p>
-            <p class="font-serif text-title tracking-[0.15em]" aria-hidden="true">
+            <p class="font-display text-title tracking-[0.15em]" aria-hidden="true">
               {SITE.artistNameDisplay}
             </p>
             <p class="font-serif text-base tracking-[0.5em] text-muted">{SITE.artistNameJa}</p>
@@ -98,19 +99,38 @@ const catchChars = [...t('hero.catchcopy')];
       )
     }
 
-    <!-- 演奏写真: マスク演出で表示し、スクロールで緩やかにパララックス -->
-    <figure class="relative" data-mask-reveal>
-      <div data-parallax="0.08">
-        <Image
-          src={performancePhoto}
-          alt={lang === 'ja' ? '菊池光峰 演奏写真' : 'KIKUCHI Mitsutaka performing the shamisen'}
-          widths={[420, 800]}
-          sizes="(min-width: 768px) 24rem, 80vw"
-          class="aspect-[2/3] h-[48svh] w-auto object-cover md:h-[68svh]"
-          loading="eager"
-          fetchpriority="high"
-        />
+    <!--
+      演奏写真の額装:
+      - ずらした罫線（額の影のような藍のオフセットフレーム）
+      - マスク演出 + ズームリビール（data-zoom）+ 緩やかなパララックス
+      - 落款（らっかん）風の朱印を左下に添える
+    -->
+    <figure class="relative mr-4 mb-4" data-reveal>
+      <div
+        class="absolute inset-0 translate-x-4 translate-y-4 border border-accent/40"
+        aria-hidden="true"
+      >
       </div>
+      <div class="relative overflow-hidden" data-mask-reveal>
+        <div data-parallax="0.05">
+          <Image
+            src={performancePhoto}
+            alt={lang === 'ja' ? '菊池光峰 演奏写真' : 'KIKUCHI Mitsutaka performing the shamisen'}
+            widths={[420, 800]}
+            sizes="(min-width: 768px) 24rem, 80vw"
+            class="aspect-[2/3] h-[44svh] w-auto object-cover md:h-[64svh]"
+            loading="eager"
+            fetchpriority="high"
+            data-zoom
+          />
+        </div>
+      </div>
+      <span
+        class="vertical-text absolute -left-3 bottom-8 bg-seal px-1.5 py-2.5 font-display text-xs leading-none tracking-[0.15em] text-white shadow-sm"
+        aria-hidden="true"
+      >
+        光峰
+      </span>
     </figure>
   </div>
 

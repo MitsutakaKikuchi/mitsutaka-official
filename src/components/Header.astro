@@ -20,9 +20,10 @@ const navItems = [
 ];
 ---
 
-<header id="site-header" class="fixed inset-x-0 top-0 z-50 bg-base/90 backdrop-blur border-b border-line">
-  <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+<header id="site-header" class="fixed inset-x-0 top-0 z-50 bg-paper/90 backdrop-blur border-b border-line transition-colors">
+  <div class="relative z-10 mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
     <a
+      id="site-logo"
       href={localePath(lang)}
       class="font-serif text-lg tracking-[0.2em] hover:text-accent transition-colors"
     >
@@ -36,7 +37,13 @@ const navItems = [
             href={item.href}
             class="nav-link text-[0.8125rem] tracking-[0.18em] text-ink/80 hover:text-accent transition-colors"
           >
-            {item.label}
+            {/* ローリングテキスト: 同じラベルを2段重ねてホバーでスライド */}
+            <span class="roll">
+              <span class="roll-inner">
+                <span>{item.label}</span>
+                <span aria-hidden="true">{item.label}</span>
+              </span>
+            </span>
           </a>
         ))
       }
@@ -51,6 +58,7 @@ const navItems = [
       <a
         href={`${localePath(lang, 'contact/')}#booking`}
         class="btn-cta bg-accent hover:bg-accent-dark text-white text-sm tracking-widest px-5 py-2"
+        data-magnetic
       >
         {t('nav.booking')}
       </a>
@@ -58,10 +66,11 @@ const navItems = [
 
     <div class="flex items-center gap-3 md:hidden">
       <a
+        id="header-lang"
         href={localePath(otherLang, subpath)}
         rel="alternate"
         hreflang={otherLang}
-        class="text-xs tracking-widest text-muted border border-line rounded-full px-3 py-1"
+        class="text-xs tracking-widest text-muted border border-line rounded-full px-3 py-1 transition-opacity"
       >
         {otherLang.toUpperCase()}
       </a>
@@ -73,31 +82,47 @@ const navItems = [
         aria-expanded="false"
         aria-controls="mobile-menu"
       >
-        <span class="menu-bar block h-px w-6 bg-ink transition-transform"></span>
-        <span class="menu-bar block h-px w-6 bg-ink transition-opacity"></span>
-        <span class="menu-bar block h-px w-6 bg-ink transition-transform"></span>
+        <span class="menu-bar block h-px w-6 bg-ink transition-all"></span>
+        <span class="menu-bar block h-px w-6 bg-ink transition-all"></span>
+        <span class="menu-bar block h-px w-6 bg-ink transition-all"></span>
       </button>
     </div>
   </div>
 
-  <!-- モバイル: 全画面オーバーレイメニュー（仕様書②-4） -->
+  <!-- モバイル: 藍黒の全画面オーバーレイメニュー（仕様書②-4） -->
   <div
     id="mobile-menu"
-    class="fixed inset-0 top-16 z-40 flex flex-col items-center justify-center gap-8 bg-base md:hidden"
+    class="fixed inset-0 z-0 flex flex-col justify-center gap-1 bg-ink px-8 pt-16 md:hidden"
   >
     {
-      navItems.map((item) => (
-        <a href={item.href} class="font-serif text-2xl tracking-[0.3em] hover:text-accent">
+      navItems.map((item, index) => (
+        <a
+          href={item.href}
+          class="flex items-baseline gap-5 border-b border-paper/10 py-4 font-serif text-2xl tracking-[0.2em] text-paper/95 transition-colors hover:text-paper/60"
+        >
+          <span class="font-sans text-[10px] tracking-[0.3em] text-paper/40">
+            {String(index + 1).padStart(2, '0')}
+          </span>
           {item.label}
         </a>
       ))
     }
-    <a
-      href={`${localePath(lang, 'contact/')}#booking`}
-      class="btn-cta bg-accent text-white tracking-widest px-8 py-3 mt-4"
-    >
-      {t('nav.booking')}
-    </a>
+    <div class="mt-10 flex items-center justify-between">
+      <a
+        href={localePath(otherLang, subpath)}
+        rel="alternate"
+        hreflang={otherLang}
+        class="border border-paper/30 rounded-full px-4 py-1.5 text-xs tracking-widest text-paper/80 transition-colors hover:border-paper/60"
+      >
+        {otherLang.toUpperCase()}
+      </a>
+      <a
+        href={`${localePath(lang, 'contact/')}#booking`}
+        class="btn-cta bg-accent text-white text-xs tracking-[0.25em] px-7 py-3"
+      >
+        {t('nav.booking')}
+      </a>
+    </div>
   </div>
 </header>
 
@@ -110,21 +135,24 @@ const navItems = [
     const toggleButton = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
 
+    function setMenuOpen(open: boolean) {
+      toggleButton?.setAttribute('aria-expanded', String(open));
+      // 表示/非表示は CSS の visibility/opacity 遷移（.is-open）で行う。
+      // html.menu-open が背面スクロールの停止とヘッダー反転を担う。
+      mobileMenu?.classList.toggle('is-open', open);
+      document.documentElement.classList.toggle('menu-open', open);
+    }
+
+    // html は View Transitions を跨いで残るため、遷移直後は必ず閉じた状態に戻す
+    setMenuOpen(false);
+
     toggleButton?.addEventListener('click', () => {
-      const isOpen = toggleButton.getAttribute('aria-expanded') === 'true';
-      toggleButton.setAttribute('aria-expanded', String(!isOpen));
-      // 表示/非表示は CSS の visibility/opacity 遷移（.is-open）で行う
-      mobileMenu?.classList.toggle('is-open', !isOpen);
-      document.body.classList.toggle('overflow-hidden', !isOpen);
+      setMenuOpen(toggleButton.getAttribute('aria-expanded') !== 'true');
     });
 
     // メニュー内のリンクを押したら閉じる（同一ページ内アンカー対策）
     mobileMenu?.querySelectorAll('a').forEach((link) => {
-      link.addEventListener('click', () => {
-        toggleButton?.setAttribute('aria-expanded', 'false');
-        mobileMenu.classList.remove('is-open');
-        document.body.classList.remove('overflow-hidden');
-      });
+      link.addEventListener('click', () => setMenuOpen(false));
     });
   }
 
