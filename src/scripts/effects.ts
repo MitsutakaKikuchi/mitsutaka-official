@@ -1,9 +1,11 @@
 /**
  * サイト全体のモーション演出。
  * - Lenis: 慣性スクロール
- * - GSAP + ScrollTrigger: スクロール連動フェード／パララックス／マスク演出
+ * - GSAP + ScrollTrigger: スクロール連動フェード／パララックス／マスク+ズームリビール
  * - キネティック・タイポグラフィ（.k-char）／SVGドローイング（[data-draw]）
+ * - マグネティックボタン（[data-magnetic]）
  * - カスタムカーソル（マウスストーカー）
+ * - 公演画像のスライドショー（[data-slideshow]）／ライトボックス（[data-lightbox]）
  * すべて prefers-reduced-motion を尊重し、無効時は静的表示にフォールバックする。
  * Astro View Transitions（astro:page-load / astro:before-swap）に対応。
  */
@@ -19,23 +21,6 @@ const RING_LERP = 0.16;
 const prefersReducedMotion = (): boolean =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const hasFinePointer = (): boolean => window.matchMedia('(pointer: fine)').matches;
-
-/*
- * ページ単位で登録する gsap.ticker コールバック。
- * View Transitions で要素が破棄されても ticker は残り続けるため、
- * astro:before-swap でまとめて解除する。
- */
-const pageTickers: gsap.TickerCallback[] = [];
-
-function addPageTicker(callback: gsap.TickerCallback): void {
-  gsap.ticker.add(callback);
-  pageTickers.push(callback);
-}
-
-function clearPageTickers(): void {
-  pageTickers.forEach((callback) => gsap.ticker.remove(callback));
-  pageTickers.length = 0;
-}
 
 /* ---------- 慣性スクロール ---------- */
 let lenis: Lenis | null = null;
@@ -152,36 +137,6 @@ function initKineticType(): void {
   );
 }
 
-/* ---------- 無限マーキー（スクロール速度・方向に反応） ---------- */
-const MARQUEE_BASE_SPEED = 0.7; // px/frame
-const MARQUEE_VELOCITY_GAIN = 0.25;
-const MARQUEE_MAX_BOOST = 9;
-const MARQUEE_DIR_LERP = 0.06;
-
-function initMarquee(): void {
-  if (prefersReducedMotion()) return;
-  document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
-    const track = el.querySelector<HTMLElement>('.marquee-track');
-    if (!track) return;
-    // トラックは同一グループ2周分。半周分進んだら巻き戻して無限ループに見せる
-    const wrapX = gsap.utils.wrap(-track.scrollWidth / 2, 0);
-    let x = 0;
-    let direction = 1;
-    let lastScrollY = window.scrollY;
-
-    addPageTicker(() => {
-      const velocity = window.scrollY - lastScrollY;
-      lastScrollY = window.scrollY;
-      // スクロール方向で流れる向きを反転（急反転しないよう lerp で馴染ませる）
-      const targetDirection = velocity === 0 ? direction : Math.sign(velocity);
-      direction += (targetDirection - direction) * MARQUEE_DIR_LERP;
-      const boost = Math.min(Math.abs(velocity) * MARQUEE_VELOCITY_GAIN, MARQUEE_MAX_BOOST);
-      x = wrapX(x - (MARQUEE_BASE_SPEED + boost) * direction);
-      track.style.transform = `translate3d(${x}px, 0, 0)`;
-    });
-  });
-}
-
 /* ---------- マグネティックボタン（カーソルに吸い付く） ---------- */
 const MAGNET_STRENGTH = 0.32;
 
@@ -281,6 +236,94 @@ function initCursor(): void {
   });
 }
 
+/* ---------- 公演画像のスライドショー（チラシ・写真が複数ある場合） ---------- */
+let slideshowTimers: number[] = [];
+
+function clearSlideshowTimers(): void {
+  slideshowTimers.forEach((timer) => window.clearInterval(timer));
+  slideshowTimers = [];
+}
+
+function initSlideshows(): void {
+  if (prefersReducedMotion()) return;
+  document.querySelectorAll<HTMLElement>('[data-slideshow]').forEach((container) => {
+    const slides = container.querySelectorAll<HTMLElement>('[data-slide]');
+    if (slides.length < 2) return;
+    const intervalMs = Number.parseInt(container.dataset.slideshow ?? '4000', 10);
+    let current = 0;
+    const timer = window.setInterval(() => {
+      slides[current]?.classList.replace('opacity-100', 'opacity-0');
+      current = (current + 1) % slides.length;
+      slides[current]?.classList.replace('opacity-0', 'opacity-100');
+    }, intervalMs);
+    slideshowTimers.push(timer);
+  });
+}
+
+/* ---------- ライトボックス（チラシ・公演写真の拡大表示） ---------- */
+function showLightboxImage(dialog: HTMLDialogElement, index: number, images: string[]): number {
+  const normalized = ((index % images.length) + images.length) % images.length;
+  const image = dialog.querySelector<HTMLImageElement>('[data-lightbox-image]');
+  if (image) image.src = images[normalized] ?? '';
+  const hasMultiple = images.length > 1;
+  dialog
+    .querySelectorAll<HTMLButtonElement>('[data-lightbox-prev], [data-lightbox-next]')
+    .forEach((button) => {
+      button.hidden = !hasMultiple;
+    });
+  return normalized;
+}
+
+function initLightbox(): void {
+  const dialog = document.querySelector<HTMLDialogElement>('#lightbox');
+  if (!dialog) return;
+
+  // ナビゲーションボタンと背景クリックでの閉鎖は、ダイアログが
+  // ビュー遷移をまたいで残る場合に二重登録しないよう一度だけ行う
+  if (!dialog.dataset.bound) {
+    dialog.dataset.bound = 'true';
+    let images: string[] = [];
+    let index = 0;
+
+    dialog.addEventListener('lightbox:open', ((event: CustomEvent<{ images: string[]; alt: string }>) => {
+      images = event.detail.images;
+      const image = dialog.querySelector<HTMLImageElement>('[data-lightbox-image]');
+      if (image) image.alt = event.detail.alt;
+      index = showLightboxImage(dialog, 0, images);
+      dialog.showModal();
+    }) as EventListener);
+
+    dialog.querySelector('[data-lightbox-prev]')?.addEventListener('click', () => {
+      index = showLightboxImage(dialog, index - 1, images);
+    });
+    dialog.querySelector('[data-lightbox-next]')?.addEventListener('click', () => {
+      index = showLightboxImage(dialog, index + 1, images);
+    });
+    dialog.querySelector('[data-lightbox-close]')?.addEventListener('click', () => dialog.close());
+    // ダイアログ自身（背景部分）のクリックで閉じる
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-lightbox]').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      let images: string[] = [];
+      try {
+        images = JSON.parse(trigger.dataset.images ?? '[]');
+      } catch {
+        images = [];
+      }
+      if (images.length === 0) return;
+      dialog.dispatchEvent(
+        new CustomEvent('lightbox:open', {
+          detail: { images, alt: trigger.getAttribute('aria-label') ?? '' },
+        })
+      );
+    });
+  });
+}
+
 /* ---------- WebGL パーティクル（ホームのヒーローのみ） ---------- */
 let destroyParticles: (() => void) | null = null;
 
@@ -300,17 +343,18 @@ function initPage(): void {
   initMaskReveals();
   initParallax();
   initKineticType();
-  initMarquee();
   initMagnetic();
   initSvgDraw();
   initCursor();
+  initSlideshows();
+  initLightbox();
   void initParticles();
   ScrollTrigger.refresh();
 }
 
 document.addEventListener('astro:page-load', initPage);
 document.addEventListener('astro:before-swap', () => {
-  clearPageTickers();
+  clearSlideshowTimers();
   destroyParticles?.();
   destroyParticles = null;
 });

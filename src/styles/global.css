@@ -12,7 +12,6 @@
   --color-accent-dark: #122b46;
   --color-muted: #8a8580;
   --color-line: #dedad2;
-  --color-seal: #9d3b2c; /* 落款（朱印）の朱色 */
 
   /*
    * タイポグラフィ（仕様書②-3）: 和欧混植
@@ -258,13 +257,17 @@ html.fx-cursor button {
   transform: none;
 }
 
-/*
- * 無限マーキー（スクロール速度・方向に反応して流れるアウトライン文字）。
- * 移動は GSAP ticker（src/scripts/effects.ts の initMarquee）が行う。
- */
-.marquee-text {
-  color: transparent;
-  -webkit-text-stroke: 1px rgb(27 58 91 / 0.4);
+/* ライトボックス（フライヤー・公演写真の拡大表示） */
+#lightbox {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+#lightbox::backdrop {
+  background: rgb(26 26 26 / 0.85);
+  backdrop-filter: blur(2px);
 }
 
 /*

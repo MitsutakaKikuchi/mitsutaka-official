@@ -1,0 +1,40 @@
+---
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<dialog id="lightbox" aria-label={t('lightbox.label')}>
+  <div class="relative">
+    <img data-lightbox-image alt="" class="block max-h-[90vh] max-w-[92vw] object-contain" />
+    <button
+      type="button"
+      data-lightbox-close
+      aria-label={t('lightbox.close')}
+      class="absolute -top-3 -right-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink text-paper shadow-lg transition-colors hover:bg-accent"
+    >
+      <span aria-hidden="true">×</span>
+    </button>
+    <button
+      type="button"
+      data-lightbox-prev
+      aria-label={t('lightbox.prev')}
+      class="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-ink/60 text-paper backdrop-blur transition-colors hover:bg-accent"
+    >
+      <span aria-hidden="true">‹</span>
+    </button>
+    <button
+      type="button"
+      data-lightbox-next
+      aria-label={t('lightbox.next')}
+      class="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-ink/60 text-paper backdrop-blur transition-colors hover:bg-accent"
+    >
+      <span aria-hidden="true">›</span>
+    </button>
+  </div>
+</dialog>

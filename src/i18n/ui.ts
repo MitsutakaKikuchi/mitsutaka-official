@@ -22,7 +22,7 @@ export const ui = {
     'home.aboutLead':
       '歌舞伎とともに歩んできた長唄の伝統を受け継ぎ、国内外の舞台でその音色の可能性を伝える。',
     'home.aboutMore': 'プロフィールを見る',
-    'home.scheduleTitle': '公演情報',
+    'home.scheduleTitle': '出演情報',
     'home.scheduleMore': 'すべての公演を見る',
     'home.noUpcoming': '現在予定されている公演はありません。',
     'home.bookingTitle': '出演のご依頼',
@@ -35,6 +35,11 @@ export const ui = {
     'schedule.soldOut': '完売',
     'schedule.flyer': '公演チラシ',
     'schedule.photo': '公演写真',
+    'schedule.website': '公演ページ',
+    'lightbox.close': '閉じる',
+    'lightbox.prev': '前の画像',
+    'lightbox.next': '次の画像',
+    'lightbox.label': '画像プレビュー',
     'media.videos': '動画',
     'media.gallery': 'フォトギャラリー',
     'contact.lead':
@@ -84,6 +89,11 @@ export const ui = {
     'schedule.soldOut': 'Sold Out',
     'schedule.flyer': 'Concert flyer',
     'schedule.photo': 'Concert photo',
+    'schedule.website': 'Event page',
+    'lightbox.close': 'Close',
+    'lightbox.prev': 'Previous image',
+    'lightbox.next': 'Next image',
+    'lightbox.label': 'Image preview',
     'media.videos': 'Videos',
     'media.gallery': 'Photo Gallery',
     'contact.lead':
