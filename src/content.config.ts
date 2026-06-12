@@ -7,11 +7,11 @@ import { glob, type Loader } from 'astro/loaders';
  * 1. Google スプレッドシート（推奨・本番運用）
  *    環境変数 SCHEDULE_CSV_URL に「ウェブに公開」した CSV の URL を設定すると有効になる。
  *    シートの1行目は次の日本語ヘッダーにすること（順不同・余分な列は無視される）:
- *    日付, 公演名, 公演名（英語）, 会場, 会場（英語）, 都市, 都市（英語）, 国,
- *    チケットURL, 公演ページURL, 完売, チラシ画像URL, 公演写真URL, ジャンル, 共演者
- *    - 日付 は YYYY-MM-DD 形式
+ *    出演日付, 公演名, 公演名（英語）, 会場, 会場（英語）, 都市, 都市（英語）, 国,
+ *    チケットURL, 公演ページURL, 完売, チラシ画像, 公演写真, ジャンル, 共演者
+ *    - 出演日付 は YYYY-MM-DD または YYYY/MM/DD 形式
  *    - 完売 は TRUE / FALSE（または 完売）
- *    - チラシ画像URL / 公演写真URL は任意。複数枚ある場合はカンマ区切りで複数URLを指定すると、
+ *    - チラシ画像 / 公演写真 は任意。複数枚ある場合はカンマ区切りで複数URLを指定すると、
  *      サイト上でスライドショー表示になる。https:// の完全URL、またはサイト内パス（例: photos/xxx.jpg）
  *    - 公演ページURL は任意。出演者の特設サイトなどへのリンク
  *    - ジャンル / 共演者 は任意。複数ある場合はカンマ区切りで指定すると、
@@ -99,7 +99,7 @@ function parseCsv(text: string): string[][] {
 
 /** スプレッドシートの日本語ヘッダー（および旧バージョンの英語ヘッダー）を内部フィールド名に変換 */
 const HEADER_ALIASES: Record<string, string> = {
-  日付: 'date',
+  出演日付: 'date',
   公演名: 'titleJa',
   '公演名（英語）': 'titleEn',
   会場: 'venueJa',
@@ -110,11 +110,14 @@ const HEADER_ALIASES: Record<string, string> = {
   チケットURL: 'ticketUrl',
   公演ページURL: 'websiteUrl',
   完売: 'soldOut',
-  チラシ画像URL: 'flyerUrls',
-  公演写真URL: 'photoUrls',
+  チラシ画像: 'flyerUrls',
+  公演写真: 'photoUrls',
   ジャンル: 'genres',
   共演者: 'performers',
-  // 旧バージョンの英語ヘッダー（互換のため）
+  // 旧バージョンの日本語・英語ヘッダー（互換のため）
+  日付: 'date',
+  チラシ画像URL: 'flyerUrls',
+  公演写真URL: 'photoUrls',
   flyerUrl: 'flyerUrls',
   photoUrl: 'photoUrls',
 };
