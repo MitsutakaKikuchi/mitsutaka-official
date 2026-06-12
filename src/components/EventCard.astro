@@ -92,6 +92,22 @@ const SLIDESHOW_INTERVAL_MS = 4000;
       <p class="mt-1 text-sm text-muted">
         {venue} — {city}{data.country !== 'JP' || lang === 'en' ? `, ${countryName}` : ''}
       </p>
+      {
+        (data.genres.length > 0 || data.performers.length > 0) && (
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            {data.genres.map((genre) => (
+              <span class="text-[0.65rem] tracking-wider text-accent border border-accent/30 px-2 py-0.5">
+                {genre}
+              </span>
+            ))}
+            {data.performers.map((performer) => (
+              <span class="text-[0.65rem] tracking-wider text-muted border border-line px-2 py-0.5">
+                {t('schedule.with')} {performer}
+              </span>
+            ))}
+          </div>
+        )
+      }
     </div>
   </div>
   {
