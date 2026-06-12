@@ -95,14 +95,11 @@ const navItems = [
     class="fixed inset-0 z-0 flex flex-col justify-center gap-1 bg-ink px-8 pt-16 md:hidden"
   >
     {
-      navItems.map((item, index) => (
+      navItems.map((item) => (
         <a
           href={item.href}
-          class="flex items-baseline gap-5 border-b border-paper/10 py-4 font-serif text-2xl tracking-[0.2em] text-paper/95 transition-colors hover:text-paper/60"
+          class="border-b border-paper/10 py-4 font-serif text-2xl tracking-[0.2em] text-paper/95 transition-colors hover:text-paper/60"
         >
-          <span class="font-sans text-[10px] tracking-[0.3em] text-paper/40">
-            {String(index + 1).padStart(2, '0')}
-          </span>
           {item.label}
         </a>
       ))
