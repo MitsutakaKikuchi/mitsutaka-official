@@ -52,9 +52,15 @@ const upcomingEvents = (await getCollection('schedule'))
           upcomingEvents.length > 0 ? (
             upcomingEvents.map((event) => <EventCard event={event} lang={lang} />)
           ) : (
-            <p class="text-muted" data-reveal>
-              {t('home.noUpcoming')}
-            </p>
+            <div class="space-y-3" data-reveal>
+              <p class="text-muted">{t('home.noUpcoming')}</p>
+              <a
+                href={`${localePath(lang, 'contact/')}#booking`}
+                class="inline-block border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+              >
+                {t('home.noUpcomingCta')}
+              </a>
+            </div>
           )
         }
         <div class="mt-10" data-reveal>

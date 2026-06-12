@@ -25,9 +25,10 @@ export const ui = {
     'home.scheduleTitle': '出演情報',
     'home.scheduleMore': 'すべての出演を見る',
     'home.noUpcoming': '現在予定されている出演はありません。',
+    'home.noUpcomingCta': '出演のご相談はこちらからお気軽にどうぞ →',
     'home.bookingTitle': '出演のご依頼',
     'home.bookingLead':
-      'コンサート・フェスティバル・式典・メディア出演など、国内外を問わずご相談を承ります。',
+      'コンサート・フェスティバル・式典・メディア出演など、国内外を問わずご相談を承ります。まずはお気軽にお問い合わせください。',
     'home.bookingCta': '出演を依頼する',
     'schedule.upcoming': '今後の出演',
     'schedule.past': '過去の出演',
@@ -79,9 +80,10 @@ export const ui = {
     'home.scheduleTitle': 'Upcoming Shows',
     'home.scheduleMore': 'View all shows',
     'home.noUpcoming': 'No upcoming shows at the moment.',
+    'home.noUpcomingCta': 'Get in touch about booking →',
     'home.bookingTitle': 'Booking',
     'home.bookingLead':
-      'Available for concerts, festivals, ceremonies, and media appearances worldwide.',
+      "Available for concerts, festivals, ceremonies, and media appearances worldwide — get in touch and let's discuss your event.",
     'home.bookingCta': 'Request a booking',
     'schedule.upcoming': 'Upcoming',
     'schedule.past': 'Past Shows',

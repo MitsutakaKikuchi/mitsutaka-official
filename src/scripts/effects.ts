@@ -261,6 +261,8 @@ function initSlideshows(): void {
 }
 
 /* ---------- ライトボックス（チラシ・公演写真の拡大表示） ---------- */
+const SWIPE_THRESHOLD_PX = 40;
+
 function showLightboxImage(dialog: HTMLDialogElement, index: number, images: string[]): number {
   const normalized = ((index % images.length) + images.length) % images.length;
   const image = dialog.querySelector<HTMLImageElement>('[data-lightbox-image]');
@@ -271,6 +273,11 @@ function showLightboxImage(dialog: HTMLDialogElement, index: number, images: str
     .forEach((button) => {
       button.hidden = !hasMultiple;
     });
+  const counter = dialog.querySelector<HTMLElement>('[data-lightbox-counter]');
+  if (counter) {
+    counter.textContent = hasMultiple ? `${normalized + 1} / ${images.length}` : '';
+    counter.hidden = !hasMultiple;
+  }
   return normalized;
 }
 
@@ -303,6 +310,19 @@ function initLightbox(): void {
     // ダイアログ自身（背景部分）のクリックで閉じる
     dialog.addEventListener('click', (event) => {
       if (event.target === dialog) dialog.close();
+    });
+
+    // スマートフォンでのスワイプ操作で前後の画像に切り替える
+    let touchStartX = 0;
+    dialog.addEventListener('touchstart', (event) => {
+      touchStartX = event.touches[0]?.clientX ?? 0;
+    });
+    dialog.addEventListener('touchend', (event) => {
+      if (images.length < 2) return;
+      const touchEndX = event.changedTouches[0]?.clientX ?? touchStartX;
+      const deltaX = touchEndX - touchStartX;
+      if (Math.abs(deltaX) < SWIPE_THRESHOLD_PX) return;
+      index = showLightboxImage(dialog, deltaX < 0 ? index + 1 : index - 1, images);
     });
   }
 

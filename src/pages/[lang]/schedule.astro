@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import EventCard from '../../components/EventCard.astro';
+import { localePath } from '../../i18n/utils';
 import { useTranslations, type Lang } from '../../i18n/ui';
 
 export function getStaticPaths() {
@@ -58,9 +59,15 @@ const pageTitle = lang === 'ja' ? '出演スケジュール' : 'Schedule';
         upcomingEvents.length > 0 ? (
           upcomingEvents.map((event) => <EventCard event={event} lang={lang} />)
         ) : (
-          <p class="py-6 text-muted" data-reveal>
-            {t('home.noUpcoming')}
-          </p>
+          <div class="space-y-3 py-6" data-reveal>
+            <p class="text-muted">{t('home.noUpcoming')}</p>
+            <a
+              href={`${localePath(lang, 'contact/')}#booking`}
+              class="inline-block border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+            >
+              {t('home.noUpcomingCta')}
+            </a>
+          </div>
         )
       }
     </section>
