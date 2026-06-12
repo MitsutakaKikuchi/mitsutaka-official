@@ -23,6 +23,7 @@ export const SITE = {
   sns: {
     instagram: 'https://www.instagram.com/_mitsu_yoshi_taka/',
   },
-  /** TODO: Media ページに表示する YouTube 動画 ID（https://youtu.be/XXXX の XXXX 部分）。動画がない場合は空配列に */
-  youtubeVideoIds: ['dQw4w9WgXcQ'],
+  /** Media ページに表示する YouTube 動画 ID（https://youtu.be/XXXX の XXXX 部分）。
+   *  空配列の間は動画セクション自体が非表示になる。動画を追加するにはここに ID を足す */
+  youtubeVideoIds: [] as string[],
 } as const;

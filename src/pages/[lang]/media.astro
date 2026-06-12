@@ -18,33 +18,38 @@ const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
 
 const photos = [
-  { src: performancePhoto, ja: '演奏会にて', en: 'In concert' },
-  { src: concertPhoto, ja: '共演ステージ', en: 'Ensemble stage' },
-  { src: workshopPhoto, ja: 'レクチャー・ワークショップ', en: 'Lecture & workshop' },
-  { src: rehearsalPhoto, ja: '合同稽古', en: 'Ensemble rehearsal' },
+  { src: performancePhoto, ja: '各種演奏会', en: 'Concerts' },
+  { src: concertPhoto, ja: 'イベント等での共演ステージ', en: 'Collaborative stages at events' },
+  { src: workshopPhoto, ja: 'レクチャー・ワークショップ', en: 'Lectures & workshops' },
+  { src: rehearsalPhoto, ja: 'レコーディング', en: 'Recording' },
 ] as const;
+
+// 動画IDが未登録（空文字のみ）の場合は動画セクションを表示しない
+const videoIds = SITE.youtubeVideoIds.filter(Boolean);
 
 const pageTitle = lang === 'ja' ? 'メディア' : 'Media';
 ---
 
-<Base lang={lang} subpath="media/" title={pageTitle}>
+<Base lang={lang} subpath="media/" title={pageTitle} description={t('meta.media')}>
   <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
     <SectionHeading en="Media" label={pageTitle} />
 
-    <section>
-      <h2 class="mb-6 text-sm tracking-[0.3em] uppercase text-accent" data-reveal>
-        {t('media.videos')}
-      </h2>
-      <div class="grid gap-8 md:grid-cols-2" data-reveal>
-        {
-          SITE.youtubeVideoIds.map((videoId) => (
-            <YouTubeEmbed videoId={videoId} title={`${SITE.artistNameEn} — Performance`} />
-          ))
-        }
-      </div>
-    </section>
+    {
+      videoIds.length > 0 && (
+        <section>
+          <h2 class="mb-6 text-sm tracking-[0.3em] uppercase text-accent" data-reveal>
+            {t('media.videos')}
+          </h2>
+          <div class="grid gap-8 md:grid-cols-2" data-reveal>
+            {videoIds.map((videoId) => (
+              <YouTubeEmbed videoId={videoId} title={`${SITE.artistNameEn} — Performance`} />
+            ))}
+          </div>
+        </section>
+      )
+    }
 
-    <section class="mt-section">
+    <section class:list={[videoIds.length > 0 && 'mt-section']}>
       <h2 class="mb-6 text-sm tracking-[0.3em] uppercase text-accent" data-reveal>
         {t('media.gallery')}
       </h2>
