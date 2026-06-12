@@ -48,10 +48,10 @@ function resolveImageUrl(url: string): string {
   return /^https?:\/\//.test(url) ? url : withBase(url);
 }
 
-// チラシ優先、なければ演奏写真（どちらも無い公演はテキストのみ）。複数ある場合はスライドショー表示
+// チラシ→演奏写真の順で全画像を表示（どちらも無い公演はテキストのみ）。複数ある場合はスライドショー表示
 const flyerImages = data.flyerUrls.map(resolveImageUrl);
 const photoImages = data.photoUrls.map(resolveImageUrl);
-const images = flyerImages.length > 0 ? flyerImages : photoImages;
+const images = [...flyerImages, ...photoImages];
 const imageLabel = flyerImages.length > 0 ? t('schedule.flyer') : t('schedule.photo');
 const imageAlt = `${imageLabel}: ${title}`;
 
@@ -124,7 +124,7 @@ const SLIDESHOW_INTERVAL_MS = 4000;
   </div>
   {
     (data.websiteUrl || (!past && (data.soldOut || data.ticketUrl))) && (
-      <div class="flex flex-col items-start gap-2 justify-self-start sm:items-end sm:justify-self-end">
+      <div class="mt-1 flex flex-row flex-wrap items-center gap-2 justify-self-start sm:mt-0 sm:flex-col sm:items-end sm:justify-self-end">
         {!past &&
           (data.soldOut ? (
             <span class="text-xs tracking-widest text-muted border border-line px-4 py-2">
