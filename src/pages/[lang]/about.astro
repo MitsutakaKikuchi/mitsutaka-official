@@ -13,7 +13,6 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
 
-// TODO: 英訳中の人名ローマ字表記（若柳宏晃・若柳歓峰）は本人に要確認
 const profile = {
   ja: [
     '東京都出身。',
@@ -24,7 +23,7 @@ const profile = {
   ],
   en: [
     'Born in Tokyo.',
-    'Introduced to classical Japanese dance (nihon buyo) in early childhood by his father Wakayagi Hiroaki, he entered the Jikiha-Bunke Wakayagi school and was granted the stage name Wakayagi Kanpo.',
+    'Introduced to classical Japanese dance (nihon buyo) in early childhood by his father Wakayagi Hiroteru, he entered the Jikiha-Bunke Wakayagi school and was granted the stage name Wakayagi Yoshitaka.',
     'He studies nagauta shamisen under Ryoko Narita.',
     'In addition to appearing in nagauta concerts and classical dance recitals, he is devoted to traditional instrument education in schools, including coaching the shamisen club at Asakusa Junior High School in Taito City, Tokyo.',
     'He is currently enrolled in the Department of Traditional Japanese Music, Faculty of Music, at the Tokyo University of the Arts.',
