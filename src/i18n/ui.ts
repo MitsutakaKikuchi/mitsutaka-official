@@ -15,6 +15,14 @@ export const ui = {
     'nav.media': 'メディア',
     'nav.contact': 'お問い合わせ',
     'nav.booking': '出演依頼',
+    'meta.about':
+      '長唄三味線方・菊池光峰のプロフィール。歌舞伎とともに歩んできた長唄の伝統を受け継ぎ、国内外の舞台で演奏する三味線奏者の経歴と活動をご紹介します。',
+    'meta.schedule':
+      '長唄三味線方・菊池光峰の出演スケジュール。今後の演奏会・公演情報と過去の出演記録をご覧いただけます。',
+    'meta.media':
+      '長唄三味線方・菊池光峰のフォトギャラリー。各種演奏会、共演ステージ、レクチャー・ワークショップ、レコーディングなどの活動の様子をご紹介します。',
+    'meta.contact':
+      '長唄三味線方・菊池光峰への出演依頼・取材・お問い合わせはこちら。コンサート・式典・メディア出演など国内外を問わずご相談を承ります。',
     'hero.catchcopy': '伝統を弾き、いまを鳴らす。',
     'hero.sub': '長唄三味線方',
     'hero.scroll': 'スクロール',
@@ -71,6 +79,14 @@ export const ui = {
     'nav.media': 'Media',
     'nav.contact': 'Contact',
     'nav.booking': 'Booking',
+    'meta.about':
+      'Profile of KIKUCHI Mitsutaka, nagauta shamisen player. Carrying on the nagauta tradition shaped alongside kabuki, performing on stages in Japan and abroad.',
+    'meta.schedule':
+      'Performance schedule of KIKUCHI Mitsutaka, nagauta shamisen player. Upcoming concerts and a record of past performances.',
+    'meta.media':
+      'Photo gallery of KIKUCHI Mitsutaka, nagauta shamisen player — concerts, collaborative stages, lectures and workshops, and recording sessions.',
+    'meta.contact':
+      'Contact KIKUCHI Mitsutaka for booking, press, and general inquiries. Available for concerts, ceremonies, and media appearances worldwide.',
     'hero.catchcopy': 'Plucking tradition, sounding the present.',
     'hero.sub': 'Nagauta Shamisen Player',
     'hero.scroll': 'Scroll',

@@ -54,6 +54,8 @@ const personJsonLd = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
+    <meta name="author" content={SITE.artistNameEn} />
+    <meta name="robots" content="index, follow" />
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
     <link rel="canonical" href={canonicalUrl.href} />
     <link rel="alternate" hreflang="ja" href={jaUrl.href} />
@@ -61,12 +63,16 @@ const personJsonLd = {
     <link rel="alternate" hreflang="x-default" href={jaUrl.href} />
     <link rel="sitemap" href={withBase('sitemap-index.xml')} />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteTitle} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonicalUrl.href} />
     <meta property="og:image" content={new URL(withBase('ogp.jpg'), Astro.site).href} />
+    <meta property="og:image:alt" content={pageTitle} />
     <meta property="og:locale" content={lang === 'ja' ? 'ja_JP' : 'en_US'} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
     <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
     <script is:inline>
       // JS 有効時のみフェードイン演出を適用するためのフラグ
