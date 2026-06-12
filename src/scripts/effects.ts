@@ -266,7 +266,17 @@ const SWIPE_THRESHOLD_PX = 40;
 function showLightboxImage(dialog: HTMLDialogElement, index: number, images: string[]): number {
   const normalized = ((index % images.length) + images.length) % images.length;
   const image = dialog.querySelector<HTMLImageElement>('[data-lightbox-image]');
-  if (image) image.src = images[normalized] ?? '';
+  if (image) {
+    // 幅・高さ属性を持たないSVGなどは表示サイズを持たず、ダイアログが0×0になってしまうため、
+    // 読み込み完了後に実寸を明示してサイズ崩れを防ぐ
+    image.removeAttribute('width');
+    image.removeAttribute('height');
+    image.onload = () => {
+      image.width = image.naturalWidth;
+      image.height = image.naturalHeight;
+    };
+    image.src = images[normalized] ?? '';
+  }
   const hasMultiple = images.length > 1;
   dialog
     .querySelectorAll<HTMLButtonElement>('[data-lightbox-prev], [data-lightbox-next]')

@@ -263,6 +263,9 @@ html.fx-cursor button {
   padding: 0;
   background: transparent;
   color: inherit;
+  /* Tailwind の margin リセットでブラウザ標準の中央寄せ（margin: auto）が
+     打ち消されてしまうため、表示時に画面中央へ配置されるよう明示する */
+  margin: auto;
 }
 
 #lightbox::backdrop {

@@ -24,7 +24,7 @@ export const ui = {
     'home.aboutMore': 'プロフィールを見る',
     'home.scheduleTitle': '出演情報',
     'home.scheduleMore': 'すべての出演を見る',
-    'home.noUpcoming': '現在予定されている出演はありません。',
+    'home.noUpcoming': '現在、出演の予定はありません。',
     'home.noUpcomingCta': '出演のご相談はこちらからお気軽にどうぞ →',
     'home.bookingTitle': '出演のご依頼',
     'home.bookingLead':
