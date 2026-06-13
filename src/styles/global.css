@@ -200,6 +200,21 @@ html.fx-cursor button {
   border: 1px solid rgb(255 255 255 / 0.8);
 }
 
+/* ページ上部のスクロール進捗バー（JS が transform: scaleX で伸縮させる） */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  height: 2px;
+  width: 100%;
+  background: var(--color-accent, #1b3a5b);
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
+  pointer-events: none;
+}
+
 /* スクロール時のみヘッダーに浮遊感のある影を付ける（JS が .is-scrolled を付与） */
 #site-header {
   transition: box-shadow 0.4s ease;
@@ -271,6 +286,18 @@ html.fx-cursor button {
 #lightbox::backdrop {
   background: rgb(26 26 26 / 0.85);
   backdrop-filter: blur(2px);
+}
+
+/*
+ * ライトボックス画像は常にビューポート内に収め、スクロール無しで全体が見えるようにする。
+ * 縦長・横長どちらの画像でも縦横比を保ったまま画面内にフィットさせる。
+ */
+#lightbox [data-lightbox-image] {
+  width: auto;
+  height: auto;
+  max-width: 92vw;
+  max-height: 85vh;
+  object-fit: contain;
 }
 
 /*

@@ -267,14 +267,6 @@ function showLightboxImage(dialog: HTMLDialogElement, index: number, images: str
   const normalized = ((index % images.length) + images.length) % images.length;
   const image = dialog.querySelector<HTMLImageElement>('[data-lightbox-image]');
   if (image) {
-    // 幅・高さ属性を持たないSVGなどは表示サイズを持たず、ダイアログが0×0になってしまうため、
-    // 読み込み完了後に実寸を明示してサイズ崩れを防ぐ
-    image.removeAttribute('width');
-    image.removeAttribute('height');
-    image.onload = () => {
-      image.width = image.naturalWidth;
-      image.height = image.naturalHeight;
-    };
     image.src = images[normalized] ?? '';
   }
   const hasMultiple = images.length > 1;
@@ -365,6 +357,33 @@ async function initParticles(): Promise<void> {
   destroyParticles = createHeroParticles(canvas);
 }
 
+/* ---------- 「過去の出演をもっと見る」展開 ---------- */
+function initPastMore(): void {
+  const button = document.querySelector<HTMLButtonElement>('[data-past-more]');
+  if (!button) return;
+  button.addEventListener('click', () => {
+    document
+      .querySelectorAll<HTMLElement>('[data-past-item].hidden')
+      .forEach((item) => item.classList.remove('hidden'));
+    button.parentElement?.remove();
+    ScrollTrigger.refresh();
+  });
+}
+
+/* ---------- スクロール進捗バー（ページ上部） ---------- */
+function initScrollProgress(): void {
+  const bar = document.getElementById('scroll-progress');
+  if (!bar) return;
+  const update = () => {
+    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
+    bar.style.transform = `scaleX(${Math.min(progress, 1)})`;
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update, { passive: true });
+  update();
+}
+
 /* ---------- ページごとの初期化 ---------- */
 function initPage(): void {
   ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
@@ -378,6 +397,8 @@ function initPage(): void {
   initCursor();
   initSlideshows();
   initLightbox();
+  initPastMore();
+  initScrollProgress();
   void initParticles();
   ScrollTrigger.refresh();
 }

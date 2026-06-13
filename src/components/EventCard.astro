@@ -76,10 +76,10 @@ const SLIDESHOW_INTERVAL_MS = 4000;
           data-lightbox
           data-images={JSON.stringify(images)}
           aria-label={imageAlt}
-          class="shrink-0"
+          class="group shrink-0"
         >
           <span
-            class="relative block h-24 w-[4.5rem] overflow-hidden border border-line bg-line/15"
+            class="relative block h-24 w-[4.5rem] overflow-hidden border border-line bg-line/15 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             data-slideshow={images.length > 1 ? SLIDESHOW_INTERVAL_MS : undefined}
           >
             {images.map((src, index) => (
