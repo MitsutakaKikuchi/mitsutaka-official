@@ -28,7 +28,7 @@ export const ui = {
     'hero.scroll': 'スクロール',
     'home.aboutTitle': 'プロフィール',
     'home.aboutLead':
-      '歌舞伎とともに磨かれてきた長唄の伝統を、確かな古典の素養とともに受け継ぐ。三味線が紡ぐ一音一音に情景を込め、その豊かな響きを国内外の舞台で、いまに伝える。',
+      '歌舞伎の情景を彩ってきた長唄三味線。その伝統を受け継ぎ、国内外の多様な音楽団体との共演を経て、いま、ここにある新たな響きを世界に鳴らす。',
     'home.aboutMore': 'プロフィールを見る',
     'home.scheduleTitle': '出演情報',
     'home.scheduleMore': 'すべての出演を見る',
@@ -93,7 +93,7 @@ export const ui = {
     'hero.scroll': 'Scroll',
     'home.aboutTitle': 'About',
     'home.aboutLead':
-      'Inheriting the nagauta tradition refined alongside kabuki over centuries, grounded in a deep command of the classics — and bringing the full, evocative voice of the shamisen to life on stages in Japan and beyond.',
+      'The nagauta shamisen, which has long colored the scenes of kabuki. Carrying on this tradition and collaborating with diverse international music groups to sound a new resonance to the world today.',
     'home.aboutMore': 'Read full profile',
     'home.scheduleTitle': 'Upcoming Shows',
     'home.scheduleMore': 'View all shows',
