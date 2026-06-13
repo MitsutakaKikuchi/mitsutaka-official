@@ -288,6 +288,11 @@ html.fx-cursor button {
   backdrop-filter: blur(2px);
 }
 
+/* ライトボックス表示中は背景ページのスクロールを固定する */
+html.lightbox-open {
+  overflow: hidden;
+}
+
 /*
  * ライトボックス画像は常にビューポート内に収め、スクロール無しで全体が見えるようにする。
  * 縦長・横長どちらの画像でも縦横比を保ったまま画面内にフィットさせる。

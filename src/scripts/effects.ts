@@ -300,7 +300,16 @@ function initLightbox(): void {
       if (image) image.alt = event.detail.alt;
       index = showLightboxImage(dialog, 0, images);
       dialog.showModal();
+      // 背景ページのスクロールを止める（Lenis慣性スクロール + ネイティブ両方）
+      lenis?.stop();
+      document.documentElement.classList.add('lightbox-open');
     }) as EventListener);
+
+    // 閉じたとき（×ボタン / 背景クリック / Escキー いずれも）に背景スクロールを復帰
+    dialog.addEventListener('close', () => {
+      document.documentElement.classList.remove('lightbox-open');
+      lenis?.start();
+    });
 
     dialog.querySelector('[data-lightbox-prev]')?.addEventListener('click', () => {
       index = showLightboxImage(dialog, index - 1, images);
