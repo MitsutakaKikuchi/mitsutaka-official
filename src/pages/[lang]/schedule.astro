@@ -13,6 +13,9 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
 
+// 過去の出演は最初の数件のみ表示し、残りは「もっと見る」で展開する
+const PAST_VISIBLE_COUNT = 5;
+
 const now = new Date();
 const allEvents = await getCollection('schedule');
 const upcomingEvents = allEvents
@@ -74,13 +77,26 @@ const pageTitle = lang === 'ja' ? '出演スケジュール' : 'Schedule';
 
     {
       pastEvents.length > 0 && (
-        <section class="mt-section">
+        <section class="mt-section" data-past-section>
           <h2 class="mb-2 text-sm tracking-[0.3em] uppercase text-muted" data-reveal>
             {t('schedule.past')}
           </h2>
-          {pastEvents.map((event) => (
-            <EventCard event={event} lang={lang} past />
+          {pastEvents.map((event, index) => (
+            <div data-past-item class:list={[index >= PAST_VISIBLE_COUNT && 'hidden']}>
+              <EventCard event={event} lang={lang} past />
+            </div>
           ))}
+          {pastEvents.length > PAST_VISIBLE_COUNT && (
+            <div class="mt-8 text-center" data-reveal>
+              <button
+                type="button"
+                data-past-more
+                class="border-b border-muted pb-1 text-sm tracking-[0.2em] text-muted transition-colors hover:text-accent hover:border-accent"
+              >
+                {t('schedule.showMore')}（{pastEvents.length - PAST_VISIBLE_COUNT}）→
+              </button>
+            </div>
+          )}
         </section>
       )
     }
