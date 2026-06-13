@@ -23,9 +23,22 @@ const enUrl = localePath('en');
       location.replace(prefersJapanese ? jaUrl : enUrl);
     </script>
   </head>
-  <body>
-    <p style="font-family: sans-serif; padding: 2rem;">
-      <a href={jaUrl}>日本語</a> / <a href={enUrl}>English</a>
+  <body
+    style="margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.75rem;background:#f7f5f0;color:#1a1a1a;font-family:'Cormorant Garamond',serif;"
+  >
+    <p
+      style="margin:0;font-size:1.35rem;letter-spacing:0.35em;text-indent:0.35em;font-family:serif;"
+    >
+      {SITE.artistNameJa}
+    </p>
+    <p
+      style="margin:0;font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;color:#8a8580;"
+    >
+      {SITE.artistNameEn}
+    </p>
+    <p style="margin:0;display:flex;gap:1.25rem;font-size:0.8rem;letter-spacing:0.2em;">
+      <a href={jaUrl} style="color:#1b3a5b;text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:2px;">日本語</a>
+      <a href={enUrl} style="color:#1b3a5b;text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:2px;">English</a>
     </p>
   </body>
 </html>
