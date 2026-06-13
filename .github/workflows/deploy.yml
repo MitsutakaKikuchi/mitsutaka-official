@@ -1,10 +1,13 @@
-# main ブランチへの push で GitHub Pages へ自動デプロイする
+# main ブランチへの push、毎日定時、手動実行で GitHub Pages へデプロイする
 name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+  # 毎日 06:00 JST（前日 21:00 UTC）にスプレッドシートを読み直して再デプロイする
+  schedule:
+    - cron: '0 21 * * *'
 
 permissions:
   contents: read

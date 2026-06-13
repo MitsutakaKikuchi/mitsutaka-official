@@ -1,4 +1,3 @@
-# TODO: GitHub ユーザー名に合わせて Sitemap の URL を変更すること
 User-agent: *
 Allow: /
 
