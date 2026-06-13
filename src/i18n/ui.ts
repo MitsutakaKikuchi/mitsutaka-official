@@ -28,7 +28,7 @@ export const ui = {
     'hero.scroll': 'スクロール',
     'home.aboutTitle': 'プロフィール',
     'home.aboutLead':
-      '歌舞伎とともに歩んできた長唄の伝統を受け継ぎ、国内外の舞台でその音色の可能性を伝える。',
+      '歌舞伎とともに磨かれてきた長唄の伝統を、確かな古典の素養とともに受け継ぐ。三味線が紡ぐ一音一音に情景を込め、その豊かな響きを国内外の舞台で、いまに伝える。',
     'home.aboutMore': 'プロフィールを見る',
     'home.scheduleTitle': '出演情報',
     'home.scheduleMore': 'すべての出演を見る',
@@ -46,6 +46,7 @@ export const ui = {
     'schedule.photo': '演奏写真',
     'schedule.website': '詳細ページ',
     'schedule.with': '共演:',
+    'schedule.showMore': '過去の出演をもっと見る',
     'lightbox.close': '閉じる',
     'lightbox.prev': '前の画像',
     'lightbox.next': '次の画像',
@@ -92,7 +93,7 @@ export const ui = {
     'hero.scroll': 'Scroll',
     'home.aboutTitle': 'About',
     'home.aboutLead':
-      'Carrying on the nagauta tradition that has evolved alongside kabuki, sharing the voice of the shamisen on stages in Japan and abroad.',
+      'Inheriting the nagauta tradition refined alongside kabuki over centuries, grounded in a deep command of the classics — and bringing the full, evocative voice of the shamisen to life on stages in Japan and beyond.',
     'home.aboutMore': 'Read full profile',
     'home.scheduleTitle': 'Upcoming Shows',
     'home.scheduleMore': 'View all shows',
@@ -110,6 +111,7 @@ export const ui = {
     'schedule.photo': 'Concert photo',
     'schedule.website': 'Event page',
     'schedule.with': 'With:',
+    'schedule.showMore': 'Show more past shows',
     'lightbox.close': 'Close',
     'lightbox.prev': 'Previous image',
     'lightbox.next': 'Next image',
