@@ -5,13 +5,17 @@ interface Props {
   /** 表示言語での見出し（例: 公演情報） */
   label: string;
   id?: string;
+  /** 任意の索引番号（例: 1 → "01"）。サブページに縦のリズムを与える */
+  index?: number;
 }
 
-const { en, label, id } = Astro.props;
+const { en, label, id, index } = Astro.props;
+const indexLabel = index !== undefined ? String(index).padStart(2, '0') : null;
 ---
 
 <div class="mb-12" data-reveal id={id}>
   <p class="flex items-center gap-3 text-[11px] tracking-[0.35em] uppercase text-accent">
+    {indexLabel && <span class="text-vermilion tabular-nums">{indexLabel}</span>}
     {en !== label && <span>{en}</span>}
     <span class="h-px w-12 bg-accent/40" aria-hidden="true"></span>
   </p>

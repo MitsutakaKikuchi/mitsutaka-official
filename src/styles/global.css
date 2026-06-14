@@ -10,6 +10,11 @@
   --color-ink: #1a1a1a;
   --color-accent: #1b3a5b;
   --color-accent-dark: #122b46;
+  /*
+   * 差し色（朱）: 藍一色の「静」に対し「動」を一点だけ添える伝統的対比。
+   * 落款印・スクロール進捗・弦の振動発光など、ごく限られた箇所にのみ使う。
+   */
+  --color-vermilion: #c04b3c;
   --color-muted: #8a8580;
   --color-line: #dedad2;
 
@@ -208,7 +213,8 @@ html.fx-cursor button {
   z-index: 60;
   height: 2px;
   width: 100%;
-  background: var(--color-accent, #1b3a5b);
+  /* 藍から朱へ。読み進めるほど「動（朱）」へ近づく */
+  background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-vermilion) 100%);
   transform: scaleX(0);
   transform-origin: left;
   will-change: transform;
@@ -222,6 +228,19 @@ html.fx-cursor button {
 
 #site-header.is-scrolled {
   box-shadow: 0 1px 24px rgb(26 26 26 / 0.08);
+}
+
+/* ヒーローの円相: 同心円のグループが常時ゆっくり回転し続ける */
+.hero-circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hero-circle-spin 60s linear infinite;
+}
+
+@keyframes hero-circle-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ヒーロー下部のスクロールインジケーター（線が上→下へ流れるループ） */

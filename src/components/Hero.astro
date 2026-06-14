@@ -29,15 +29,40 @@ const catchChars = [...t('hero.catchcopy')];
     preserveAspectRatio="xMidYMid slice"
     aria-hidden="true"
   >
-    <circle
-      data-draw
-      cx="420"
-      cy="400"
-      r="300"
-      fill="none"
-      stroke="#1b3a5b"
-      stroke-opacity="0.14"
-      stroke-width="1.5"></circle>
+    <!--
+      円相: 同心円のグループとして常時ゆっくり回転する
+      （technication.co.jp の背景円グラフィックを参考に、複数リング + 軌道上の朱のマーカーで構成）
+    -->
+    <g class="hero-circle">
+      <circle
+        data-draw
+        cx="420"
+        cy="400"
+        r="300"
+        fill="none"
+        stroke="#1b3a5b"
+        stroke-opacity="0.14"
+        stroke-width="1.5"></circle>
+      <circle
+        cx="420"
+        cy="400"
+        r="380"
+        fill="none"
+        stroke="#1b3a5b"
+        stroke-opacity="0.07"
+        stroke-width="1"></circle>
+      <!-- 軌道上を巡る朱のマーカー（差し色） -->
+      <circle
+        cx="420"
+        cy="400"
+        r="380"
+        fill="none"
+        stroke="#c04b3c"
+        stroke-opacity="0.6"
+        stroke-width="4"
+        stroke-linecap="round"
+        stroke-dasharray="120 2268"></circle>
+    </g>
     <line
       data-draw
       x1="150"

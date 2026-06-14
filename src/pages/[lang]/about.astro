@@ -35,7 +35,7 @@ const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
 
 <Base lang={lang} subpath="about/" title={pageTitle} description={t('meta.about')}>
   <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
-    <SectionHeading en="About" label={pageTitle} />
+    <SectionHeading en="About" label={pageTitle} index={1} />
 
     <div class="grid gap-12 md:grid-cols-[1fr_minmax(16rem,24rem)]">
       <div class="space-y-6 leading-loose" data-reveal>
@@ -63,7 +63,7 @@ const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
     <!-- TODO: 受賞歴・主な実績が確定したらセクションとして追加する -->
 
     <section class="mt-section">
-      <SectionHeading en="Press Kit" label={lang === 'ja' ? 'プレス向け資料' : 'Press Kit'} />
+      <SectionHeading en="Press Kit" label={lang === 'ja' ? 'プレス向け資料' : 'Press Kit'} index={2} />
       <p class="leading-relaxed text-muted" data-reveal>
         {
           lang === 'ja'
