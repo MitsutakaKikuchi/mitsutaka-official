@@ -73,7 +73,7 @@ const hasActions = hasTicketAction || Boolean(data.websiteUrl);
   ]}
   data-reveal
 >
-  <div class="flex gap-4 sm:gap-6">
+  <div class="flex flex-col gap-3 sm:flex-row sm:gap-6">
     {
       images.length > 0 && (
         <button
@@ -84,7 +84,7 @@ const hasActions = hasTicketAction || Boolean(data.websiteUrl);
           class="group shrink-0"
         >
           <span
-            class="relative block h-28 w-20 overflow-hidden border border-line bg-line/15 transition-transform duration-500 ease-out group-hover:scale-[1.03] sm:h-32 sm:w-24"
+            class="relative block h-40 w-full overflow-hidden border border-line bg-line/15 transition-transform duration-500 ease-out group-hover:scale-[1.03] sm:h-32 sm:w-24"
             data-slideshow={images.length > 1 ? SLIDESHOW_INTERVAL_MS : undefined}
           >
             {images.map((src, index) => (
