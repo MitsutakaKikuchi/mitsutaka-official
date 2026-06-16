@@ -99,6 +99,33 @@ body::after {
   font-weight: 500;
 }
 
+/*
+ * タイポグラフィ最適化（特にモバイル）。
+ * - text-wrap: balance/pretty で見出しの行末孤立や本文の最終行1単語を防ぐ
+ * - 日本語は line-break: strict で禁則処理を厳格化
+ * - word-break: auto-phrase は文節単位で改行する最新CSS（Chrome 119+）。
+ *   非対応ブラウザは無視するだけのプログレッシブエンハンスメント
+ */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+:lang(ja) {
+  line-break: strict;
+}
+
+/* 縦書きでない日本語の本文・リード文を文節で自然に折り返す */
+.font-serif:not(.vertical-text),
+p:lang(ja) {
+  word-break: auto-phrase;
+}
+
 /* 縦書き（仕様書②-4: 見出し・キャッチコピーの部分活用） */
 .vertical-text {
   writing-mode: vertical-rl;
@@ -240,6 +267,30 @@ html.fx-cursor button {
 @keyframes hero-circle-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/*
+ * CSS スクロール駆動アニメーション（最新仕様 animation-timeline: view()）。
+ * ヒーローがビューポート上端から退場する間に、内容を静かにフェード＋上昇させ
+ * 「間（ま）」のある余韻を残す。JS 不要・コンポジタ処理で軽量、モバイルでも滑らか。
+ * 非対応ブラウザ（Safari / Firefox 等）では何も起きないプログレッシブエンハンスメント。
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-fade {
+      animation: hero-scroll-fade linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 95%;
+      will-change: opacity, transform;
+    }
+  }
+}
+
+@keyframes hero-scroll-fade {
+  to {
+    opacity: 0;
+    transform: translateY(-3%);
   }
 }
 

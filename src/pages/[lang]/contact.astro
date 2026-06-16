@@ -12,8 +12,9 @@ const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
 
 const pageTitle = lang === 'ja' ? 'お問い合わせ' : 'Contact';
+// text-base（16px）でモバイルの iOS 自動ズームを防ぎ、PC では sm:text-sm に戻す
 const inputClass =
-  'w-full border border-line bg-white/70 px-4 py-3 text-sm tracking-wider focus:border-accent focus:outline-none transition-colors';
+  'w-full border border-line bg-white/70 px-4 py-3 text-base tracking-wider focus:border-accent focus:outline-none transition-colors sm:text-sm';
 ---
 
 <Base lang={lang} subpath="contact/" title={pageTitle} description={t('meta.contact')}>
@@ -40,13 +41,13 @@ const inputClass =
               { value: 'general', label: t('contact.typeGeneral') },
               { value: 'press', label: t('contact.typePress') },
             ].map((option, index) => (
-              <label class="flex items-center gap-2 text-sm tracking-wider">
+              <label class="flex min-h-11 items-center gap-2 text-sm tracking-wider">
                 <input
                   type="radio"
                   name="inquiryType"
                   value={option.value}
                   checked={index === 0}
-                  class="accent-accent"
+                  class="h-4 w-4 accent-accent"
                 />
                 {option.label}
               </label>

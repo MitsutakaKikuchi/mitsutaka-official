@@ -75,8 +75,9 @@ const catchChars = [...t('hero.catchcopy')];
   </svg>
 
   <!-- pb はスクロールインジケーター（absolute bottom）との重なりを防ぐ余白 -->
+  <!-- hero-fade: スクロール退場時にフェード＋上昇する CSS スクロール駆動演出 -->
   <div
-    class="relative mx-auto grid w-full max-w-6xl items-center justify-items-center gap-12 px-4 pt-10 pb-28 sm:px-6 sm:pb-32 md:grid-cols-[1fr_auto]"
+    class="hero-fade relative mx-auto grid w-full max-w-6xl items-center justify-items-center gap-12 px-4 pt-10 pb-28 sm:px-6 sm:pb-32 md:grid-cols-[1fr_auto]"
   >
     {
       lang === 'ja' ? (

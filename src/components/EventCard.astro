@@ -56,19 +56,24 @@ const imageLabel = flyerImages.length > 0 ? t('schedule.flyer') : t('schedule.ph
 const imageAlt = `${imageLabel}: ${title}`;
 
 const SLIDESHOW_INTERVAL_MS = 4000;
+
+// 共演者は個別チップではなく1行にまとめて表示する（多数いても整然と並ぶ）
+const performerSeparator = lang === 'ja' ? '、' : ', ';
+const performerList = data.performers.join(performerSeparator);
+
+// アクション（チケット / 詳細ページ）が1つでもあるか
+const hasTicketAction = !past && (data.soldOut || Boolean(data.ticketUrl));
+const hasActions = hasTicketAction || Boolean(data.websiteUrl);
 ---
 
 <article
   class:list={[
-    'grid gap-3 border-b border-line px-3 py-6 -mx-3 transition-colors hover:bg-accent/[0.04] sm:grid-cols-[10rem_1fr_auto] sm:items-center',
+    'border-b border-line px-3 py-6 -mx-3 transition-colors hover:bg-accent/[0.04]',
     past && 'opacity-60',
   ]}
   data-reveal
 >
-  <time datetime={data.date.toISOString().slice(0, 10)} class="text-sm tracking-wider text-accent">
-    {formatEventDate(data.date, lang)}
-  </time>
-  <div class="flex items-start gap-4">
+  <div class="flex gap-4 sm:gap-6">
     {
       images.length > 0 && (
         <button
@@ -79,7 +84,7 @@ const SLIDESHOW_INTERVAL_MS = 4000;
           class="group shrink-0"
         >
           <span
-            class="relative block h-24 w-[4.5rem] overflow-hidden border border-line bg-line/15 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            class="relative block h-28 w-20 overflow-hidden border border-line bg-line/15 transition-transform duration-500 ease-out group-hover:scale-[1.03] sm:h-32 sm:w-24"
             data-slideshow={images.length > 1 ? SLIDESHOW_INTERVAL_MS : undefined}
           >
             {images.map((src, index) => (
@@ -99,60 +104,76 @@ const SLIDESHOW_INTERVAL_MS = 4000;
         </button>
       )
     }
-    <div>
-      <h3 class="font-serif text-lg tracking-wider">{title}</h3>
+
+    <div class="min-w-0 flex-1">
+      {/* 日付は見出し上のアイブロウとして配置 */}
+      <time
+        datetime={data.date.toISOString().slice(0, 10)}
+        class="block text-xs tracking-[0.2em] text-accent"
+      >
+        {formatEventDate(data.date, lang)}
+      </time>
+
+      <h3 class="mt-1.5 font-serif text-lg leading-snug tracking-wider">{title}</h3>
+
       <p class="mt-1 text-sm text-muted">
         {venue} — {city}{data.country !== 'JP' || lang === 'en' ? `, ${countryName}` : ''}
       </p>
+
       {
-        (data.genres.length > 0 || data.performers.length > 0) && (
-          <div class="mt-2 flex flex-wrap gap-1.5">
+        data.genres.length > 0 && (
+          <div class="mt-2.5 flex flex-wrap gap-1.5">
             {data.genres.map((genre) => (
-              <span class="text-[0.65rem] tracking-wider text-accent border border-accent/30 px-2 py-0.5">
+              <span class="border border-accent/30 px-2 py-0.5 text-[0.65rem] tracking-wider text-accent">
                 {genre}
-              </span>
-            ))}
-            {data.performers.map((performer) => (
-              <span class="text-[0.65rem] tracking-wider text-muted border border-line px-2 py-0.5">
-                {t('schedule.with')} {performer}
               </span>
             ))}
           </div>
         )
       }
-    </div>
-  </div>
-  {
-    (data.websiteUrl || (!past && (data.soldOut || data.ticketUrl))) && (
-      <div class="mt-1 flex flex-row flex-wrap items-center gap-2 justify-self-start sm:mt-0 sm:flex-col sm:items-end sm:justify-self-end">
-        {!past &&
-          (data.soldOut ? (
-            <span class="text-xs tracking-widest text-muted border border-line px-4 py-2">
-              {t('schedule.soldOut')}
-            </span>
-          ) : (
-            data.ticketUrl && (
+
+      {/* 共演者は1行にまとめて静かに表示する */}
+      {
+        performerList && (
+          <p class="mt-2 text-xs leading-relaxed text-muted">
+            <span class="tracking-wider text-accent/70">{t('schedule.with')}</span> {performerList}
+          </p>
+        )
+      }
+
+      {
+        hasActions && (
+          <div class="mt-4 flex flex-wrap items-center gap-2">
+            {hasTicketAction &&
+              (data.soldOut ? (
+                <span class="border border-line px-4 py-2 text-xs tracking-widest text-muted">
+                  {t('schedule.soldOut')}
+                </span>
+              ) : (
+                data.ticketUrl && (
+                  <a
+                    href={data.ticketUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="border border-accent px-4 py-2 text-xs tracking-widest text-accent transition-colors hover:bg-accent hover:text-white"
+                  >
+                    {t('schedule.tickets')}
+                  </a>
+                )
+              ))}
+            {data.websiteUrl && (
               <a
-                href={data.ticketUrl}
+                href={data.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="border border-accent text-accent hover:bg-accent hover:text-white transition-colors text-xs tracking-widest px-4 py-2"
+                class="border border-line px-4 py-2 text-xs tracking-widest text-muted transition-colors hover:border-accent hover:text-accent"
               >
-                {t('schedule.tickets')}
+                {t('schedule.website')}
               </a>
-            )
-          ))}
-        {data.websiteUrl && (
-          <a
-            href={data.websiteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="border border-line text-muted hover:border-accent hover:text-accent transition-colors text-xs tracking-widest px-4 py-2"
-          >
-            {t('schedule.website')}
-          </a>
-        )}
-      </div>
-    )
-  }
+            )}
+          </div>
+        )
+      }
+    </div>
+  </div>
 </article>
