@@ -87,19 +87,23 @@ const hasActions = hasTicketAction || Boolean(data.websiteUrl);
             class="relative block h-40 w-full overflow-hidden border border-line bg-line/15 transition-transform duration-500 ease-out group-hover:scale-[1.03] sm:h-32 sm:w-24"
             data-slideshow={images.length > 1 ? SLIDESHOW_INTERVAL_MS : undefined}
           >
-            {images.map((src, index) => (
-              <img
-                src={src}
-                alt={index === 0 ? imageAlt : ''}
-                aria-hidden={index === 0 ? undefined : 'true'}
-                loading="lazy"
-                data-slide
-                class:list={[
-                  'absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 hover:opacity-80',
-                  index === 0 ? 'opacity-100' : 'opacity-0',
-                ]}
-              />
-            ))}
+            {images.map((src, index) => {
+              const isFlyer = index < flyerImages.length;
+              return (
+                <img
+                  src={src}
+                  alt={index === 0 ? imageAlt : ''}
+                  aria-hidden={index === 0 ? undefined : 'true'}
+                  loading="lazy"
+                  data-slide
+                  class:list={[
+                    'absolute inset-0 h-full w-full transition-opacity duration-1000 hover:opacity-80',
+                    isFlyer ? 'object-contain' : 'object-cover',
+                    index === 0 ? 'opacity-100' : 'opacity-0',
+                  ]}
+                />
+              );
+            })}
           </span>
         </button>
       )
@@ -166,7 +170,7 @@ const hasActions = hasTicketAction || Boolean(data.websiteUrl);
                 href={data.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="border border-line px-4 py-2 text-xs tracking-widest text-muted transition-colors hover:border-accent hover:text-accent"
+                class="border border-accent/60 px-4 py-2 text-xs tracking-widest text-accent/80 transition-colors hover:border-accent hover:text-accent"
               >
                 {t('schedule.website')}
               </a>
