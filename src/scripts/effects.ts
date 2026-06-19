@@ -236,6 +236,36 @@ function initCursor(): void {
   });
 }
 
+/* ---------- 公演画像の読み込み失敗フォールバック ---------- */
+/**
+ * 読み込めなかった画像（Google ドライブ変換失敗・URL切れなど）は非表示にする。
+ * カード内の全画像が失敗した場合は画像枠ごと隠し、テキストのみの表示に切り替える。
+ */
+function initEventImageFallback(): void {
+  document.querySelectorAll<HTMLElement>('[data-event-images]').forEach((box) => {
+    const images = Array.from(box.querySelectorAll<HTMLImageElement>('img'));
+    let remaining = images.length;
+
+    const handleFailure = (img: HTMLImageElement): void => {
+      if (img.dataset.failed) return;
+      img.dataset.failed = 'true';
+      img.remove();
+      remaining -= 1;
+      // すべて失敗したら画像枠（ボタン）ごと隠す
+      if (remaining <= 0) box.style.display = 'none';
+    };
+
+    images.forEach((img) => {
+      // キャッシュ済みで既に失敗している画像も拾う
+      if (img.complete && img.naturalWidth === 0) {
+        handleFailure(img);
+      } else {
+        img.addEventListener('error', () => handleFailure(img));
+      }
+    });
+  });
+}
+
 /* ---------- 公演画像のスライドショー（チラシ・写真が複数ある場合） ---------- */
 let slideshowTimers: number[] = [];
 
@@ -404,6 +434,7 @@ function initPage(): void {
   initMagnetic();
   initSvgDraw();
   initCursor();
+  initEventImageFallback();
   initSlideshows();
   initLightbox();
   initPastMore();
