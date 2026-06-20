@@ -1,15 +1,17 @@
 /**
- * サイト全体のモーション演出（「和の所作」方針: 静・間・余韻を重んじる）。
+ * サイト全体のモーション演出（「古典 × 現代技術」方針）。
+ * 和の意匠（墨・円相・縦書き）を保ちつつ、現代的なインタラクションを重ねて
+ * 「伝統を弾き、いまを鳴らす」というコンセプトを動きでも表現する。
  * - Lenis: 慣性スクロール
  * - GSAP + ScrollTrigger: スクロール連動フェード／パララックス／マスク+ズームリビール
- * - キネティック・タイポグラフィ（.k-char）: 墨が静かに置かれるような淡い登場
+ * - キネティック・タイポグラフィ（.k-char）: 墨が立ち上がるように1字ずつ登場
  * - SVGドローイング（[data-draw]）: 筆で一筆書きされる円相・界線
+ * - WebGL パーティクル（#hero-canvas）: 墨を流したような藍の粒子がマウスに反応
+ * - マグネティックボタン（[data-magnetic]）: カーソルに吸い付く CTA
+ * - カスタムカーソル: 落款の朱点 + 藍の輪（リンク上で朱に灯る）
  * - 公演画像のスライドショー（[data-slideshow]）／ライトボックス（[data-lightbox]）
  * すべて prefers-reduced-motion を尊重し、無効時は静的表示にフォールバックする。
  * Astro View Transitions（astro:page-load / astro:before-swap）に対応。
- *
- * 制作会社サイト的なギミック（カスタムカーソル / マグネティックボタン /
- * マウス反応 WebGL パーティクル）は、和の伝統芸能の品格にそぐわないため撤去した。
  */
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -18,9 +20,11 @@ import Lenis from 'lenis';
 gsap.registerPlugin(ScrollTrigger);
 
 const REVEAL_OFFSET_PX = 28;
+const RING_LERP = 0.16;
 
 const prefersReducedMotion = (): boolean =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const hasFinePointer = (): boolean => window.matchMedia('(pointer: fine)').matches;
 
 /* ---------- 慣性スクロール ---------- */
 let lenis: Lenis | null = null;
@@ -114,28 +118,51 @@ function initParallax(): void {
   });
 }
 
-/* ---------- 墨が置かれるように現れる見出し（旧キネティック・タイポ） ---------- */
-// 文字が飛び跳ねる演出はやめ、墨が和紙にゆっくり滲み出るような静かな登場に。
-// stagger を大きめ・duration を長めに取り「間（ま）」を作る。
+/* ---------- キネティック・タイポグラフィ（墨が立ち上がる） ---------- */
+// 墨の滲み（blur）を解きながら、1字ずつ下から静かに立ち上がる。
+// 和の「間」を残しつつ、現代的なステージング表示で生命感を与える。
 function initKineticType(): void {
   const chars = document.querySelectorAll<HTMLElement>('.k-char');
   if (chars.length === 0) return;
   if (prefersReducedMotion()) {
-    gsap.set(chars, { autoAlpha: 1, filter: 'blur(0px)' });
+    gsap.set(chars, { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
     return;
   }
   gsap.fromTo(
     chars,
-    { autoAlpha: 0, filter: 'blur(6px)' },
+    { autoAlpha: 0, y: '0.4em', filter: 'blur(8px)' },
     {
       autoAlpha: 1,
+      y: 0,
       filter: 'blur(0px)',
-      duration: 1.6,
-      ease: 'power2.out',
-      stagger: 0.12,
-      delay: 0.4,
+      duration: 1.1,
+      ease: 'power3.out',
+      stagger: 0.09,
+      delay: 0.35,
     }
   );
+}
+
+/* ---------- マグネティックボタン（カーソルに吸い付く） ---------- */
+const MAGNET_STRENGTH = 0.32;
+
+function initMagnetic(): void {
+  if (!hasFinePointer() || prefersReducedMotion()) return;
+  document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => {
+    const xTo = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3.out' });
+    const yTo = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3.out' });
+
+    el.addEventListener('mousemove', (event) => {
+      const rect = el.getBoundingClientRect();
+      xTo((event.clientX - (rect.left + rect.width / 2)) * MAGNET_STRENGTH);
+      yTo((event.clientY - (rect.top + rect.height / 2)) * MAGNET_STRENGTH);
+    });
+
+    el.addEventListener('mouseleave', () => {
+      xTo(0);
+      yTo(0);
+    });
+  });
 }
 
 /* ---------- SVG ラインドローイング ---------- */
@@ -151,6 +178,68 @@ function initSvgDraw(): void {
       { strokeDasharray: length, strokeDashoffset: length },
       { strokeDashoffset: 0, duration: 2.4, ease: 'power2.inOut', delay: 0.2 }
     );
+  });
+}
+
+/* ---------- カスタムカーソル（落款の朱点 + 藍の輪） ---------- */
+const RING_SCALE_ACTIVE = 1.6;
+const RING_SCALE_LERP = 0.2;
+
+let cursorBound = false;
+let mouseX = -100;
+let mouseY = -100;
+let ringX = -100;
+let ringY = -100;
+let ringScale = 1;
+let ringScaleTarget = 1;
+
+function ensureCursorElements(): void {
+  if (!document.getElementById('cursor-dot')) {
+    const dot = document.createElement('div');
+    dot.id = 'cursor-dot';
+    dot.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(dot);
+  }
+  if (!document.getElementById('cursor-ring')) {
+    const ring = document.createElement('div');
+    ring.id = 'cursor-ring';
+    ring.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(ring);
+  }
+}
+
+function initCursor(): void {
+  if (!hasFinePointer() || prefersReducedMotion()) return;
+  // View Transitions で body が入れ替わるたびに要素を再生成する
+  ensureCursorElements();
+  document.documentElement.classList.add('fx-cursor');
+
+  if (cursorBound) return;
+  cursorBound = true;
+
+  window.addEventListener('mousemove', (event) => {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+  });
+
+  // リンク・ボタン上では輪を拡大し、朱に灯す（落款を捺すイメージ）
+  document.addEventListener('mouseover', (event) => {
+    const target = (event.target as HTMLElement).closest('a, button');
+    ringScaleTarget = target ? RING_SCALE_ACTIVE : 1;
+  });
+
+  gsap.ticker.add(() => {
+    const dot = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+    if (!dot || !ring) return;
+    ringX += (mouseX - ringX) * RING_LERP;
+    ringY += (mouseY - ringY) * RING_LERP;
+    ringScale += (ringScaleTarget - ringScale) * RING_SCALE_LERP;
+    // translate(-50%, -50%) で常に円の中心をカーソル位置に合わせる
+    dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+    ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%) scale(${ringScale})`;
+    // 色の切替（藍→朱）は CSS の .is-active に委ねる
+    ring.classList.toggle('is-active', ringScaleTarget > 1);
   });
 }
 
@@ -303,6 +392,17 @@ function initLightbox(): void {
   });
 }
 
+/* ---------- WebGL パーティクル（ホームのヒーローのみ） ---------- */
+let destroyParticles: (() => void) | null = null;
+
+async function initParticles(): Promise<void> {
+  const canvas = document.querySelector<HTMLCanvasElement>('#hero-canvas');
+  if (!canvas || prefersReducedMotion()) return;
+  // Three.js はホームページでのみ動的読込（他ページのバンドルを軽量に保つ）
+  const { createHeroParticles } = await import('./heroParticles');
+  destroyParticles = createHeroParticles(canvas);
+}
+
 /* ---------- 「過去の出演をもっと見る」展開 ---------- */
 function initPastMore(): void {
   const button = document.querySelector<HTMLButtonElement>('[data-past-more]');
@@ -338,16 +438,21 @@ function initPage(): void {
   initMaskReveals();
   initParallax();
   initKineticType();
+  initMagnetic();
   initSvgDraw();
+  initCursor();
   initEventImageFallback();
   initSlideshows();
   initLightbox();
   initPastMore();
   initScrollProgress();
+  void initParticles();
   ScrollTrigger.refresh();
 }
 
 document.addEventListener('astro:page-load', initPage);
 document.addEventListener('astro:before-swap', () => {
   clearSlideshowTimers();
+  destroyParticles?.();
+  destroyParticles = null;
 });

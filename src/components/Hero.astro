@@ -18,8 +18,14 @@ const catchChars = [...t('hero.catchcopy')];
 <section
   class="relative flex min-h-[calc(100svh-4rem)] items-center justify-center overflow-hidden"
 >
+  <!-- WebGL パーティクル（墨を流したような藍の粒子・マウス反応。reduced-motion 時は起動しない） -->
+  <canvas
+    id="hero-canvas"
+    class="pointer-events-none absolute inset-0 h-full w-full"
+    aria-hidden="true"></canvas>
+
   <!-- 円相（禅画の一円相）をモチーフにした SVG ラインドローイング。
-       ページ表示時に筆で一筆書きされるように現れ、そのまま静止する。 -->
+       ページ表示時に筆で一筆書きされるように現れ、描き終えると静かに「呼吸」する。 -->
   <svg
     class="pointer-events-none absolute inset-0 h-full w-full"
     viewBox="0 0 1200 800"
@@ -28,9 +34,10 @@ const catchChars = [...t('hero.catchcopy')];
   >
     <!--
       一円相（いちえんそう）: 筆で一気に描いた墨の円。
-      data-draw により一筆書きされ、描き終えたら静止する（回転や軌道マーカーは持たない）。
+      data-draw で一筆書きされ、hero-ensou によりごく僅かに拡縮・濃淡が揺らぐ（回転はしない）。
     -->
     <circle
+      class="hero-ensou"
       data-draw
       cx="420"
       cy="400"

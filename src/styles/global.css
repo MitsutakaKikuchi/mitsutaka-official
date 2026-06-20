@@ -147,7 +147,7 @@ html.js [data-mask-reveal] {
 html.js .k-char {
   display: inline-block;
   opacity: 0;
-  filter: blur(6px); /* GSAP が墨の滲みを解くように静かにフォーカスさせる */
+  filter: blur(8px); /* GSAP が墨の滲みを解きながら1字ずつ立ち上げる */
 }
 
 /* ナビゲーションリンクの下線アニメーション */
@@ -197,6 +197,48 @@ html.js .k-char {
   transform: translateY(-1.6em);
 }
 
+/*
+ * カスタムカーソル（落款の朱点 + 藍の輪）。
+ * 中央合わせは JS の translate(-50%, -50%)、拡大は JS の lerp で行う。
+ * リンク・ボタン上では .is-active が付き、輪が朱に灯る（落款を捺すイメージ）。
+ */
+html.fx-cursor,
+html.fx-cursor a,
+html.fx-cursor button {
+  cursor: none;
+}
+
+#cursor-dot,
+#cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 9999px;
+  will-change: transform;
+}
+
+#cursor-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-vermilion);
+}
+
+#cursor-ring {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgb(27 58 91 / 0.55); /* 藍 */
+  transition:
+    border-color 0.35s ease,
+    background-color 0.35s ease;
+}
+
+#cursor-ring.is-active {
+  border-color: var(--color-vermilion); /* 朱に灯る */
+  background-color: rgb(192 75 60 / 0.1);
+}
+
 /* ページ上部のスクロール進捗バー（JS が transform: scaleX で伸縮させる） */
 #scroll-progress {
   position: fixed;
@@ -220,6 +262,30 @@ html.js .k-char {
 
 #site-header.is-scrolled {
   box-shadow: 0 1px 24px rgb(26 26 26 / 0.08);
+}
+
+/*
+ * 一円相の「呼吸」: 一筆書きで描き終えた後、ごく僅かに拡大縮小・濃淡が揺らぎ、
+ * 静止画ではなく生きた墨のように佇む（回転はしない）。
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-ensou {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ensou-breath 9s ease-in-out infinite;
+  }
+}
+
+@keyframes ensou-breath {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.78;
+  }
 }
 
 /*
@@ -282,6 +348,16 @@ html.js .k-char {
 .btn-cta:focus-visible {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgb(18 43 70 / 0.25);
+}
+
+/* マグネティック要素は GSAP が transform を毎フレーム書くため CSS 側の transform 遷移を外す */
+[data-magnetic] {
+  transition-property: background-color, box-shadow, color;
+}
+
+[data-magnetic]:hover,
+[data-magnetic]:focus-visible {
+  transform: none;
 }
 
 /* ライトボックス（フライヤー・公演写真の拡大表示） */
@@ -428,6 +504,11 @@ html.menu-open #header-lang {
 
   html.js [data-mask-reveal] {
     clip-path: none;
+  }
+
+  #cursor-dot,
+  #cursor-ring {
+    display: none;
   }
 
   *,
