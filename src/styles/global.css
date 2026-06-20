@@ -147,7 +147,7 @@ html.js [data-mask-reveal] {
 html.js .k-char {
   display: inline-block;
   opacity: 0;
-  filter: blur(10px); /* GSAP がブラー解除しながらステージング表示する */
+  filter: blur(6px); /* GSAP が墨の滲みを解くように静かにフォーカスさせる */
 }
 
 /* ナビゲーションリンクの下線アニメーション */
@@ -197,41 +197,6 @@ html.js .k-char {
   transform: translateY(-1.6em);
 }
 
-/*
- * カスタムカーソル（マウスストーカー）。
- * 中央合わせは JS の translate(-50%, -50%) で行う（margin + scale の組み合わせは
- * ホバー拡大時に円がずれる原因になるため使わない）。拡大も JS が lerp で行う。
- */
-html.fx-cursor,
-html.fx-cursor a,
-html.fx-cursor button {
-  cursor: none;
-}
-
-#cursor-dot,
-#cursor-ring {
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 9999;
-  border-radius: 9999px;
-  mix-blend-mode: difference;
-  will-change: transform;
-}
-
-#cursor-dot {
-  width: 8px;
-  height: 8px;
-  background: #fff;
-}
-
-#cursor-ring {
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgb(255 255 255 / 0.8);
-}
-
 /* ページ上部のスクロール進捗バー（JS が transform: scaleX で伸縮させる） */
 #scroll-progress {
   position: fixed;
@@ -255,19 +220,6 @@ html.fx-cursor button {
 
 #site-header.is-scrolled {
   box-shadow: 0 1px 24px rgb(26 26 26 / 0.08);
-}
-
-/* ヒーローの円相: 同心円のグループが常時ゆっくり回転し続ける */
-.hero-circle {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: hero-circle-spin 60s linear infinite;
-}
-
-@keyframes hero-circle-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /*
@@ -330,16 +282,6 @@ html.fx-cursor button {
 .btn-cta:focus-visible {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgb(18 43 70 / 0.25);
-}
-
-/* マグネティック要素は GSAP が transform を毎フレーム書くため CSS 側の transform 遷移を外す */
-[data-magnetic] {
-  transition-property: background-color, box-shadow, color;
-}
-
-[data-magnetic]:hover,
-[data-magnetic]:focus-visible {
-  transform: none;
 }
 
 /* ライトボックス（フライヤー・公演写真の拡大表示） */
@@ -486,11 +428,6 @@ html.menu-open #header-lang {
 
   html.js [data-mask-reveal] {
     clip-path: none;
-  }
-
-  #cursor-dot,
-  #cursor-ring {
-    display: none;
   }
 
   *,

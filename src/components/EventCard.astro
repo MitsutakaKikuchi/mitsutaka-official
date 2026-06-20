@@ -119,7 +119,13 @@ const hasActions = hasTicketAction || Boolean(data.websiteUrl);
         {formatEventDate(data.date, lang)}
       </time>
 
-      <h3 class="mt-2 font-serif text-lg leading-snug tracking-wider">{title}</h3>
+      {/* 日本語の長いタイトルを文節・中黒区切りで自然に折り返し、行のバランスも整える
+          （auto-phrase / text-balance 非対応ブラウザでは無視されるだけで害はない） */}
+      <h3
+        class="mt-2 font-serif text-lg leading-snug tracking-wider text-balance [word-break:auto-phrase]"
+      >
+        {title}
+      </h3>
 
       <p class="mt-1.5 text-sm text-muted">
         {venue} — {city}{data.country !== 'JP' || lang === 'en' ? `, ${countryName}` : ''}

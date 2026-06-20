@@ -18,11 +18,8 @@ const catchChars = [...t('hero.catchcopy')];
 <section
   class="relative flex min-h-[calc(100svh-4rem)] items-center justify-center overflow-hidden"
 >
-  <!-- WebGL パーティクル（藍の粒子・マウス反応。reduced-motion 時は起動しない） -->
-  <canvas id="hero-canvas" class="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true"
-  ></canvas>
-
-  <!-- 円相をモチーフにした SVG ラインドローイング -->
+  <!-- 円相（禅画の一円相）をモチーフにした SVG ラインドローイング。
+       ページ表示時に筆で一筆書きされるように現れ、そのまま静止する。 -->
   <svg
     class="pointer-events-none absolute inset-0 h-full w-full"
     viewBox="0 0 1200 800"
@@ -30,39 +27,20 @@ const catchChars = [...t('hero.catchcopy')];
     aria-hidden="true"
   >
     <!--
-      円相: 同心円のグループとして常時ゆっくり回転する
-      （technication.co.jp の背景円グラフィックを参考に、複数リング + 軌道上の朱のマーカーで構成）
+      一円相（いちえんそう）: 筆で一気に描いた墨の円。
+      data-draw により一筆書きされ、描き終えたら静止する（回転や軌道マーカーは持たない）。
     -->
-    <g class="hero-circle">
-      <circle
-        data-draw
-        cx="420"
-        cy="400"
-        r="300"
-        fill="none"
-        stroke="#1b3a5b"
-        stroke-opacity="0.14"
-        stroke-width="1.5"></circle>
-      <circle
-        cx="420"
-        cy="400"
-        r="380"
-        fill="none"
-        stroke="#1b3a5b"
-        stroke-opacity="0.07"
-        stroke-width="1"></circle>
-      <!-- 軌道上を巡る朱のマーカー（差し色） -->
-      <circle
-        cx="420"
-        cy="400"
-        r="380"
-        fill="none"
-        stroke="#c04b3c"
-        stroke-opacity="0.6"
-        stroke-width="4"
-        stroke-linecap="round"
-        stroke-dasharray="120 2268"></circle>
-    </g>
+    <circle
+      data-draw
+      cx="420"
+      cy="400"
+      r="300"
+      fill="none"
+      stroke="#1b3a5b"
+      stroke-opacity="0.16"
+      stroke-width="2"
+      stroke-linecap="round"></circle>
+    <!-- 界線（けいせん）: 一本の細い斜線を筆で引く -->
     <line
       data-draw
       x1="150"
@@ -70,7 +48,7 @@ const catchChars = [...t('hero.catchcopy')];
       x2="1050"
       y2="60"
       stroke="#1a1a1a"
-      stroke-opacity="0.07"
+      stroke-opacity="0.06"
       stroke-width="1"></line>
   </svg>
 

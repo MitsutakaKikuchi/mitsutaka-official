@@ -42,7 +42,14 @@ const personJsonLd = {
   name: SITE.artistNameEn,
   alternateName: SITE.artistNameJa,
   jobTitle: lang === 'ja' ? '長唄三味線方' : 'Nagauta Shamisen Player',
+  description: lang === 'ja' ? SITE.descriptionJa : SITE.descriptionEn,
   url: new URL(withBase('/'), Astro.site).href,
+  image: new URL(withBase('ogp.jpg'), Astro.site).href,
+  nationality: lang === 'ja' ? '日本' : 'Japanese',
+  knowsAbout:
+    lang === 'ja'
+      ? ['長唄', '三味線', '歌舞伎音楽', '日本の伝統音楽']
+      : ['Nagauta', 'Shamisen', 'Kabuki music', 'Japanese traditional music'],
   sameAs: Object.values(SITE.sns).filter(Boolean),
 };
 ---
@@ -56,6 +63,11 @@ const personJsonLd = {
     <meta name="description" content={pageDescription} />
     <meta name="author" content={SITE.artistNameEn} />
     <meta name="robots" content="index, follow" />
+    {
+      SITE.googleSiteVerification && (
+        <meta name="google-site-verification" content={SITE.googleSiteVerification} />
+      )
+    }
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
     <link rel="canonical" href={canonicalUrl.href} />
     <link rel="alternate" hreflang="ja" href={jaUrl.href} />
