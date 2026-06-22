@@ -119,11 +119,13 @@ const hasActions = hasTicketAction || Boolean(data.websiteUrl);
         {formatEventDate(data.date, lang)}
       </time>
 
-      {/* 日本語の長いタイトルは中黒（・）の後に <wbr> で明示的な改行候補を入れ、
-          単語の途中で折り返されるのを防ぐ（全ブラウザ対応）。
-          auto-phrase / text-balance は対応ブラウザでの追加の改善（非対応でも害はない） */}
+      {/* 日本語の長いタイトルの折り返し制御（全ブラウザ対応）:
+          - word-break:keep-all … カタカナ等が単語の途中で改行されるのを防ぐ
+          - 中黒（・）の後に <wbr> … 文節の境目だけを改行候補にする
+          - overflow-wrap:anywhere … 1文節が幅を超える場合のみ安全に改行（はみ出し防止）
+          - text-balance … 対応ブラウザでの行バランス最適化（非対応でも害はない） */}
       <h3
-        class="mt-2 font-serif text-lg leading-snug tracking-wider text-balance [word-break:auto-phrase]"
+        class="mt-2 font-serif text-lg leading-snug tracking-wider text-balance [word-break:keep-all] [overflow-wrap:anywhere]"
       >
         {title.split('・').map((segment, index) => (
           <>
