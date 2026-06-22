@@ -8,7 +8,7 @@ import { glob, type Loader } from 'astro/loaders';
  *    環境変数 SCHEDULE_CSV_URL に「ウェブに公開」した CSV の URL を設定すると有効になる。
  *    シートの1行目は次の日本語ヘッダーにすること（順不同・余分な列は無視される）:
  *    出演日付, 公演名, 公演名（英語）, 会場, 会場（英語）, 都市, 都市（英語）, 国,
- *    チケットURL, 公演ページURL, 完売, チラシ画像, 公演写真, ジャンル, 共演者
+ *    チケットURL, 公演ページURL, 完売, チラシ画像, 公演写真, ジャンル, 共演者, 備考
  *    - 出演日付 は YYYY-MM-DD または YYYY/MM/DD 形式
  *    - 完売 は TRUE / FALSE（または 完売）
  *    - チラシ画像 / 公演写真 は任意。複数枚ある場合はカンマ区切りで複数URLを指定すると、
@@ -16,6 +16,7 @@ import { glob, type Loader } from 'astro/loaders';
  *    - 公演ページURL は任意。出演者の特設サイトなどへのリンク
  *    - ジャンル / 共演者 は任意。複数ある場合はカンマ区切りで指定すると、
  *      公演カード上に小さなタグとして表示される（例: 長唄, 舞踊会）
+ *    - 備考 は任意。「関係者限定」など、公演カードに注記として表示される
  *
  * 2. Markdown ファイル（フォールバック・ローカル開発用）
  *    SCHEDULE_CSV_URL 未設定時は src/content/schedule/*.md を読む。
@@ -55,6 +56,8 @@ const scheduleSchema = z.object({
   genres: commaListSchema,
   /** 共演者（任意・複数可） */
   performers: commaListSchema,
+  /** 備考（任意・例: 関係者限定） */
+  notes: z.string().optional(),
 });
 
 /** ダブルクォート対応の簡易CSVパーサー（タイトル内のカンマ・改行も扱える） */
@@ -114,6 +117,7 @@ const HEADER_ALIASES: Record<string, string> = {
   公演写真: 'photoUrls',
   ジャンル: 'genres',
   共演者: 'performers',
+  備考: 'notes',
   // 旧バージョンの日本語・英語ヘッダー（互換のため）
   日付: 'date',
   チラシ画像URL: 'flyerUrls',
@@ -168,6 +172,7 @@ function sheetLoader(csvUrl: string): Loader {
             photoUrls: raw.photoUrls || '',
             genres: raw.genres || '',
             performers: raw.performers || '',
+            notes: raw.notes || undefined,
           },
         });
         store.set({ id, data });
