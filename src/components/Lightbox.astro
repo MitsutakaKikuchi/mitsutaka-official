@@ -9,42 +9,45 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
 
+<!--
+  ライトボックス: ダイアログをビューポート全面のフレックス中央寄せにし、
+  画像を縦横比そのままで必ず画面内に収める（見切れ防止）。
+  操作ボタンは画像サイズに依存せずビューポート端へ固定配置する。
+-->
 <dialog id="lightbox" aria-label={t('lightbox.label')}>
-  <div class="relative">
-    <img
-      data-lightbox-image
-      alt=""
-      class="block h-auto w-auto max-h-[85vh] max-w-[92vw] object-contain"
-    />
-    <button
-      type="button"
-      data-lightbox-close
-      aria-label={t('lightbox.close')}
-      class="absolute -top-3 -right-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink text-paper shadow-lg transition-colors hover:bg-accent"
-    >
-      <span aria-hidden="true">×</span>
-    </button>
-    <button
-      type="button"
-      data-lightbox-prev
-      aria-label={t('lightbox.prev')}
-      class="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-ink/60 text-paper backdrop-blur transition-colors hover:bg-accent"
-    >
-      <span aria-hidden="true">‹</span>
-    </button>
-    <button
-      type="button"
-      data-lightbox-next
-      aria-label={t('lightbox.next')}
-      class="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-ink/60 text-paper backdrop-blur transition-colors hover:bg-accent"
-    >
-      <span aria-hidden="true">›</span>
-    </button>
-    <p
-      data-lightbox-counter
-      class="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-ink/60 px-3 py-1 text-xs tracking-widest text-paper backdrop-blur"
-      aria-hidden="true"
-    >
-    </p>
-  </div>
+  <button
+    type="button"
+    data-lightbox-close
+    aria-label={t('lightbox.close')}
+    class="fixed right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-ink/70 text-paper backdrop-blur transition-colors hover:bg-accent"
+  >
+    <span aria-hidden="true" class="text-lg leading-none">×</span>
+  </button>
+  <button
+    type="button"
+    data-lightbox-prev
+    aria-label={t('lightbox.prev')}
+    class="fixed left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-ink/50 text-paper backdrop-blur transition-colors hover:bg-accent sm:left-5"
+  >
+    <span aria-hidden="true" class="text-lg leading-none">‹</span>
+  </button>
+  <button
+    type="button"
+    data-lightbox-next
+    aria-label={t('lightbox.next')}
+    class="fixed right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-ink/50 text-paper backdrop-blur transition-colors hover:bg-accent sm:right-5"
+  >
+    <span aria-hidden="true" class="text-lg leading-none">›</span>
+  </button>
+  <img
+    data-lightbox-image
+    alt=""
+    class="block max-h-[88dvh] max-w-[92vw] select-none object-contain"
+  />
+  <p
+    data-lightbox-counter
+    class="fixed bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-ink/60 px-3 py-1 text-xs tracking-widest text-paper backdrop-blur"
+    aria-hidden="true"
+  >
+  </p>
 </dialog>

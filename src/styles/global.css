@@ -361,14 +361,27 @@ html.fx-cursor button {
 }
 
 /* ライトボックス（フライヤー・公演写真の拡大表示） */
+/*
+ * ダイアログをビューポート全面（100vw × 100dvh）に広げ、開いている間だけ
+ * フレックスで中央寄せにする。dvh によりモバイルのアドレスバー伸縮にも追従。
+ * 画像サイズに依存せず確実に中央へ収まり、横方向の見切れが起きない。
+ */
 #lightbox {
+  width: 100vw;
+  height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  margin: 0;
   border: none;
   padding: 0;
   background: transparent;
   color: inherit;
-  /* Tailwind の margin リセットでブラウザ標準の中央寄せ（margin: auto）が
-     打ち消されてしまうため、表示時に画面中央へ配置されるよう明示する */
-  margin: auto;
+}
+
+#lightbox[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #lightbox::backdrop {
@@ -389,8 +402,54 @@ html.lightbox-open {
   width: auto;
   height: auto;
   max-width: 92vw;
-  max-height: 85vh;
+  max-height: 88dvh;
   object-fit: contain;
+}
+
+/*
+ * 開閉のズーム＆フェード演出（現代CSS: @starting-style + transition-behavior:allow-discrete）。
+ * 非対応ブラウザでは即時表示にフォールバックし、reduced-motion 時は無効化する。
+ */
+@media (prefers-reduced-motion: no-preference) {
+  #lightbox {
+    opacity: 0;
+    transform: scale(0.96);
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease,
+      overlay 0.3s ease allow-discrete,
+      display 0.3s ease allow-discrete;
+  }
+
+  #lightbox[open] {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  @starting-style {
+    #lightbox[open] {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  #lightbox::backdrop {
+    opacity: 0;
+    transition:
+      opacity 0.3s ease,
+      overlay 0.3s ease allow-discrete,
+      display 0.3s ease allow-discrete;
+  }
+
+  #lightbox[open]::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    #lightbox[open]::backdrop {
+      opacity: 0;
+    }
+  }
 }
 
 /*

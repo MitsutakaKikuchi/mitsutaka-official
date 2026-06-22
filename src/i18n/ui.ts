@@ -89,7 +89,7 @@ export const ui = {
       'Photo gallery of KIKUCHI Mitsutaka, nagauta shamisen player — concerts, collaborative performances, lectures and workshops, and recording sessions.',
     'meta.contact':
       'Contact KIKUCHI Mitsutaka for booking, press, and general inquiries. Available for concerts, ceremonies, and media appearances worldwide.',
-    'hero.catchcopy': 'Plucking tradition, sounding the present.',
+    'hero.catchcopy': 'Plucking the past, playing the present.',
     'hero.sub': 'Nagauta Shamisen Player',
     'hero.scroll': 'Scroll',
     'home.aboutTitle': 'About',
