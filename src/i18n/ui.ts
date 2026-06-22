@@ -82,11 +82,11 @@ export const ui = {
     'nav.contact': 'Contact',
     'nav.booking': 'Booking',
     'meta.about':
-      'Profile of KIKUCHI Mitsutaka, nagauta shamisen player. Carrying on the nagauta tradition shaped alongside kabuki, devoted to performance and music education.',
+      'Profile of KIKUCHI Mitsutaka, a nagauta shamisen player carrying on a tradition that developed alongside kabuki, with a dedication to both performance and music education.',
     'meta.schedule':
       'Performance schedule of KIKUCHI Mitsutaka, nagauta shamisen player. Upcoming concerts and a record of past performances.',
     'meta.media':
-      'Photo gallery of KIKUCHI Mitsutaka, nagauta shamisen player — concerts, collaborative stages, lectures and workshops, and recording sessions.',
+      'Photo gallery of KIKUCHI Mitsutaka, nagauta shamisen player — concerts, collaborative performances, lectures and workshops, and recording sessions.',
     'meta.contact':
       'Contact KIKUCHI Mitsutaka for booking, press, and general inquiries. Available for concerts, ceremonies, and media appearances worldwide.',
     'hero.catchcopy': 'Plucking tradition, sounding the present.',
@@ -94,7 +94,7 @@ export const ui = {
     'hero.scroll': 'Scroll',
     'home.aboutTitle': 'About',
     'home.aboutLead':
-      'Rooted in the classics, resonating into the future. Bearing the tradition of the nagauta shamisen, taking a new step where modern technology and the wider world converge.',
+      'Rooted in the classics, resonating into the future. Carrying the nagauta shamisen tradition forward to where it meets modern technology and the wider world.',
     'home.aboutMore': 'Read full profile',
     'home.scheduleTitle': 'Upcoming Shows',
     'home.scheduleMore': 'View all shows',

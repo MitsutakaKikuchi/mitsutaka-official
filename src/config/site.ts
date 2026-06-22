@@ -13,7 +13,7 @@ export const SITE = {
   descriptionJa:
     '歌舞伎とともに歩んできた長唄の伝統を受け継ぐ長唄三味線方・菊池光峰の公式サイト。国内外での演奏活動、プロフィール、公演スケジュール、コンサート・式典・メディアへの出演依頼の受付はこちら。',
   descriptionEn:
-    'Official website of KIKUCHI Mitsutaka, a nagauta shamisen player carrying on the tradition shaped alongside kabuki. Profile, upcoming concert schedule, and booking inquiries for performances, ceremonies, and media worldwide.',
+    'Official website of KIKUCHI Mitsutaka, a nagauta shamisen player carrying on a tradition that developed alongside kabuki. Profile, upcoming performances, and booking inquiries for concerts, ceremonies, and media appearances worldwide.',
   /**
    * 問い合わせフォーム送信先（Formspree）。
    * TODO: https://formspree.io でフォームを作成し、発行された ID に置き換える
