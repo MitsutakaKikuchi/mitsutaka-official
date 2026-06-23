@@ -93,10 +93,22 @@ const catchChars = [...t('hero.catchcopy')];
         </div>
       ) : (
         <div class="flex flex-col gap-6">
+          {/* 単語ごとに inline-block + whitespace-nowrap で包み、単語間は実スペースで分かち書き。
+              これにより 1 文字ずつのアニメ（.k-char）を保ちつつ、語の途中で改行されず
+              スペースも潰れない（inline-block の連続で空白が消える問題を回避）。 */}
           <h1 class="font-serif text-headline tracking-[0.1em]">
-            {catchChars.map((char) => (
-              <span class="k-char">{char === ' ' ? ' ' : char}</span>
-            ))}
+            {t('hero.catchcopy')
+              .split(' ')
+              .map((word, wordIndex) => (
+                <>
+                  {wordIndex > 0 && ' '}
+                  <span class="inline-block whitespace-nowrap">
+                    {[...word].map((char) => (
+                      <span class="k-char">{char}</span>
+                    ))}
+                  </span>
+                </>
+              ))}
             <span class="sr-only">{SITE.artistNameEn}</span>
           </h1>
           <div class="flex flex-col gap-2" data-reveal>

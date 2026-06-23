@@ -1,6 +1,8 @@
 /**
  * ヒーロー背景の WebGL パーティクル（Three.js + カスタムシェーダー）。
- * 墨を流したような藍色の粒子がゆっくり漂い、マウスに反応して逃げる。
+ * 墨を流したような藍色の粒子がゆっくり漂い、マウス／タッチに反応して逃げる。
+ * タップ・クリック時は uForce が一時的に高まり、波紋のように粒子が散る
+ * （スマホでもポインタを持たずに「動き」を体感できる）。
  * 「静と動」のコンセプトを保つため、動きは控えめ・低彩度に抑える。
  */
 import {
@@ -26,6 +28,7 @@ const vertexShader = /* glsl */ `
   attribute float aSeed;
   uniform float uTime;
   uniform vec2 uMouse;
+  uniform float uForce;
   uniform float uPixelRatio;
   varying float vAlpha;
 
@@ -37,11 +40,12 @@ const vertexShader = /* glsl */ `
     pos.x += sin(t + pos.y * 0.8) * 0.35;
     pos.y += cos(t * 0.8 + pos.x * 0.6) * 0.25;
 
-    // マウスからの緩やかな反発
+    // マウス／タッチからの緩やかな反発。タップ時は uForce で範囲・強さが一時的に増す
     vec2 delta = pos.xy - uMouse;
     float dist = length(delta);
-    float force = smoothstep(1.4, 0.0, dist);
-    pos.xy += normalize(delta + 0.0001) * force * 0.45;
+    float radius = 1.4 + uForce * 1.3;
+    float force = smoothstep(radius, 0.0, dist);
+    pos.xy += normalize(delta + 0.0001) * force * (0.45 + uForce * 0.9);
 
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
@@ -111,6 +115,7 @@ export function createHeroParticles(canvas: HTMLCanvasElement): () => void {
     uniforms: {
       uTime: { value: 0 },
       uMouse: { value: { x: 100, y: 100 } },
+      uForce: { value: 0 },
       uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
       uColor: { value: ACCENT_COLOR },
     },
@@ -129,28 +134,55 @@ export function createHeroParticles(canvas: HTMLCanvasElement): () => void {
     halfWidth = halfHeight * camera.aspect;
   }
 
-  function onMouseMove(event: MouseEvent): void {
+  function setPointerFromClient(clientX: number, clientY: number): void {
     const rect = canvas.getBoundingClientRect();
-    const ndcX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    const ndcY = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
+    const ndcX = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -(((clientY - rect.top) / rect.height) * 2 - 1);
     material.uniforms.uMouse.value.x = ndcX * halfWidth;
     material.uniforms.uMouse.value.y = ndcY * halfHeight;
   }
 
+  // ポインタ（マウス・タッチ・ペン共通）で反発点を追従させる
+  function onPointerMove(event: PointerEvent): void {
+    setPointerFromClient(event.clientX, event.clientY);
+  }
+
+  // タップ／クリックで波紋のように粒子が一時的に大きく散る
+  let ripple = 0;
+  function onPointerDown(event: PointerEvent): void {
+    setPointerFromClient(event.clientX, event.clientY);
+    ripple = 1;
+  }
+
+  // タッチは指を離したら反発点を画面外へ戻し、粒子を静かに落ち着かせる
+  function onPointerUp(event: PointerEvent): void {
+    if (event.pointerType === 'touch') {
+      material.uniforms.uMouse.value.x = 100;
+      material.uniforms.uMouse.value.y = 100;
+    }
+  }
+
   resize();
   window.addEventListener('resize', resize);
-  window.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('pointermove', onPointerMove, { passive: true });
+  window.addEventListener('pointerdown', onPointerDown, { passive: true });
+  window.addEventListener('pointerup', onPointerUp, { passive: true });
 
   const startTime = performance.now();
   renderer.setAnimationLoop(() => {
     material.uniforms.uTime.value = (performance.now() - startTime) / 1000;
+    // 波紋はフレームごとに減衰させ、タップ直後だけ強く反応する
+    ripple *= 0.94;
+    material.uniforms.uForce.value = ripple;
     renderer.render(scene, camera);
   });
 
   return () => {
     renderer.setAnimationLoop(null);
     window.removeEventListener('resize', resize);
-    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerdown', onPointerDown);
+    window.removeEventListener('pointerup', onPointerUp);
     geometry.dispose();
     material.dispose();
     renderer.dispose();
