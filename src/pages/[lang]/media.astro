@@ -56,15 +56,22 @@ const pageTitle = lang === 'ja' ? 'メディア' : 'Media';
       <div class="grid gap-4 sm:grid-cols-2">
         {
           photos.map((photo) => (
-            <figure class="group overflow-hidden" data-mask-reveal>
-              <Image
-                src={photo.src}
-                alt={lang === 'ja' ? photo.ja : photo.en}
-                widths={[480, 960]}
-                sizes="(min-width: 640px) 50vw, 100vw"
-                class="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                loading="lazy"
-              />
+            <figure class="group" data-mask-reveal>
+              <div class="relative overflow-hidden">
+                <Image
+                  src={photo.src}
+                  alt={lang === 'ja' ? photo.ja : photo.en}
+                  widths={[480, 960]}
+                  sizes="(min-width: 640px) 50vw, 100vw"
+                  class="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                />
+                {/* ホバー時に内側へ朱の額縁が浮かび上がる（ヒーローの額装モチーフと呼応）。装飾のみ・即revert可 */}
+                <span
+                  aria-hidden="true"
+                  class="pointer-events-none absolute inset-2.5 border border-vermilion/0 transition-colors duration-500 group-hover:border-vermilion/50"
+                ></span>
+              </div>
               <figcaption class="px-1 py-3 text-xs tracking-[0.2em] text-muted">
                 {lang === 'ja' ? photo.ja : photo.en}
               </figcaption>

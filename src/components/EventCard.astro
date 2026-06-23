@@ -68,11 +68,16 @@ const hasActions = hasTicketAction || Boolean(data.websiteUrl);
 
 <article
   class:list={[
-    'border-b border-line px-3 py-6 -mx-3 transition-colors hover:bg-accent/[0.04]',
+    'group/card relative border-b border-line px-3 py-6 -mx-3 transition-colors hover:bg-accent/[0.04]',
     past && 'opacity-60',
   ]}
   data-reveal
 >
+  {/* ホバー時に左端へ朱の罫線が縦に引かれる（落款の朱を想起）。装飾のみ・即revert可 */}
+  <span
+    aria-hidden="true"
+    class="pointer-events-none absolute left-0 top-0 h-full w-[2px] origin-top scale-y-0 bg-vermilion transition-transform duration-500 ease-out group-hover/card:scale-y-100"
+  ></span>
   <div class="flex flex-col gap-3 sm:flex-row sm:gap-6">
     {
       images.length > 0 && (
