@@ -149,16 +149,19 @@ export function createHeroParticles(canvas: HTMLCanvasElement): () => void {
 
   // タップ／クリックで波紋のように粒子が一時的に大きく散る
   let ripple = 0;
+  // タッチで指を離したあと、波紋が収まってから反発点を画面外へ戻すための保留フラグ。
+  // すぐ戻すと素早いタップで波紋が見えないため（長押しした時だけ反応する不具合の原因）
+  let touchPendingReset = false;
   function onPointerDown(event: PointerEvent): void {
     setPointerFromClient(event.clientX, event.clientY);
     ripple = 1;
+    touchPendingReset = false;
   }
 
-  // タッチは指を離したら反発点を画面外へ戻し、粒子を静かに落ち着かせる
+  // タッチは指を離しても即座には戻さず、波紋の再生を最後まで見せてから静かに落ち着かせる
   function onPointerUp(event: PointerEvent): void {
     if (event.pointerType === 'touch') {
-      material.uniforms.uMouse.value.x = 100;
-      material.uniforms.uMouse.value.y = 100;
+      touchPendingReset = true;
     }
   }
 
@@ -174,6 +177,12 @@ export function createHeroParticles(canvas: HTMLCanvasElement): () => void {
     // 波紋はフレームごとに減衰させ、タップ直後だけ強く反応する
     ripple *= 0.94;
     material.uniforms.uForce.value = ripple;
+    // タッチ後、波紋が十分収まったら反発点を画面外へ戻して粒子を落ち着かせる
+    if (touchPendingReset && ripple < 0.02) {
+      material.uniforms.uMouse.value.x = 100;
+      material.uniforms.uMouse.value.y = 100;
+      touchPendingReset = false;
+    }
     renderer.render(scene, camera);
   });
 
