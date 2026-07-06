@@ -22,6 +22,8 @@ export default defineConfig({
           en: 'en',
         },
       },
+      // ルートは言語振り分け用の noindex ページのため sitemap から除外
+      filter: (page) => page !== 'https://mitsutakakikuchi.github.io/mitsutaka-official/',
     }),
   ],
   vite: {
