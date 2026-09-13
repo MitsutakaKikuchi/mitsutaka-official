@@ -6,7 +6,9 @@
 - スタイリング: Tailwind CSS v4
 - 多言語: `/ja/` `/en/` のURL分割 + hreflang
 - 公演データ: Markdown（`src/content/schedule/`）
-- フォーム: Formspree
+- フォーム: Formspree（JS 有効時は fetch 送信 → `/thanks/` へ遷移。送信中・入力エラー・通信エラーの状態表示付き）
+- 法務ページ: プライバシーポリシー `/privacy/`・利用規約 `/terms/`（日英）
+- アクセス解析: Google Analytics 4（`src/config/site.ts` の `ga4MeasurementId` を設定すると、クッキーバナーで同意した訪問者にのみ読込）
 - デプロイ: GitHub Actions → GitHub Pages（`main` への push で自動）
 - タイポグラフィ: フルードサイズ（`clamp()`）+ ディスプレイ書体（Italiana / Yuji Syuku 筆文字）
 - モーション演出:
@@ -17,6 +19,10 @@
   - Astro View Transitions（シームレスなページ遷移）
   - カスタムカーソル（バニラJS）／フィルムグレイン（SVGノイズ）
   - 公演チラシ・写真のスライドショー表示／ライトボックス（タップで拡大表示）
+  - 落款リップル（ヒーローをタップすると朱の印が捺されるように波紋が広がる）
+  - 傾きパララックス（対応スマホで額装写真が端末の傾きに合わせて揺れる）
+  - ページ遷移の墨ワイプ（View Transitions のカスタムアニメーション）＋読み込みインジケーター
+  - スマホ用スティッキー CTA（ファーストビューを過ぎると下部に「出演情報／出演依頼」が現れる）
   - すべて `prefers-reduced-motion` 対応（無効時は静的表示）
 
 > **注意**: CSS の `scroll-behavior: smooth` は ScrollTrigger と干渉してページが勝手にスクロールする不具合を起こすため使用しないこと（詳細は `src/styles/global.css` のコメント参照）。
@@ -28,6 +34,8 @@ npm install        # 依存パッケージのインストール
 npm run dev        # 開発サーバー起動（http://localhost:4321/mitsutaka-official/）
 npm run build      # 本番ビルド（dist/ に出力）
 npm run preview    # ビルド結果の確認
+npm run icons      # public/favicon.svg から favicon.ico / apple-touch-icon / PWA アイコンを再生成
+npm run images     # src/assets/photos, public/photos, public/flyers の画像を圧縮（追加したら実行）
 ```
 
 ## GitHub Pages 公開手順
@@ -51,6 +59,8 @@ npm run preview    # ビルド結果の確認
 | YouTube 動画ID（現在はダミー。なければ空配列に） | `src/config/site.ts` の `youtubeVideoIds` |
 | 公演データ（現在はサンプル3件） | `src/content/schedule/*.md` |
 | 英語プロフィール内の人名ローマ字表記（若柳宏晃・若柳歓峰）の確認 | `src/pages/[lang]/about.astro` |
+| GA4 測定ID（`G-XXXXXXXXXX`。空の間は解析もクッキーバナーも出ない） | `src/config/site.ts` の `ga4MeasurementId` |
+| 規約の最終改定日（内容を変えたら更新） | `src/config/site.ts` の `legalUpdatedAt` |
 
 設定済み: GitHubユーザー名（MitsutakaKikuchi）／Formspree ID／アーティスト名／プロフィール文／写真（`src/assets/photos/`）／OGP画像（`public/ogp.jpg`）
 
@@ -105,6 +115,21 @@ npm run preview    # ビルド結果の確認
 1. `astro.config.mjs` の `site` をドメインに変更し、`base` を `'/'` にする
 2. `public/robots.txt` の Sitemap URL を変更する
 3. GitHub Pages の Custom domain 設定（または任意のホスティングへ `dist/` を配置）
+
+## SEO・法務・UX まわりの実装メモ
+
+| 項目 | 実装 |
+|------|------|
+| メタタイトル／メタ記述 | 各ページから `Base.astro` に `title` / `description` を渡す。文言は `src/i18n/ui.ts` の `meta.*` |
+| OGP / Twitter Card | `public/ogp.jpg`（1200×630）。`Base.astro` が width/height/alt 付きで出力 |
+| ファビコン | `public/favicon.svg` が原本。`npm run icons` で `.ico` / apple-touch-icon / `site.webmanifest` 用 PNG を生成 |
+| robots.txt / sitemap | `public/robots.txt`、`@astrojs/sitemap`（ルートと `/thanks/` は除外） |
+| 404 | `src/pages/404.astro`（GitHub Pages が全パスで返すため日英併記） |
+| ありがとうページ | `/ja/thanks/` `/en/thanks/`（noindex） |
+| クッキーバナー | `src/components/CookieBanner.astro` + `src/scripts/consent.ts`。同意は localStorage `mk-consent` に保存。フッターの「クッキー設定」で再表示 |
+| フォームの状態 | `src/pages/[lang]/contact.astro` 内のスクリプト（必須・メール形式の検証、送信中スピナー、サーバー／通信エラー表示、ハニーポット） |
+| 画像の alt | 写真ごとに日英の説明文を付与（`media.astro` の `altJa` / `altEn` 等） |
+| 画像圧縮 | `npm run images`。`public/` 配下は Astro の最適化対象外のため、追加時は必ず実行する |
 
 ## ディレクトリ構成
 

@@ -1,0 +1,147 @@
+---
+import Base from '../../layouts/Base.astro';
+import LegalLayout, { type LegalSection } from '../../components/LegalLayout.astro';
+import { SITE } from '../../config/site';
+import { useTranslations, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'ja' } }, { params: { lang: 'en' } }];
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const pageTitle = t('legal.terms');
+
+const content: Record<Lang, { intro: string; sections: LegalSection[] }> = {
+  ja: {
+    intro: `本利用規約（以下「本規約」）は、${SITE.artistNameJa}（以下「運営者」）が運営する本ウェブサイト（以下「当サイト」）の利用条件を定めるものです。当サイトをご利用になる方（以下「利用者」）は、本規約に同意したものとみなします。`,
+    sections: [
+      {
+        heading: '著作権・知的財産権',
+        body: [
+          '当サイトに掲載されている文章・写真・映像・音源・ロゴ・デザインその他一切のコンテンツの著作権およびその他の知的財産権は、運営者または正当な権利を有する第三者に帰属します。',
+          '私的使用など著作権法で認められた範囲を超えて、コンテンツを無断で複製・転載・改変・配布・公衆送信することを禁止します。掲載写真や音源の使用をご希望の場合は、お問い合わせフォームより事前にご相談ください。',
+        ],
+      },
+      {
+        heading: '禁止事項',
+        body: [
+          '利用者は、当サイトの利用にあたり、以下の行為を行ってはなりません。',
+          [
+            '運営者または第三者の権利・利益を侵害する行為',
+            '当サイトの運営を妨害する行為、サーバーやネットワークに過度な負荷をかける行為',
+            'お問い合わせフォームを通じた営業・勧誘・スパム、または虚偽の内容の送信',
+            '法令または公序良俗に反する行為',
+          ],
+        ],
+      },
+      {
+        heading: '掲載内容について',
+        body: [
+          '公演スケジュールをはじめとする当サイトの掲載内容は、正確な情報の提供に努めていますが、主催者の都合等により予告なく変更・中止される場合があります。最新の情報は各公演の主催者または詳細ページでご確認ください。',
+          '運営者は、当サイトの内容を予告なく変更・削除し、または当サイトの運営を中断・終了することがあります。',
+        ],
+      },
+      {
+        heading: '免責事項',
+        body: [
+          '運営者は、当サイトの情報の正確性・完全性・有用性について保証するものではありません。当サイトの利用または利用できなかったことにより利用者に生じた損害について、運営者の故意または重過失による場合を除き、責任を負いません。',
+        ],
+      },
+      {
+        heading: '外部サイトへのリンク',
+        body: [
+          '当サイトから外部のウェブサイト（チケット販売サイト、公演詳細ページ、SNS 等）へリンクしている場合、リンク先の内容については各運営者が責任を負うものであり、運営者はその内容を保証せず、責任を負いません。',
+          '当サイトへのリンクは原則として自由ですが、公序良俗に反するサイトや、運営者の信用を損なうおそれのある形でのリンクはお断りします。',
+        ],
+      },
+      {
+        heading: '個人情報の取り扱い',
+        body: ['当サイトにおける個人情報の取り扱いについては、プライバシーポリシーをご確認ください。'],
+      },
+      {
+        heading: '本規約の変更',
+        body: [
+          '運営者は、必要に応じて本規約を変更することができます。変更後の規約は当サイトに掲載した時点から効力を生じるものとします。',
+        ],
+      },
+      {
+        heading: '準拠法・管轄',
+        body: [
+          '本規約は日本法に準拠し、解釈されます。当サイトに関して紛争が生じた場合、東京地方裁判所を第一審の専属的合意管轄裁判所とします。',
+        ],
+      },
+    ],
+  },
+  en: {
+    intro: `These Terms of Use (the “Terms”) set out the conditions for using this website (the “Site”), operated by ${SITE.artistNameEn} (the “Operator”). By using the Site you are deemed to have agreed to these Terms.`,
+    sections: [
+      {
+        heading: 'Copyright and intellectual property',
+        body: [
+          'All content on the Site — including text, photographs, video, audio, logos, and design — is protected by copyright and other intellectual property rights belonging to the Operator or to third parties who hold the rights.',
+          'Reproducing, reposting, modifying, distributing, or transmitting any content without permission is prohibited beyond the scope allowed by copyright law (such as private use). If you wish to use any photographs or recordings, please contact us in advance via the contact form.',
+        ],
+      },
+      {
+        heading: 'Prohibited conduct',
+        body: [
+          'When using the Site, you must not:',
+          [
+            'Infringe the rights or interests of the Operator or any third party',
+            'Interfere with the operation of the Site or place an excessive load on its servers or network',
+            'Use the contact form for unsolicited marketing, solicitation, spam, or to send false information',
+            'Act in violation of the law or public order and morals',
+          ],
+        ],
+      },
+      {
+        heading: 'Site content',
+        body: [
+          'We strive to keep the information on the Site — including the performance schedule — accurate. However, performances may be changed or cancelled without notice for reasons such as the organizer’s circumstances. Please confirm the latest details with each performance’s organizer or official page.',
+          'The Operator may change or remove content, or suspend or terminate the Site, without prior notice.',
+        ],
+      },
+      {
+        heading: 'Disclaimer',
+        body: [
+          'The Operator makes no guarantee as to the accuracy, completeness, or usefulness of the information on the Site. Except in cases of willful misconduct or gross negligence, the Operator is not liable for any damage arising from your use of, or inability to use, the Site.',
+        ],
+      },
+      {
+        heading: 'External links',
+        body: [
+          'The Site may link to external websites such as ticketing services, event pages, and social media. The operators of those sites are responsible for their content; the Operator does not guarantee and is not responsible for it.',
+          'You may generally link to the Site freely, but links from sites that are contrary to public order and morals or that could harm the Operator’s reputation are not permitted.',
+        ],
+      },
+      {
+        heading: 'Personal information',
+        body: ['Please see our Privacy Policy for how personal information is handled on the Site.'],
+      },
+      {
+        heading: 'Changes to these Terms',
+        body: [
+          'The Operator may revise these Terms as necessary. Revised Terms take effect when posted on the Site.',
+        ],
+      },
+      {
+        heading: 'Governing law and jurisdiction',
+        body: [
+          'These Terms are governed by and construed in accordance with the laws of Japan. The Tokyo District Court shall have exclusive jurisdiction as the court of first instance over any dispute relating to the Site.',
+        ],
+      },
+    ],
+  },
+};
+---
+
+<Base lang={lang} subpath="terms/" title={pageTitle} description={t('meta.terms')} ogType="article">
+  <LegalLayout
+    lang={lang}
+    en="Terms of Use"
+    title={pageTitle}
+    intro={content[lang].intro}
+    sections={content[lang].sections}
+  />
+</Base>

@@ -73,6 +73,43 @@ export const ui = {
     '404.title': 'ページが見つかりません',
     '404.lead': 'お探しのページは移動または削除された可能性があります。',
     '404.back': 'ホームへ戻る',
+    'hero.ctaPrimary': '出演を依頼する',
+    'hero.ctaSecondary': '出演情報を見る',
+    'sticky.cta': '出演依頼',
+    'sticky.schedule': '出演情報',
+    'form.sending': '送信中…',
+    'form.errorRequired': 'この項目は必須です。',
+    'form.errorEmail': 'メールアドレスの形式が正しくありません。',
+    'form.errorSummary': '入力内容をご確認ください。',
+    'form.errorNetwork':
+      '送信できませんでした。通信状況をご確認のうえ、しばらくしてからもう一度お試しください。',
+    'form.errorServer': '送信に失敗しました。お手数ですが時間をおいて再度お試しください。',
+    'form.privacyConsent': 'プライバシーポリシーに同意する',
+    'form.privacyLink': 'プライバシーポリシー',
+    'thanks.title': 'お問い合わせありがとうございます',
+    'thanks.lead':
+      'お問い合わせを受け付けました。内容を確認のうえ、通常2〜3営業日以内にご返信いたします。',
+    'thanks.note':
+      '数日経っても返信がない場合は、迷惑メールフォルダをご確認いただくか、SNS の DM よりご連絡ください。',
+    'thanks.home': 'ホームへ戻る',
+    'thanks.schedule': '出演情報を見る',
+    'meta.thanks': 'お問い合わせを受け付けました。',
+    'meta.privacy':
+      '菊池光峰公式サイトのプライバシーポリシー。お問い合わせフォームで取得する個人情報の取り扱い、アクセス解析（Google Analytics）とクッキーの利用について定めています。',
+    'meta.terms':
+      '菊池光峰公式サイトの利用規約。著作権、免責事項、外部リンク、掲載内容の変更について定めています。',
+    'legal.privacy': 'プライバシーポリシー',
+    'legal.terms': '利用規約',
+    'legal.updated': '最終改定日',
+    'legal.cookieSettings': 'クッキー設定',
+    'cookie.title': 'クッキーの利用について',
+    'cookie.body':
+      '当サイトでは、より良いサイト運営のためにアクセス解析（Google Analytics）にクッキーを使用します。「同意する」を選ぶと解析が有効になります。同意しなくてもサイトは通常通りご利用いただけます。',
+    'cookie.accept': '同意する',
+    'cookie.decline': '同意しない',
+    'cookie.more': '詳しく見る',
+    'loading.label': '読み込み中',
+    'notfound.contact': 'お問い合わせ',
   },
   en: {
     'nav.home': 'Home',
@@ -139,6 +176,43 @@ export const ui = {
     '404.title': 'Page Not Found',
     '404.lead': 'The page you are looking for may have been moved or deleted.',
     '404.back': 'Back to Home',
+    'hero.ctaPrimary': 'Request a booking',
+    'hero.ctaSecondary': 'See upcoming shows',
+    'sticky.cta': 'Booking',
+    'sticky.schedule': 'Schedule',
+    'form.sending': 'Sending…',
+    'form.errorRequired': 'This field is required.',
+    'form.errorEmail': 'Please enter a valid email address.',
+    'form.errorSummary': 'Please check the highlighted fields.',
+    'form.errorNetwork':
+      'Your message could not be sent. Please check your connection and try again in a moment.',
+    'form.errorServer': 'Something went wrong while sending. Please try again later.',
+    'form.privacyConsent': 'I agree to the Privacy Policy',
+    'form.privacyLink': 'Privacy Policy',
+    'thanks.title': 'Thank you for your message',
+    'thanks.lead':
+      'Your inquiry has been received. We usually reply within 2–3 business days.',
+    'thanks.note':
+      'If you have not heard back after a few days, please check your spam folder or reach out via DM on social media.',
+    'thanks.home': 'Back to Home',
+    'thanks.schedule': 'See upcoming shows',
+    'meta.thanks': 'Your inquiry has been received.',
+    'meta.privacy':
+      'Privacy policy of the official website of KIKUCHI Mitsutaka: how personal data submitted through the contact form is handled, and how analytics (Google Analytics) and cookies are used.',
+    'meta.terms':
+      'Terms of use of the official website of KIKUCHI Mitsutaka: copyright, disclaimer, external links, and changes to content.',
+    'legal.privacy': 'Privacy Policy',
+    'legal.terms': 'Terms of Use',
+    'legal.updated': 'Last updated',
+    'legal.cookieSettings': 'Cookie settings',
+    'cookie.title': 'About cookies',
+    'cookie.body':
+      'This site uses cookies for analytics (Google Analytics) to help us improve it. Choose “Accept” to enable analytics. You can use the site as usual without accepting.',
+    'cookie.accept': 'Accept',
+    'cookie.decline': 'Decline',
+    'cookie.more': 'Learn more',
+    'loading.label': 'Loading',
+    'notfound.contact': 'Contact',
   },
 } as const;
 

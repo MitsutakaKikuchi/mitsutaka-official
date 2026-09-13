@@ -10,6 +10,11 @@
  * - マグネティックボタン（[data-magnetic]）: カーソルに吸い付く CTA
  * - カスタムカーソル: 落款の朱点 + 藍の輪（リンク上で朱に灯る）
  * - 公演画像のスライドショー（[data-slideshow]）／ライトボックス（[data-lightbox]）
+ * - 落款リップル（#hero）: タップ／クリック位置に朱の印が捺されるように波紋が広がる（スマホ向け）
+ * - 傾きパララックス（[data-tilt]）: スマホの傾きで額装写真が僅かに揺れる（対応端末のみ）
+ * - スクロールドローイング（[data-draw-scroll]）: スクロール量に応じて筆が進む
+ * - スティッキー CTA（#sticky-cta）: ファーストビューを過ぎると現れ、フッターで引っ込む
+ * - ページローダー（#page-loader）: View Transitions のナビゲーション中に表示
  * すべて prefers-reduced-motion を尊重し、無効時は静的表示にフォールバックする。
  * Astro View Transitions（astro:page-load / astro:before-swap）に対応。
  */
@@ -430,6 +435,172 @@ function initScrollProgress(): void {
   update();
 }
 
+
+/* ---------- 落款リップル（タップ位置に朱の印が捺される） ---------- */
+function initSealRipple(): void {
+  const hero = document.getElementById('hero');
+  const layer = document.getElementById('hero-ripples');
+  if (!hero || !layer || prefersReducedMotion()) return;
+  hero.addEventListener(
+    'pointerdown',
+    (event) => {
+      // ボタン・リンクのタップでは出さない（誤操作感を避ける）
+      if ((event.target as HTMLElement).closest('a, button')) return;
+      const rect = hero.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'seal-ripple';
+      ripple.style.left = `${event.clientX - rect.left}px`;
+      ripple.style.top = `${event.clientY - rect.top}px`;
+      layer.appendChild(ripple);
+      ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+      // 念のためのフォールバック
+      window.setTimeout(() => ripple.remove(), 1400);
+    },
+    { passive: true }
+  );
+}
+
+/* ---------- 傾きパララックス（スマホの傾きで額縁が揺れる） ---------- */
+const TILT_MAX_DEG = 6;
+let tiltHandler: ((event: DeviceOrientationEvent) => void) | null = null;
+
+function initTilt(): void {
+  if (tiltHandler) {
+    window.removeEventListener('deviceorientation', tiltHandler);
+    tiltHandler = null;
+  }
+  const targets = document.querySelectorAll<HTMLElement>('[data-tilt]');
+  if (targets.length === 0 || hasFinePointer() || prefersReducedMotion()) return;
+  if (!('DeviceOrientationEvent' in window)) return;
+  // iOS 13+ は明示的な許可が必要（ユーザー操作起点でしか要求できない）ため、許可不要の端末のみ有効化
+  const needsPermission =
+    typeof (DeviceOrientationEvent as unknown as { requestPermission?: unknown }).requestPermission ===
+    'function';
+  if (needsPermission) return;
+
+  const setters = Array.from(targets).map((el) => ({
+    x: gsap.quickTo(el, 'rotationX', { duration: 0.8, ease: 'power2.out' }),
+    y: gsap.quickTo(el, 'rotationY', { duration: 0.8, ease: 'power2.out' }),
+  }));
+  targets.forEach((el) => gsap.set(el, { transformPerspective: 900 }));
+
+  tiltHandler = (event) => {
+    const beta = event.beta ?? 0; // 前後の傾き
+    const gamma = event.gamma ?? 0; // 左右の傾き
+    const rx = gsap.utils.clamp(-TILT_MAX_DEG, TILT_MAX_DEG, (beta - 45) * -0.15);
+    const ry = gsap.utils.clamp(-TILT_MAX_DEG, TILT_MAX_DEG, gamma * 0.2);
+    setters.forEach((set) => {
+      set.x(rx);
+      set.y(ry);
+    });
+  };
+  window.addEventListener('deviceorientation', tiltHandler, { passive: true });
+}
+
+/* ---------- スクロールドローイング（スクロール量に応じて筆が進む） ---------- */
+function initScrollDraw(): void {
+  document.querySelectorAll<SVGGeometryElement>('[data-draw-scroll]').forEach((path) => {
+    const length = path.getTotalLength();
+    if (prefersReducedMotion()) {
+      gsap.set(path, { strokeDasharray: 'none', strokeDashoffset: 0 });
+      return;
+    }
+    gsap.fromTo(
+      path,
+      { strokeDasharray: length, strokeDashoffset: length },
+      {
+        strokeDashoffset: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: path.closest('footer, section') ?? path,
+          start: 'top 95%',
+          end: 'bottom bottom',
+          scrub: 0.6,
+        },
+      }
+    );
+  });
+}
+
+/* ---------- 見出しの罫線（リビール時に左から引かれる） ---------- */
+function initHeadingRules(): void {
+  const reduced = prefersReducedMotion();
+  document.querySelectorAll<HTMLElement>('.heading-rule').forEach((rule) => {
+    if (reduced) {
+      gsap.set(rule, { scaleX: 1 });
+      return;
+    }
+    gsap.fromTo(
+      rule,
+      { scaleX: 0, transformOrigin: 'left center' },
+      {
+        scaleX: 1,
+        duration: 1.2,
+        ease: 'power3.inOut',
+        delay: 0.2,
+        scrollTrigger: { trigger: rule, start: 'top 90%', once: true },
+      }
+    );
+  });
+}
+
+/* ---------- スマホ用スティッキー CTA ---------- */
+let stickyCtaBound = false;
+
+function initStickyCta(): void {
+  const bar = document.getElementById('sticky-cta');
+  if (!bar) return;
+  const hero = document.getElementById('hero');
+  const footer = document.querySelector('footer');
+
+  const update = () => {
+    // ヒーローがあるページはヒーローを過ぎてから、無いページは少しスクロールしたら表示
+    const threshold = hero ? hero.offsetHeight * 0.75 : 240;
+    const footerTop = footer ? footer.getBoundingClientRect().top : Number.POSITIVE_INFINITY;
+    const nearFooter = footerTop < window.innerHeight - 40;
+    const visible = window.scrollY > threshold && !nearFooter;
+    bar.classList.toggle('is-visible', visible);
+    bar.setAttribute('aria-hidden', String(!visible));
+    bar.querySelectorAll('a').forEach((link) => link.setAttribute('tabindex', visible ? '0' : '-1'));
+  };
+
+  if (!stickyCtaBound) {
+    stickyCtaBound = true;
+    window.addEventListener('scroll', () => update(), { passive: true });
+    window.addEventListener('resize', () => update(), { passive: true });
+  }
+  update();
+}
+
+/* ---------- ページローダー（View Transitions のナビゲーション中） ---------- */
+function showPageLoader(): void {
+  const loader = document.getElementById('page-loader');
+  if (!loader) return;
+  loader.hidden = false;
+  requestAnimationFrame(() => loader.classList.add('is-active'));
+}
+
+function hidePageLoader(): void {
+  const loader = document.getElementById('page-loader');
+  if (!loader) return;
+  loader.classList.remove('is-active');
+  window.setTimeout(() => {
+    loader.hidden = true;
+  }, 400);
+}
+
+/* ---------- 画像の読み込み状態（読み込み完了までプレースホルダーを表示） ---------- */
+function initImageLoading(): void {
+  document.querySelectorAll<HTMLImageElement>('img[data-slide], .yt-lite img').forEach((img) => {
+    const markLoaded = () => img.classList.add('is-loaded');
+    if (img.complete && img.naturalWidth > 0) {
+      markLoaded();
+    } else {
+      img.addEventListener('load', markLoaded, { once: true });
+    }
+  });
+}
+
 /* ---------- ページごとの初期化 ---------- */
 function initPage(): void {
   ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
@@ -446,11 +617,19 @@ function initPage(): void {
   initLightbox();
   initPastMore();
   initScrollProgress();
+  initSealRipple();
+  initTilt();
+  initScrollDraw();
+  initHeadingRules();
+  initStickyCta();
+  initImageLoading();
+  hidePageLoader();
   void initParticles();
   ScrollTrigger.refresh();
 }
 
 document.addEventListener('astro:page-load', initPage);
+document.addEventListener('astro:before-preparation', showPageLoader);
 document.addEventListener('astro:before-swap', () => {
   clearSlideshowTimers();
   destroyParticles?.();

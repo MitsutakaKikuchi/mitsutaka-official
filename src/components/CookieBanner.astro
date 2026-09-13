@@ -1,0 +1,58 @@
+---
+/**
+ * クッキー同意バナー。
+ * SITE.ga4MeasurementId が空の間は描画しない（解析を使わないなら同意も不要）。
+ * 表示制御・同意保存は src/scripts/consent.ts が担当する。
+ */
+import { SITE } from '../config/site';
+import { localePath } from '../i18n/utils';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+{
+  SITE.ga4MeasurementId && (
+    <div
+      id="cookie-banner"
+      role="region"
+      aria-label={t('cookie.title')}
+      hidden
+      class="fixed inset-x-3 bottom-3 z-[70] mx-auto max-w-xl border border-line bg-paper/95 p-5 shadow-[0_12px_40px_rgb(26_26_26/0.14)] backdrop-blur sm:inset-x-6 sm:bottom-6 sm:p-6"
+    >
+      <span
+        aria-hidden="true"
+        class="absolute left-0 top-0 h-full w-[2px] bg-gradient-to-b from-accent to-vermilion"
+      />
+      <p class="text-[11px] tracking-[0.3em] uppercase text-accent">{t('cookie.title')}</p>
+      <p class="mt-2 text-sm leading-relaxed text-ink/85">{t('cookie.body')}</p>
+      <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <button
+          type="button"
+          data-consent-accept
+          class="btn-cta bg-accent hover:bg-accent-dark px-6 py-2.5 text-xs tracking-[0.25em] text-white"
+        >
+          {t('cookie.accept')}
+        </button>
+        <button
+          type="button"
+          data-consent-decline
+          class="border border-line px-6 py-2.5 text-xs tracking-[0.25em] text-ink/80 transition-colors hover:border-ink"
+        >
+          {t('cookie.decline')}
+        </button>
+        <a
+          href={localePath(lang, 'privacy/')}
+          class="ml-auto border-b border-accent/50 pb-0.5 text-xs tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+        >
+          {t('cookie.more')}
+        </a>
+      </div>
+    </div>
+  )
+}

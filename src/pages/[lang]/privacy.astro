@@ -1,0 +1,207 @@
+---
+import Base from '../../layouts/Base.astro';
+import LegalLayout, { type LegalSection } from '../../components/LegalLayout.astro';
+import { SITE } from '../../config/site';
+import { useTranslations, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'ja' } }, { params: { lang: 'en' } }];
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const pageTitle = t('legal.privacy');
+
+const content: Record<Lang, { intro: string; sections: LegalSection[] }> = {
+  ja: {
+    intro: `本サイト（以下「当サイト」）は、${SITE.artistNameJa}（以下「運営者」）が運営する公式ウェブサイトです。運営者は、当サイトの利用者（以下「利用者」）の個人情報の重要性を認識し、個人情報の保護に関する法律その他の関係法令を遵守し、以下の方針に基づいて個人情報を取り扱います。`,
+    sections: [
+      {
+        heading: '取得する情報',
+        body: [
+          '当サイトでは、お問い合わせフォームを通じて以下の情報を取得します。',
+          ['お名前', 'メールアドレス', '団体・会社名（任意）', 'お問い合わせの種別および内容'],
+          'また、アクセス解析のため、閲覧ページ・参照元・ブラウザの種類・端末の種類・おおよその地域などの情報を、クッキー等を用いて取得することがあります（詳細は「アクセス解析ツールについて」をご覧ください）。',
+        ],
+      },
+      {
+        heading: '利用目的',
+        body: [
+          '取得した個人情報は、以下の目的で利用します。',
+          [
+            'お問い合わせ・出演依頼・取材依頼への回答および連絡',
+            '出演に関する打ち合わせ、契約、その他業務上必要な連絡',
+            '当サイトの利用状況の把握と改善',
+          ],
+          '上記以外の目的で利用する場合は、あらかじめ利用者の同意を得るものとします。',
+        ],
+      },
+      {
+        heading: 'お問い合わせフォームについて',
+        body: [
+          '当サイトのお問い合わせフォームは、フォーム送信サービス「Formspree」（Formspree, Inc.／米国）を利用しています。フォームに入力された内容は同サービスのサーバーを経由して運営者へ送信されます。同サービスにおける情報の取り扱いについては、Formspree のプライバシーポリシー（https://formspree.io/legal/privacy-policy/）をご確認ください。',
+        ],
+      },
+      {
+        heading: '第三者への提供',
+        body: [
+          '運営者は、以下の場合を除き、取得した個人情報を第三者に提供しません。',
+          [
+            '利用者本人の同意がある場合',
+            '法令に基づく場合',
+            '人の生命・身体・財産の保護のために必要で、本人の同意を得ることが困難な場合',
+            '公演の実施等に必要な範囲で、主催者・会場等の関係者に共有する場合（この場合も必要最小限の情報に限ります）',
+          ],
+        ],
+      },
+      {
+        heading: 'アクセス解析ツールについて',
+        body: [
+          '当サイトでは、Google LLC が提供するアクセス解析ツール「Google アナリティクス」を利用することがあります。Google アナリティクスはクッキーを使用してトラフィックデータを収集しますが、このデータは匿名で収集されており、個人を特定するものではありません。',
+          '当サイトでは、利用者がクッキーバナーで「同意する」を選択した場合にのみ Google アナリティクスを有効にします。同意しない場合、解析用のクッキーは発行されません。同意はフッターの「クッキー設定」からいつでも変更できます。',
+          'Google によるデータの取り扱いについては「Google のサービスを使用するサイトやアプリから収集した情報の Google による使用」（https://policies.google.com/technologies/partner-sites）をご確認ください。ブラウザの設定によりクッキーを無効にすることも可能です。',
+        ],
+      },
+      {
+        heading: 'クッキー（Cookie）およびローカルストレージについて',
+        body: [
+          'クッキーとは、ウェブサイトがブラウザに保存する小さなテキストファイルです。当サイトでは、前項のアクセス解析に用いるクッキーのほか、クッキーの同意状況を記憶するためにブラウザのローカルストレージを使用します。これらは利用者を個人として特定するものではありません。',
+        ],
+      },
+      {
+        heading: '外部サービスの埋め込み・リンクについて',
+        body: [
+          '当サイトには、YouTube（Google LLC）の動画や Instagram（Meta Platforms, Inc.）へのリンクなど、外部サービスのコンテンツが含まれることがあります。動画は利用者が再生操作を行った時点で初めて読み込まれる方式（youtube-nocookie.com）を採用しています。外部サービス上での情報の取り扱いについては、各サービスのプライバシーポリシーをご確認ください。',
+        ],
+      },
+      {
+        heading: '安全管理',
+        body: [
+          '運営者は、取得した個人情報の漏えい・滅失・毀損を防止するため、合理的な安全管理措置を講じます。当サイトとの通信は TLS（HTTPS）により暗号化されています。',
+        ],
+      },
+      {
+        heading: '個人情報の開示・訂正・削除',
+        body: [
+          '利用者本人から、自身の個人情報の開示・訂正・利用停止・削除の請求があった場合、本人確認のうえ、法令の定める範囲で速やかに対応します。請求はお問い合わせフォームよりご連絡ください。',
+        ],
+      },
+      {
+        heading: '本ポリシーの改定',
+        body: [
+          '運営者は、法令の変更やサービス内容の変更に応じて、本ポリシーを改定することがあります。改定後のポリシーは当サイトに掲載した時点から効力を生じます。',
+        ],
+      },
+      {
+        heading: 'お問い合わせ窓口',
+        body: [
+          `本ポリシーに関するお問い合わせは、当サイトのお問い合わせフォームより ${SITE.artistNameJa} 宛にご連絡ください。`,
+        ],
+      },
+    ],
+  },
+  en: {
+    intro: `This website (the “Site”) is the official website operated by ${SITE.artistNameEn} (the “Operator”). The Operator recognizes the importance of the personal information of the Site’s visitors (“you”), complies with the Act on the Protection of Personal Information of Japan and other applicable laws, and handles personal information in accordance with this policy.`,
+    sections: [
+      {
+        heading: 'Information we collect',
+        body: [
+          'Through the contact form on the Site, we collect the following information:',
+          ['Name', 'Email address', 'Organization (optional)', 'Type and content of your inquiry'],
+          'For analytics purposes we may also collect, using cookies and similar technologies, information such as pages viewed, referrer, browser type, device type, and approximate region (see “Analytics” below).',
+        ],
+      },
+      {
+        heading: 'How we use it',
+        body: [
+          'Personal information is used for the following purposes:',
+          [
+            'Responding to inquiries, booking requests, and press requests',
+            'Coordinating, contracting, and other communication necessary for performances',
+            'Understanding how the Site is used and improving it',
+          ],
+          'We will obtain your consent before using your information for any other purpose.',
+        ],
+      },
+      {
+        heading: 'Contact form',
+        body: [
+          'The contact form is provided by Formspree (Formspree, Inc., USA). Information you enter is transmitted to the Operator via Formspree’s servers. Please refer to Formspree’s privacy policy (https://formspree.io/legal/privacy-policy/) for details on how that service handles data.',
+        ],
+      },
+      {
+        heading: 'Sharing with third parties',
+        body: [
+          'We do not share your personal information with third parties, except:',
+          [
+            'With your consent',
+            'Where required by law',
+            'Where necessary to protect a person’s life, body, or property and obtaining consent is difficult',
+            'With organizers, venues, or other parties involved in a performance, to the minimum extent necessary to carry it out',
+          ],
+        ],
+      },
+      {
+        heading: 'Analytics',
+        body: [
+          'The Site may use Google Analytics, a web analytics service provided by Google LLC. Google Analytics uses cookies to collect traffic data. This data is collected anonymously and does not identify individuals.',
+          'Google Analytics is enabled only if you choose “Accept” in the cookie banner. If you decline, no analytics cookies are set. You can change your choice at any time via “Cookie settings” in the footer.',
+          'For information on how Google uses data, see “How Google uses information from sites or apps that use our services” (https://policies.google.com/technologies/partner-sites). You can also disable cookies in your browser settings.',
+        ],
+      },
+      {
+        heading: 'Cookies and local storage',
+        body: [
+          'Cookies are small text files stored in your browser by a website. In addition to the analytics cookies described above, the Site uses your browser’s local storage to remember your cookie consent choice. None of these identify you personally.',
+        ],
+      },
+      {
+        heading: 'Embedded content and external links',
+        body: [
+          'The Site may include content from external services, such as YouTube (Google LLC) videos and links to Instagram (Meta Platforms, Inc.). Videos are loaded only when you press play, using youtube-nocookie.com. Please refer to each service’s privacy policy for how they handle your data.',
+        ],
+      },
+      {
+        heading: 'Security',
+        body: [
+          'The Operator takes reasonable measures to prevent leakage, loss, or damage of personal information. Communication with the Site is encrypted using TLS (HTTPS).',
+        ],
+      },
+      {
+        heading: 'Access, correction, and deletion',
+        body: [
+          'If you request access to, correction of, suspension of use of, or deletion of your personal information, we will respond promptly within the scope required by law after verifying your identity. Please submit requests via the contact form.',
+        ],
+      },
+      {
+        heading: 'Changes to this policy',
+        body: [
+          'The Operator may revise this policy in response to changes in law or in the Site’s services. The revised policy takes effect when posted on the Site.',
+        ],
+      },
+      {
+        heading: 'Contact',
+        body: [
+          `For questions about this policy, please contact ${SITE.artistNameEn} via the contact form on the Site.`,
+        ],
+      },
+    ],
+  },
+};
+---
+
+<Base
+  lang={lang}
+  subpath="privacy/"
+  title={pageTitle}
+  description={t('meta.privacy')}
+  ogType="article"
+>
+  <LegalLayout
+    lang={lang}
+    en="Privacy Policy"
+    title={pageTitle}
+    intro={content[lang].intro}
+    sections={content[lang].sections}
+  />
+</Base>

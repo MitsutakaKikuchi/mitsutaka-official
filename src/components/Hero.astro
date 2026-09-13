@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import performancePhoto from '../assets/photos/performance.jpg';
 import { SITE } from '../config/site';
+import { localePath } from '../i18n/utils';
 import { useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -13,12 +14,18 @@ const t = useTranslations(lang);
 
 // キネティック・タイポグラフィ用に1文字ずつ分割（GSAP がステージング表示する）
 const catchChars = [...t('hero.catchcopy')];
+
+const photoAlt =
+  lang === 'ja'
+    ? '舞台で長唄三味線を演奏する菊池光峰'
+    : 'KIKUCHI Mitsutaka performing nagauta shamisen on stage';
 ---
 
 <section
+  id="hero"
   class="relative flex min-h-[calc(100svh-4rem)] items-center justify-center overflow-hidden"
 >
-  <!-- WebGL パーティクル（墨を流したような藍の粒子・マウス反応。reduced-motion 時は起動しない） -->
+  <!-- WebGL パーティクル（墨を流したような藍の粒子・マウス／タッチ反応。reduced-motion 時は起動しない） -->
   <canvas
     id="hero-canvas"
     class="pointer-events-none absolute inset-0 h-full w-full"
@@ -32,10 +39,6 @@ const catchChars = [...t('hero.catchcopy')];
     preserveAspectRatio="xMidYMid slice"
     aria-hidden="true"
   >
-    <!--
-      一円相（いちえんそう）: 筆で一気に描いた墨の円。
-      data-draw で一筆書きされ、hero-ensou によりごく僅かに拡縮・濃淡が揺らぐ（回転はしない）。
-    -->
     <circle
       class="hero-ensou"
       data-draw
@@ -59,23 +62,26 @@ const catchChars = [...t('hero.catchcopy')];
       stroke-width="1"></line>
   </svg>
 
+  <!-- タップ／クリック位置に朱の落款が捺されるように波紋が広がる（JS: initSealRipple） -->
+  <div id="hero-ripples" class="pointer-events-none absolute inset-0" aria-hidden="true"></div>
+
   <!-- pb はスクロールインジケーター（absolute bottom）との重なりを防ぐ余白 -->
   <!-- hero-fade: スクロール退場時にフェード＋上昇する CSS スクロール駆動演出 -->
   <div
-    class="hero-fade relative mx-auto grid w-full max-w-6xl items-center justify-items-center gap-12 px-4 pt-10 pb-28 sm:px-6 sm:pb-32 md:grid-cols-[1fr_auto]"
+    class="hero-fade relative mx-auto grid w-full max-w-6xl items-center justify-items-center gap-10 px-4 pt-8 pb-24 sm:px-6 sm:gap-12 sm:pt-10 sm:pb-32 md:grid-cols-[1fr_auto]"
   >
     {
       lang === 'ja' ? (
-        <div class="flex flex-col items-center gap-8">
+        <div class="flex flex-col items-center gap-7 sm:gap-8">
           {/* 縦書き: 右のキャッチコピー → 左の名前 の順に読む */}
-          <div class="flex flex-row-reverse items-start justify-center gap-8 sm:gap-12">
-            <h1 class="vertical-text max-h-[min(34rem,calc(100svh-18rem))] font-serif text-lead leading-loose tracking-[0.42em] text-ink/80">
+          <div class="flex flex-row-reverse items-start justify-center gap-7 sm:gap-12">
+            <h1 class="vertical-text max-h-[min(34rem,calc(100svh-20rem))] font-serif text-lead leading-loose tracking-[0.42em] text-ink/80">
               {catchChars.map((char) => (
                 <span class="k-char">{char}</span>
               ))}
               <span class="sr-only">{SITE.artistNameJa}</span>
             </h1>
-            <div class="flex flex-row-reverse items-start gap-5" data-reveal>
+            <div class="flex flex-row-reverse items-start gap-4 sm:gap-5" data-reveal>
               <p class="vertical-text text-xs tracking-[0.5em] text-accent sm:text-sm">
                 {t('hero.sub')}
               </p>
@@ -90,9 +96,24 @@ const catchChars = [...t('hero.catchcopy')];
           <p class="text-[10px] tracking-[0.5em] text-muted" data-reveal>
             {SITE.artistNameDisplay}
           </p>
+          <div class="hero-cta flex w-full flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-8" data-reveal>
+            <a
+              href={`${localePath(lang, 'contact/')}#booking`}
+              class="btn-cta btn-ink bg-accent hover:bg-accent-dark w-full max-w-xs px-8 py-3.5 text-center text-sm tracking-[0.3em] text-white sm:w-auto"
+              data-magnetic
+            >
+              {t('hero.ctaPrimary')}
+            </a>
+            <a
+              href={localePath(lang, 'schedule/')}
+              class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+            >
+              {t('hero.ctaSecondary')} →
+            </a>
+          </div>
         </div>
       ) : (
-        <div class="flex flex-col gap-6">
+        <div class="flex w-full flex-col gap-6">
           {/* 単語ごとに inline-block + whitespace-nowrap で包み、単語間は実スペースで分かち書き。
               これにより 1 文字ずつのアニメ（.k-char）を保ちつつ、語の途中で改行されず
               スペースも潰れない（inline-block の連続で空白が消える問題を回避）。 */}
@@ -118,6 +139,21 @@ const catchChars = [...t('hero.catchcopy')];
             </p>
             <p class="font-serif text-base tracking-[0.5em] text-muted">{SITE.artistNameJa}</p>
           </div>
+          <div class="hero-cta mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8" data-reveal>
+            <a
+              href={`${localePath(lang, 'contact/')}#booking`}
+              class="btn-cta btn-ink bg-accent hover:bg-accent-dark w-full max-w-xs px-8 py-3.5 text-center text-sm tracking-[0.25em] text-white sm:w-auto"
+              data-magnetic
+            >
+              {t('hero.ctaPrimary')}
+            </a>
+            <a
+              href={localePath(lang, 'schedule/')}
+              class="self-start border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity sm:self-auto"
+            >
+              {t('hero.ctaSecondary')} →
+            </a>
+          </div>
         </div>
       )
     }
@@ -126,8 +162,9 @@ const catchChars = [...t('hero.catchcopy')];
       演奏写真の額装:
       - ずらした罫線（額の影のような藍のオフセットフレーム）
       - マスク演出 + ズームリビール（data-zoom）+ 緩やかなパララックス
+      - スマホでは端末の傾きに応じて額縁が僅かに揺れる（data-tilt / JS: initTilt）
     -->
-    <figure class="relative mr-4 mb-4" data-reveal>
+    <figure class="relative mr-4 mb-4" data-reveal data-tilt>
       <div
         class="absolute inset-0 translate-x-4 translate-y-4 border border-accent/40"
         aria-hidden="true"
@@ -137,10 +174,10 @@ const catchChars = [...t('hero.catchcopy')];
         <div data-parallax="0.05">
           <Image
             src={performancePhoto}
-            alt={lang === 'ja' ? '菊池光峰 演奏写真' : 'KIKUCHI Mitsutaka performing the shamisen'}
+            alt={photoAlt}
             widths={[420, 800]}
             sizes="(min-width: 768px) 24rem, 80vw"
-            class="aspect-[2/3] h-[44svh] w-auto object-cover md:h-[64svh]"
+            class="aspect-[2/3] h-[40svh] w-auto object-cover sm:h-[44svh] md:h-[64svh]"
             loading="eager"
             fetchpriority="high"
             data-zoom
@@ -152,9 +189,9 @@ const catchChars = [...t('hero.catchcopy')];
 
   <a
     href="#content"
-    class="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-muted hover:text-accent transition-colors"
+    class="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-muted hover:text-accent transition-colors sm:bottom-6"
   >
     <span class="text-[10px] tracking-[0.3em] uppercase">{t('hero.scroll')}</span>
-    <span class="scroll-hint-line block h-10 w-px bg-current"></span>
+    <span class="scroll-hint-line block h-8 w-px bg-current sm:h-10"></span>
   </a>
 </section>

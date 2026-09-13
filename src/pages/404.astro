@@ -3,31 +3,70 @@ import Base from '../layouts/Base.astro';
 import { localePath } from '../i18n/utils';
 import { useTranslations } from '../i18n/ui';
 
+// GitHub Pages はルートの 404.html を全パスで返すため、日英併記の単一ページにする
 const t = useTranslations('ja');
 const tEn = useTranslations('en');
 ---
 
-<Base lang="ja" title="404">
-  <div class="mx-auto flex max-w-3xl flex-col items-center gap-8 px-4 py-32 text-center sm:px-6">
-    <p class="font-serif text-display tracking-widest text-accent">404</p>
-    <div class="space-y-2">
+<Base lang="ja" title="404 Not Found" description={t('404.lead')} noindex hideStickyCta>
+  <div class="relative mx-auto flex max-w-3xl flex-col items-center gap-8 px-4 py-section text-center sm:px-6">
+    <!-- 途切れた一円相: 「道が途中で途切れている」ことを図で示す -->
+    <svg class="h-32 w-32 text-accent" viewBox="0 0 120 120" aria-hidden="true">
+      <path
+        data-draw
+        d="M84 28A40 40 0 1 0 92 70"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"></path>
+      <text
+        x="60"
+        y="67"
+        text-anchor="middle"
+        class="font-display"
+        font-size="22"
+        letter-spacing="3"
+        fill="currentColor">404</text>
+    </svg>
+    <div class="space-y-2" data-reveal>
       <h1 class="font-serif text-2xl tracking-[0.2em]">{t('404.title')}</h1>
       <p class="text-sm tracking-wider text-muted">{tEn('404.title')}</p>
     </div>
-    <p class="leading-relaxed text-muted">{t('404.lead')}</p>
-    <div class="flex gap-6">
-      <a
-        href={localePath('ja')}
-        class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
-      >
-        {t('404.back')}
-      </a>
-      <a
-        href={localePath('en')}
-        class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
-      >
-        {tEn('404.back')}
-      </a>
+    <div class="space-y-1 leading-relaxed text-muted" data-reveal>
+      <p>{t('404.lead')}</p>
+      <p class="text-sm">{tEn('404.lead')}</p>
+    </div>
+    <div class="grid gap-x-10 gap-y-4 sm:grid-cols-2" data-reveal>
+      <div class="flex flex-col items-center gap-3">
+        <p class="text-[10px] tracking-[0.35em] text-accent">日本語</p>
+        <a
+          href={localePath('ja')}
+          class="btn-cta bg-accent hover:bg-accent-dark px-8 py-3 text-sm tracking-[0.25em] text-white"
+        >
+          {t('404.back')}
+        </a>
+        <a
+          href={localePath('ja', 'contact/')}
+          class="border-b border-accent pb-1 text-xs tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+        >
+          {t('notfound.contact')}
+        </a>
+      </div>
+      <div class="flex flex-col items-center gap-3">
+        <p class="text-[10px] tracking-[0.35em] text-accent">ENGLISH</p>
+        <a
+          href={localePath('en')}
+          class="btn-cta bg-accent hover:bg-accent-dark px-8 py-3 text-sm tracking-[0.25em] text-white"
+        >
+          {tEn('404.back')}
+        </a>
+        <a
+          href={localePath('en', 'contact/')}
+          class="border-b border-accent pb-1 text-xs tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+        >
+          {tEn('notfound.contact')}
+        </a>
+      </div>
     </div>
   </div>
 </Base>

@@ -1,0 +1,44 @@
+---
+/**
+ * スマホ専用のスティッキー CTA（画面下部に固定）。
+ * ファーストビューを過ぎたら現れ、フッターに達すると引っ込む（JS: effects.ts initStickyCta）。
+ * お問い合わせページでは表示しない（フォーム自体が CTA のため）。
+ */
+import { localePath } from '../i18n/utils';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<div
+  id="sticky-cta"
+  class="fixed inset-x-0 bottom-0 z-[55] md:hidden"
+  aria-hidden="true"
+>
+  <div
+    class="mx-3 mb-3 flex items-stretch gap-2 border border-line bg-paper/92 p-2 shadow-[0_10px_30px_rgb(26_26_26/0.14)] backdrop-blur"
+    style="margin-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));"
+  >
+    <a
+      href={localePath(lang, 'schedule/')}
+      class="flex flex-1 items-center justify-center border border-line px-3 py-3 text-xs tracking-[0.25em] text-ink/85 transition-colors active:bg-line/40"
+      tabindex="-1"
+    >
+      {t('sticky.schedule')}
+    </a>
+    <a
+      href={`${localePath(lang, 'contact/')}#booking`}
+      class="btn-cta relative flex flex-[1.4] items-center justify-center overflow-hidden bg-accent px-3 py-3 text-xs tracking-[0.25em] text-white"
+      tabindex="-1"
+    >
+      <span class="relative z-10">{t('sticky.cta')}</span>
+      {/* 撥で弦を弾いたような朱の光が右から左へ走る（reduced-motion では停止） */}
+      <span aria-hidden="true" class="cta-sheen"></span>
+    </a>
+  </div>
+</div>

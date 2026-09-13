@@ -10,7 +10,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "icons": "node scripts/generate-icons.mjs",
+    "images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.3.0",
