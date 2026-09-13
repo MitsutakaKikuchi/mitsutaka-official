@@ -26,6 +26,16 @@ export const SITE = {
    * 空のままなら何も出力されない。
    */
   googleSiteVerification: 'l3yrr9hNZM2NmFxoKAwH6HRRAgJG7MdlObm6ahZu21o',
+  /**
+   * Google Analytics 4 の測定ID（例: 'G-XXXXXXXXXX'）。
+   * 空文字の間は解析タグを一切読み込まない。値を入れると、クッキーバナーで
+   * 訪問者が「同意する」を選んだ場合にのみ gtag.js を読み込む（GDPR / 改正電気通信事業法配慮）。
+   */
+  ga4MeasurementId: '',
+  /** プライバシーポリシー・利用規約の最終改定日（ISO 形式）。改定時にここを更新する */
+  legalUpdatedAt: '2026-09-13',
+  /** OGP 画像（public/ 配下）。1200×630px */
+  ogImage: 'ogp.jpg',
   /** SNS は Instagram のみ運用。追加する場合はここに URL を足し、Footer.astro に項目を追加する */
   sns: {
     instagram: 'https://www.instagram.com/_mitsu_yoshi_taka/',

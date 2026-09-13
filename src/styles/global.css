@@ -577,3 +577,355 @@ html.menu-open #header-lang {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* =========================================================================
+ * 追加演出・UI 状態（2026-09 改修）
+ * ========================================================================= */
+
+/*
+ * View Transitions のページ遷移を「巻物を上から広げる」ような墨のワイプにする。
+ * 旧ページは静かに沈み、新ページは上端から下へ現れる。reduced-motion では既定のフェードのまま。
+ */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: vt-sink 0.45s cubic-bezier(0.76, 0, 0.24, 1) both;
+  }
+
+  ::view-transition-new(root) {
+    animation: vt-unroll 0.7s cubic-bezier(0.76, 0, 0.24, 1) both;
+  }
+}
+
+@keyframes vt-sink {
+  to {
+    opacity: 0;
+    transform: translateY(1.5%);
+  }
+}
+
+@keyframes vt-unroll {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(-1%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+
+/* 見出しの罫線: リビール時に GSAP が左から引く（初期は非表示） */
+html.js .heading-rule {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/*
+ * 落款リップル: タップした位置に朱の印が捺され、輪が広がって消える。
+ * 二重の輪（濃い内輪 + 薄い外輪）で「撥が弦を弾いた」余韻を表す。
+ */
+.seal-ripple {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 9999px;
+  background: var(--color-vermilion);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: seal-dot 0.9s ease-out forwards;
+}
+
+.seal-ripple::before,
+.seal-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1px solid var(--color-vermilion);
+  animation: seal-ring 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.seal-ripple::after {
+  border-color: var(--color-accent);
+  animation-delay: 0.12s;
+  animation-duration: 1.3s;
+}
+
+@keyframes seal-dot {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.7;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes seal-ring {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(14);
+    opacity: 0;
+  }
+}
+
+/* CTA を横切る朱の光（撥が弦を弾く一閃）。スティッキー CTA と主要 CTA に使用 */
+.cta-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgb(192 75 60 / 0.55) 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: cta-sheen 5s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+@keyframes cta-sheen {
+  0%,
+  70% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+/* スマホ用スティッキー CTA: 下からせり上がる。メニュー展開中・ライトボックス表示中は隠す */
+#sticky-cta {
+  transform: translateY(110%);
+  opacity: 0;
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s ease;
+  pointer-events: none;
+}
+
+#sticky-cta.is-visible {
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+html.menu-open #sticky-cta,
+html.lightbox-open #sticky-cta {
+  transform: translateY(110%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* クッキーバナー: 下からせり上がる */
+#cookie-banner {
+  transform: translateY(24px);
+  opacity: 0;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s ease;
+}
+
+#cookie-banner.is-visible {
+  transform: none;
+  opacity: 1;
+}
+
+/*
+ * ページローダー: ナビゲーション中に上部の線が伸び、右上で一円相が回る。
+ * 短い遷移では表示前に消えるよう、少し遅らせて現れる。
+ */
+#page-loader {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 80;
+  height: 0;
+  pointer-events: none;
+}
+
+#page-loader .page-loader-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-vermilion));
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+}
+
+#page-loader .page-loader-ensou {
+  position: absolute;
+  top: 1.25rem;
+  right: 1rem;
+  width: 22px;
+  height: 22px;
+  color: var(--color-accent);
+  opacity: 0;
+  stroke-dasharray: 60 34;
+}
+
+#page-loader.is-active .page-loader-bar {
+  opacity: 1;
+  animation: loader-bar 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+#page-loader.is-active .page-loader-ensou {
+  animation:
+    loader-fade 0.3s ease 0.25s forwards,
+    loader-spin 1.1s linear infinite;
+}
+
+@keyframes loader-bar {
+  0% {
+    transform: scaleX(0);
+  }
+  60% {
+    transform: scaleX(0.7);
+  }
+  100% {
+    transform: scaleX(0.92);
+  }
+}
+
+@keyframes loader-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 送信ボタンの読み込み状態: ラベルを薄くし、一円相のスピナーを重ねる */
+.btn-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 9999px;
+  border: 1.5px solid rgb(255 255 255 / 0.35);
+  border-top-color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.btn-cta.is-loading .btn-label {
+  opacity: 0.35;
+}
+
+.btn-cta.is-loading .btn-spinner {
+  opacity: 1;
+  animation: loader-spin 0.9s linear infinite;
+}
+
+/* フォームのエラー文: 現れるときに僅かに上へ滑り込む */
+.form-error.is-visible {
+  animation: error-in 0.3s ease both;
+}
+
+@keyframes error-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* ありがとうページ: 一円相を描き終えた頃に朱の落款が捺される */
+.thanks-seal {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: seal-stamp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 2.2s both;
+}
+
+@keyframes seal-stamp {
+  from {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/*
+ * 公演画像の読み込み状態: 画像が届くまで和紙色のシマーを出し、届いたら静かに置き換わる。
+ * ::before は最初の子として描かれ、後続の絶対配置 <img> がその上に載る。
+ */
+[data-event-images] > span::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, rgb(222 218 210 / 0.25) 30%, rgb(222 218 210 / 0.6) 50%, rgb(222 218 210 / 0.25) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+img[data-slide] {
+  transition: opacity 1s ease;
+}
+
+html.js img[data-slide]:not(.is-loaded) {
+  opacity: 0 !important;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
+}
+
+/* 320px 級の極小画面: 縦書きの行間と余白を詰めてファーストビューに収める */
+@media (max-width: 360px) {
+  .vertical-text.text-lead {
+    line-height: 1.7;
+    letter-spacing: 0.3em;
+  }
+}
+
+/* iOS: 下部セーフエリアを持つ端末でスティッキー CTA の背面に本文が隠れないよう余白 */
+@supports (padding: env(safe-area-inset-bottom)) {
+  #sticky-cta {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* reduced-motion: 追加演出を停止 */
+@media (prefers-reduced-motion: reduce) {
+  .cta-sheen,
+  .seal-ripple,
+  [data-event-images] > span::before {
+    animation: none;
+  }
+
+  html.js .heading-rule {
+    transform: none;
+  }
+
+  .thanks-seal {
+    animation: none;
+  }
+}

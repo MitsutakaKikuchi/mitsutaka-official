@@ -17,11 +17,36 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as Lang;
 const t = useTranslations(lang);
 
+// caption はギャラリーの見出し、alt は写真の内容を説明する代替テキスト（アクセシビリティ・画像検索用）
 const photos = [
-  { src: performancePhoto, ja: '各種演奏会', en: 'Concerts' },
-  { src: concertPhoto, ja: 'イベント等での共演ステージ', en: 'Collaborative performances' },
-  { src: workshopPhoto, ja: 'レクチャー・ワークショップ', en: 'Lectures & workshops' },
-  { src: rehearsalPhoto, ja: 'レコーディング', en: 'Recording sessions' },
+  {
+    src: performancePhoto,
+    ja: '各種演奏会',
+    en: 'Concerts',
+    altJa: '演奏会の舞台で紋付を着て長唄三味線を演奏する菊池光峰',
+    altEn: 'KIKUCHI Mitsutaka in formal kimono playing nagauta shamisen on a concert stage',
+  },
+  {
+    src: concertPhoto,
+    ja: 'イベント等での共演ステージ',
+    en: 'Collaborative performances',
+    altJa: '共演者と並んで舞台で三味線を演奏する菊池光峰',
+    altEn: 'KIKUCHI Mitsutaka performing shamisen on stage alongside fellow musicians',
+  },
+  {
+    src: workshopPhoto,
+    ja: 'レクチャー・ワークショップ',
+    en: 'Lectures & workshops',
+    altJa: 'ワークショップで参加者に三味線の演奏を教える菊池光峰',
+    altEn: 'KIKUCHI Mitsutaka teaching shamisen to participants at a workshop',
+  },
+  {
+    src: rehearsalPhoto,
+    ja: 'レコーディング',
+    en: 'Recording sessions',
+    altJa: 'レコーディングスタジオで三味線を演奏する菊池光峰',
+    altEn: 'KIKUCHI Mitsutaka playing shamisen during a recording session',
+  },
 ] as const;
 
 // 動画IDが未登録（空文字のみ）の場合は動画セクションを表示しない
@@ -60,7 +85,7 @@ const pageTitle = lang === 'ja' ? 'メディア' : 'Media';
               <div class="relative overflow-hidden">
                 <Image
                   src={photo.src}
-                  alt={lang === 'ja' ? photo.ja : photo.en}
+                  alt={lang === 'ja' ? photo.altJa : photo.altEn}
                   widths={[480, 960]}
                   sizes="(min-width: 640px) 50vw, 100vw"
                   class="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"

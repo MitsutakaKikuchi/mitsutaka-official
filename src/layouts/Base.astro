@@ -12,28 +12,53 @@ import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Lightbox from '../components/Lightbox.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+import StickyCta from '../components/StickyCta.astro';
 import { SITE } from '../config/site';
 import { localePath, withBase } from '../i18n/utils';
-import type { Lang } from '../i18n/ui';
+import { useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
   /** 言語プレフィックス以降のパス（例: 'about/'。トップは ''） */
   subpath?: string;
+  /** ページ固有のメタタイトル。省略時はサイト全体のタイトル */
   title?: string;
+  /** ページ固有のメタ記述。省略時はサイト全体の説明文 */
   description?: string;
+  /** 検索エンジンに登録しないページ（ありがとうページ等） */
+  noindex?: boolean;
+  /** スマホのスティッキー CTA を出さない（お問い合わせページ等） */
+  hideStickyCta?: boolean;
+  /** OGP の種別（記事的なページは 'article'） */
+  ogType?: 'website' | 'article';
 }
 
-const { lang, subpath = '', title, description } = Astro.props;
+const {
+  lang,
+  subpath = '',
+  title,
+  description,
+  noindex = false,
+  hideStickyCta = false,
+  ogType = 'website',
+} = Astro.props;
+const t = useTranslations(lang);
 
 const siteTitle = lang === 'ja' ? SITE.titleJa : SITE.titleEn;
-const pageTitle = title ? `${title} | ${SITE.artistNameEn}` : siteTitle;
+const brand = lang === 'ja' ? SITE.artistNameJa : SITE.artistNameEn;
+const pageTitle = title ? `${title} | ${brand}` : siteTitle;
 const pageDescription =
   description ?? (lang === 'ja' ? SITE.descriptionJa : SITE.descriptionEn);
 
 const canonicalUrl = new URL(localePath(lang, subpath), Astro.site);
 const jaUrl = new URL(localePath('ja', subpath), Astro.site);
 const enUrl = new URL(localePath('en', subpath), Astro.site);
+const ogImageUrl = new URL(withBase(SITE.ogImage), Astro.site).href;
+const ogImageAlt =
+  lang === 'ja'
+    ? `${SITE.artistNameJa} — 長唄三味線方 公式サイト`
+    : `${SITE.artistNameEn} — Nagauta Shamisen Player, Official Website`;
 
 // 構造化データ: アーティスト情報（仕様書④-2）
 const personJsonLd = {
@@ -44,7 +69,7 @@ const personJsonLd = {
   jobTitle: lang === 'ja' ? '長唄三味線方' : 'Nagauta Shamisen Player',
   description: lang === 'ja' ? SITE.descriptionJa : SITE.descriptionEn,
   url: new URL(withBase('/'), Astro.site).href,
-  image: new URL(withBase('ogp.jpg'), Astro.site).href,
+  image: ogImageUrl,
   nationality: lang === 'ja' ? '日本' : 'Japanese',
   knowsAbout:
     lang === 'ja'
@@ -52,40 +77,62 @@ const personJsonLd = {
       : ['Nagauta', 'Shamisen', 'Kabuki music', 'Japanese traditional music'],
   sameAs: Object.values(SITE.sns).filter(Boolean),
 };
+
+// 構造化データ: サイト自体（言語別 URL を明示）
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: siteTitle,
+  url: new URL(localePath(lang), Astro.site).href,
+  inLanguage: lang,
+};
 ---
 
 <!doctype html>
 <html lang={lang}>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
     <meta name="author" content={SITE.artistNameEn} />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+    <meta name="theme-color" content="#f7f5f0" />
+    {SITE.ga4MeasurementId && <meta name="ga4-measurement-id" content={SITE.ga4MeasurementId} />}
     {
       SITE.googleSiteVerification && (
         <meta name="google-site-verification" content={SITE.googleSiteVerification} />
       )
     }
+    <link rel="icon" href={withBase('favicon.ico')} sizes="32x32" />
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="apple-touch-icon" href={withBase('icons/apple-touch-icon.png')} />
+    <link rel="manifest" href={withBase('site.webmanifest')} />
     <link rel="canonical" href={canonicalUrl.href} />
     <link rel="alternate" hreflang="ja" href={jaUrl.href} />
     <link rel="alternate" hreflang="en" href={enUrl.href} />
     <link rel="alternate" hreflang="x-default" href={jaUrl.href} />
     <link rel="sitemap" href={withBase('sitemap-index.xml')} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={siteTitle} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonicalUrl.href} />
-    <meta property="og:image" content={new URL(withBase('ogp.jpg'), Astro.site).href} />
-    <meta property="og:image:alt" content={pageTitle} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:secure_url" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta property="og:locale" content={lang === 'ja' ? 'ja_JP' : 'en_US'} />
+    <meta property="og:locale:alternate" content={lang === 'ja' ? 'en_US' : 'ja_JP'} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
     <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
     <script is:inline>
       // JS 有効時のみフェードイン演出を適用するためのフラグ
       document.documentElement.classList.add('js');
@@ -93,16 +140,37 @@ const personJsonLd = {
     <ClientRouter />
   </head>
   <body class="bg-paper text-ink min-h-screen flex flex-col">
+    <a
+      href="#content"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:bg-ink focus:px-4 focus:py-2 focus:text-paper focus:text-sm focus:tracking-widest"
+    >
+      {lang === 'ja' ? '本文へスキップ' : 'Skip to content'}
+    </a>
     <div id="scroll-progress" aria-hidden="true"></div>
+    <!-- ページ遷移中の読み込みインジケーター（上部の藍→朱の線 + 右上の一円相） -->
+    <div id="page-loader" aria-live="polite" aria-label={t('loading.label')} hidden>
+      <span class="page-loader-bar" aria-hidden="true"></span>
+      <svg class="page-loader-ensou" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></circle>
+      </svg>
+    </div>
     <Header lang={lang} subpath={subpath} />
-    <main class="flex-1">
+    <main id="content" class="flex-1" tabindex="-1">
       <slot />
     </main>
     <Footer lang={lang} />
+    {!hideStickyCta && <StickyCta lang={lang} />}
     <Lightbox lang={lang} />
+    <CookieBanner lang={lang} />
     <script>
       // モーション演出一式（Lenis / GSAP / カーソル / WebGL パーティクル）
       import '../scripts/effects';
+      // クッキー同意 + GA4（測定IDは <head> の meta から読む。View Transitions でも head は差し替わるため確実）
+      import { initConsent } from '../scripts/consent';
+      document.addEventListener('astro:page-load', () => {
+        const meta = document.querySelector<HTMLMetaElement>('meta[name="ga4-measurement-id"]');
+        initConsent(meta?.content ?? '');
+      });
     </script>
   </body>
 </html>

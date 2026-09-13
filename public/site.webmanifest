@@ -1,0 +1,14 @@
+{
+  "name": "菊池光峰 | KIKUCHI Mitsutaka",
+  "short_name": "菊池光峰",
+  "description": "長唄三味線方・菊池光峰の公式サイト",
+  "start_url": "/mitsutaka-official/",
+  "display": "browser",
+  "background_color": "#f7f5f0",
+  "theme_color": "#f7f5f0",
+  "icons": [
+    { "src": "/mitsutaka-official/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/mitsutaka-official/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/mitsutaka-official/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

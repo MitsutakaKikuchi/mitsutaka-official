@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+# 送信完了ページは検索結果に出さない（noindex も併用）
+Disallow: /mitsutaka-official/ja/thanks/
+Disallow: /mitsutaka-official/en/thanks/
 
 Sitemap: https://mitsutakakikuchi.github.io/mitsutaka-official/sitemap-index.xml

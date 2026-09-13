@@ -1,0 +1,59 @@
+---
+import Base from '../../layouts/Base.astro';
+import { localePath } from '../../i18n/utils';
+import { useTranslations, type Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'ja' } }, { params: { lang: 'en' } }];
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const pageTitle = lang === 'ja' ? 'お問い合わせ完了' : 'Thank You';
+---
+
+<Base
+  lang={lang}
+  subpath="thanks/"
+  title={pageTitle}
+  description={t('meta.thanks')}
+  noindex
+  hideStickyCta
+>
+  <div class="relative mx-auto flex max-w-2xl flex-col items-center gap-8 px-4 py-section text-center sm:px-6">
+    <!-- 一円相を一筆で描き、中心に朱の落款を捺す（送信完了の「印」） -->
+    <svg class="h-28 w-28 text-accent" viewBox="0 0 120 120" aria-hidden="true">
+      <path
+        data-draw
+        d="M86 30A40 40 0 1 0 96 62"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"></path>
+      <circle class="thanks-seal" cx="60" cy="60" r="6" fill="#c04b3c"></circle>
+    </svg>
+    <div class="space-y-3">
+      <p class="text-[11px] tracking-[0.35em] uppercase text-accent" data-reveal>
+        {lang === 'ja' ? 'Thank you' : 'Message received'}
+      </p>
+      <h1 class="font-display text-title tracking-[0.12em]" data-reveal>{t('thanks.title')}</h1>
+    </div>
+    <p class="max-w-lg leading-loose text-ink/85" data-reveal>{t('thanks.lead')}</p>
+    <p class="max-w-lg text-xs leading-relaxed text-muted" data-reveal>{t('thanks.note')}</p>
+    <div class="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:gap-8" data-reveal>
+      <a
+        href={localePath(lang)}
+        class="btn-cta bg-accent hover:bg-accent-dark px-10 py-4 text-sm tracking-[0.25em] text-white"
+        data-magnetic
+      >
+        {t('thanks.home')}
+      </a>
+      <a
+        href={localePath(lang, 'schedule/')}
+        class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+      >
+        {t('thanks.schedule')} →
+      </a>
+    </div>
+  </div>
+</Base>
