@@ -1,4 +1,4 @@
-﻿export const LANGUAGES = {
+export const LANGUAGES = {
   ja: '日本語',
   en: 'English',
 } as const;

@@ -2,7 +2,6 @@
 import { Image } from 'astro:assets';
 import performancePhoto from '../assets/photos/performance.jpg';
 import Strings from './Strings.astro';
-import StringsHud from './StringsHud.astro';
 import { SITE } from '../config/site';
 import { localePath } from '../i18n/utils';
 import { useTranslations, type Lang } from '../i18n/ui';
@@ -194,9 +193,8 @@ const photoAlt =
 
   <!-- 下部 HUD: 弦インジケーター・音のトグル／スクロール誘導／所在地 -->
   <div
-    class="absolute inset-x-0 bottom-0 mx-auto flex max-w-6xl items-end justify-between gap-4 px-4 pb-5 sm:px-6 sm:pb-6"
+    class="absolute inset-x-0 bottom-0 mx-auto flex max-w-6xl items-end justify-end gap-4 px-4 pb-5 sm:px-6 sm:pb-6"
   >
-    <StringsHud lang={lang} />
     <a
       href="#about"
       class="absolute bottom-5 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-paper/50 transition-colors hover:text-paper sm:bottom-6 sm:flex"

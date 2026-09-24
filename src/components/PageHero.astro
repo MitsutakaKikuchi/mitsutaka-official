@@ -7,7 +7,6 @@
  * 下端の光の筋（night-seam）を境に、本文の「昼の和紙」へ切り替わる。
  */
 import Strings from './Strings.astro';
-import StringsHud from './StringsHud.astro';
 import { localePath } from '../i18n/utils';
 import { useTranslations, type Lang } from '../i18n/ui';
 
@@ -70,7 +69,6 @@ const indexLabel =
       {lead && <p class="max-w-2xl leading-relaxed text-paper/70">{lead}</p>}
     </div>
 
-    <StringsHud lang={lang} class="mt-12 sm:absolute sm:right-6 sm:bottom-8 sm:mt-0 sm:items-end" />
   </div>
 
   <span class="night-seam" aria-hidden="true"></span>

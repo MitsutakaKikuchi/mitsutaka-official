@@ -1,4 +1,4 @@
-﻿@import 'tailwindcss';
+@import 'tailwindcss';
 
 @theme {
   /*
@@ -1024,29 +1024,6 @@ html.js img[data-slide]:not(.is-loaded) {
 
 .strings-glow {
   filter: drop-shadow(0 0 3px rgb(143 179 224 / 0.5));
-}
-
-/* 弦インジケーター（HUD の三点）: 弾かれた弦に対応する点が灯る */
-.string-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 9999px;
-  border: 1px solid rgb(143 179 224 / 0.6);
-  transition:
-    background-color 1s ease,
-    box-shadow 1s ease;
-}
-
-.string-dot.is-lit {
-  background-color: var(--color-glow);
-  box-shadow: 0 0 8px var(--color-glow);
-  transition-duration: 0.05s;
-}
-
-.string-dot[data-dot='1'].is-lit {
-  background-color: #e0735f;
-  box-shadow: 0 0 8px #e0735f;
 }
 
 /* ---------- ヘッダー: 夜の舞台の上では透過・和紙色文字、本文上では和紙の帯 ---------- */

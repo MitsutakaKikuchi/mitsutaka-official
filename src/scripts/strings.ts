@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 光の三本弦（components/Strings.astro）のインタラクション。
  * - ポインタが弦を横切ると、その位置・速さに応じて弦が弾かれ、減衰振動しながら光る
  * - タップ／クリックでも近くの弦が弾かれる（スクロール中のタッチ端末向け）
@@ -168,3 +168,4 @@ export function initStrings(): void {
     gsap.ticker.add(tick);
   }
 }
+
