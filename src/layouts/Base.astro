@@ -2,6 +2,7 @@
 import '@fontsource-variable/inter';
 import '@fontsource/italiana';
 import '@fontsource/yuji-syuku';
+import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource-variable/cormorant';
 import '@fontsource-variable/noto-sans-jp';
 import '@fontsource-variable/noto-serif-jp';
@@ -32,6 +33,11 @@ interface Props {
   hideStickyCta?: boolean;
   /** OGP の種別（記事的なページは 'article'） */
   ogType?: 'website' | 'article';
+  /**
+   * ページ冒頭が「夜の舞台」（Hero / PageHero）で始まるか。
+   * false のページ（ありがとう・404）はヘッダーを和紙色で表示し、余白を確保する
+   */
+  nightTop?: boolean;
 }
 
 const {
@@ -42,6 +48,7 @@ const {
   noindex = false,
   hideStickyCta = false,
   ogType = 'website',
+  nightTop = true,
 } = Astro.props;
 const t = useTranslations(lang);
 
@@ -97,7 +104,7 @@ const websiteJsonLd = {
     <meta name="description" content={pageDescription} />
     <meta name="author" content={SITE.artistNameEn} />
     <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
-    <meta name="theme-color" content="#f7f5f0" />
+    <meta name="theme-color" content={nightTop ? '#0b0f16' : '#f7f5f0'} />
     {SITE.ga4MeasurementId && <meta name="ga4-measurement-id" content={SITE.ga4MeasurementId} />}
     {
       SITE.googleSiteVerification && (
@@ -154,7 +161,7 @@ const websiteJsonLd = {
         <circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></circle>
       </svg>
     </div>
-    <Header lang={lang} subpath={subpath} />
+    <Header lang={lang} subpath={subpath} overlay={nightTop} />
     <main id="content" class="flex-1" tabindex="-1">
       <slot />
     </main>
@@ -165,6 +172,9 @@ const websiteJsonLd = {
     <script>
       // モーション演出一式（Lenis / GSAP / カーソル / WebGL パーティクル）
       import '../scripts/effects';
+      // 光の三本弦（触れると弾かれる弦・音のトグル）
+      import { initStrings } from '../scripts/strings';
+      document.addEventListener('astro:page-load', initStrings);
       // クッキー同意 + GA4（測定IDは <head> の meta から読む。View Transitions でも head は差し替わるため確実）
       import { initConsent } from '../scripts/consent';
       document.addEventListener('astro:page-load', () => {

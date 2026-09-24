@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import SectionHeading from '../../components/SectionHeading.astro';
+import PageHero from '../../components/PageHero.astro';
 import { SITE } from '../../config/site';
 import { localePath } from '../../i18n/utils';
 import { useTranslations, type Lang } from '../../i18n/ui';
@@ -29,10 +29,8 @@ const thanksUrl = localePath(lang, 'thanks/');
   description={t('meta.contact')}
   hideStickyCta
 >
-  <div class="mx-auto max-w-3xl px-4 py-section sm:px-6">
-    <SectionHeading en="Contact / Booking" label={pageTitle} id="booking" />
-
-    <p class="leading-relaxed text-muted" data-reveal>{t('contact.lead')}</p>
+  <PageHero lang={lang} en="Contact" label={pageTitle} index={4} lead={t('contact.lead')} />
+  <div id="booking" class="mx-auto max-w-3xl scroll-mt-16 px-4 py-section sm:px-6">
 
     <!--
       Formspree による静的サイト用フォーム。
@@ -43,7 +41,7 @@ const thanksUrl = localePath(lang, 'thanks/');
       id="contact-form"
       action={SITE.formspreeEndpoint}
       method="POST"
-      class="mt-12 space-y-8"
+      class="space-y-8"
       data-thanks={thanksUrl}
       data-msg-required={t('form.errorRequired')}
       data-msg-email={t('form.errorEmail')}
@@ -66,22 +64,29 @@ const thanksUrl = localePath(lang, 'thanks/');
 
       <fieldset>
         <legend class={labelClass}>{t('contact.type')}</legend>
-        <div class="flex flex-col gap-3 sm:flex-row sm:gap-6">
+        {/* 種別はタップしやすいタイル型のラジオ（選択中は藍の枠 + 朱の印） */}
+        <div class="grid gap-3 sm:grid-cols-3">
           {
             [
-              { value: 'booking', label: t('contact.typeBooking') },
-              { value: 'general', label: t('contact.typeGeneral') },
-              { value: 'press', label: t('contact.typePress') },
+              { value: 'booking', label: t('contact.typeBooking'), en: 'Booking' },
+              { value: 'general', label: t('contact.typeGeneral'), en: 'General' },
+              { value: 'press', label: t('contact.typePress'), en: 'Press' },
             ].map((option, index) => (
-              <label class="flex min-h-11 items-center gap-2 text-sm tracking-wider">
+              <label class="group relative flex min-h-14 cursor-pointer items-center gap-3 border border-line bg-white/70 px-4 py-3 text-sm tracking-wider transition-colors hover:border-accent/50 has-[:checked]:border-accent has-[:checked]:bg-accent/[0.05] has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent">
                 <input
                   type="radio"
                   name="inquiryType"
                   value={option.value}
                   checked={index === 0}
-                  class="h-4 w-4 accent-accent"
+                  class="peer sr-only"
                 />
-                {option.label}
+                <span class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-accent/50 peer-checked:border-accent" aria-hidden="true">
+                  <span class="h-2 w-2 scale-0 rounded-full bg-vermilion transition-transform group-has-[:checked]:scale-100" />
+                </span>
+                <span class="flex flex-col">
+                  <span>{option.label}</span>
+                  {lang === 'ja' && <span class="hud text-muted">{option.en}</span>}
+                </span>
               </label>
             ))
           }
@@ -265,10 +270,26 @@ const thanksUrl = localePath(lang, 'thanks/');
     if (!form || form.dataset.bound) return;
     form.dataset.bound = 'true';
 
+    // ?type=press などで種別を事前選択（プロフィールの「資料を請求する」から来た場合など）
+    const presetType = new URLSearchParams(window.location.search).get('type');
+    if (presetType) {
+      const radio = form.querySelector<HTMLInputElement>(`input[name="inquiryType"][value="${CSS.escape(presetType)}"]`);
+      if (radio) radio.checked = true;
+    }
+
     // 入力し直したらその項目のエラーを消す
     form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[aria-describedby]').forEach((field) => {
       field.addEventListener('input', () => setFieldError(form, field.name, null));
       field.addEventListener('change', () => setFieldError(form, field.name, null));
+    });
+
+    // メール欄は入力を終えた時点（blur）で形式を確認し、送信前に気付けるようにする
+    const emailField = form.elements.namedItem('email') as HTMLInputElement | null;
+    emailField?.addEventListener('blur', () => {
+      const value = emailField.value.trim();
+      if (value && !EMAIL_PATTERN.test(value)) {
+        setFieldError(form, 'email', form.dataset.msgEmail ?? '');
+      }
     });
 
     form.addEventListener('submit', async (event) => {

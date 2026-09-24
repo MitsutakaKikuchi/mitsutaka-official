@@ -335,12 +335,22 @@ function initLightbox(): void {
     dialog.dataset.bound = 'true';
     let images: string[] = [];
     let index = 0;
-
-    dialog.addEventListener('lightbox:open', ((event: CustomEvent<{ images: string[]; alt: string }>) => {
-      images = event.detail.images;
+    // 画像ごとの代替テキスト（ギャラリー）。無ければトリガーの aria-label を共通で使う
+    let alts: string[] = [];
+    let fallbackAlt = '';
+    const updateAlt = () => {
       const image = dialog.querySelector<HTMLImageElement>('[data-lightbox-image]');
-      if (image) image.alt = event.detail.alt;
-      index = showLightboxImage(dialog, 0, images);
+      if (image) image.alt = alts[index] ?? fallbackAlt;
+    };
+
+    dialog.addEventListener('lightbox:open', ((
+      event: CustomEvent<{ images: string[]; alt: string; start?: number; alts?: string[] }>
+    ) => {
+      images = event.detail.images;
+      alts = event.detail.alts ?? [];
+      fallbackAlt = event.detail.alt;
+      index = showLightboxImage(dialog, event.detail.start ?? 0, images);
+      updateAlt();
       dialog.showModal();
       // 背景ページのスクロールを止める（Lenis慣性スクロール + ネイティブ両方）
       lenis?.stop();
@@ -355,9 +365,11 @@ function initLightbox(): void {
 
     dialog.querySelector('[data-lightbox-prev]')?.addEventListener('click', () => {
       index = showLightboxImage(dialog, index - 1, images);
+      updateAlt();
     });
     dialog.querySelector('[data-lightbox-next]')?.addEventListener('click', () => {
       index = showLightboxImage(dialog, index + 1, images);
+      updateAlt();
     });
     dialog.querySelector('[data-lightbox-close]')?.addEventListener('click', () => dialog.close());
     // ダイアログ自身（背景部分）のクリックで閉じる
@@ -376,6 +388,7 @@ function initLightbox(): void {
       const deltaX = touchEndX - touchStartX;
       if (Math.abs(deltaX) < SWIPE_THRESHOLD_PX) return;
       index = showLightboxImage(dialog, deltaX < 0 ? index + 1 : index - 1, images);
+      updateAlt();
     });
   }
 
@@ -388,9 +401,20 @@ function initLightbox(): void {
         images = [];
       }
       if (images.length === 0) return;
+      let alts: string[] | undefined;
+      try {
+        alts = trigger.dataset.alts ? JSON.parse(trigger.dataset.alts) : undefined;
+      } catch {
+        alts = undefined;
+      }
       dialog.dispatchEvent(
         new CustomEvent('lightbox:open', {
-          detail: { images, alt: trigger.getAttribute('aria-label') ?? '' },
+          detail: {
+            images,
+            alts,
+            start: Number.parseInt(trigger.dataset.start ?? '0', 10) || 0,
+            alt: trigger.getAttribute('aria-label') ?? '',
+          },
         })
       );
     });
@@ -601,6 +625,61 @@ function initImageLoading(): void {
   });
 }
 
+/* ---------- 直近公演のカウントダウン（あと○日）---------- */
+// ビルドは1日1回のため、日数は閲覧時にブラウザ側で計算する（日本時間の日付で比較）
+const DAY_MS = 86_400_000;
+
+function initCountdowns(): void {
+  document.querySelectorAll<HTMLElement>('[data-countdown]').forEach((el) => {
+    const target = Date.parse(`${el.dataset.countdown}T00:00:00+09:00`);
+    if (Number.isNaN(target)) return;
+    const todayJst = new Date(Date.now() + 9 * 3_600_000).toISOString().slice(0, 10);
+    const today = Date.parse(`${todayJst}T00:00:00+09:00`);
+    const days = Math.round((target - today) / DAY_MS);
+    if (days < 0) return;
+    const label =
+      days === 0
+        ? el.dataset.labelToday
+        : days === 1
+          ? el.dataset.labelTomorrow
+          : el.dataset.labelDays?.replace('{n}', String(days));
+    if (label) el.textContent = `— ${label}`;
+  });
+}
+
+/* ---------- ライトボックスのキーボード操作（← → で前後の画像）---------- */
+let lightboxKeysBound = false;
+
+function initLightboxKeys(): void {
+  if (lightboxKeysBound) return;
+  lightboxKeysBound = true;
+  document.addEventListener('keydown', (event) => {
+    const dialog = document.querySelector<HTMLDialogElement>('#lightbox');
+    if (!dialog?.open) return;
+    if (event.key === 'ArrowLeft') {
+      dialog.querySelector<HTMLButtonElement>('[data-lightbox-prev]:not([hidden])')?.click();
+    } else if (event.key === 'ArrowRight') {
+      dialog.querySelector<HTMLButtonElement>('[data-lightbox-next]:not([hidden])')?.click();
+    }
+  });
+}
+
+/* ---------- トップへ戻る ---------- */
+function initToTop(): void {
+  document.querySelectorAll<HTMLElement>('[data-to-top]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (lenis) {
+        lenis.scrollTo(0, { duration: 1.2 });
+      } else {
+        window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+      }
+      // キーボード利用者のためにフォーカスをページ先頭へ戻す
+      document.getElementById('site-logo')?.focus({ preventScroll: true });
+    });
+  });
+}
+
 /* ---------- ページごとの初期化 ---------- */
 function initPage(): void {
   ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
@@ -623,6 +702,9 @@ function initPage(): void {
   initHeadingRules();
   initStickyCta();
   initImageLoading();
+  initCountdowns();
+  initLightboxKeys();
+  initToTop();
   hidePageLoader();
   void initParticles();
   ScrollTrigger.refresh();

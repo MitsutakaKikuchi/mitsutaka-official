@@ -2,6 +2,8 @@
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
+import PageHero from '../../components/PageHero.astro';
+import { localePath } from '../../i18n/utils';
 import portraitPhoto from '../../assets/photos/portrait.jpg';
 import { SITE } from '../../config/site';
 import { useTranslations, type Lang } from '../../i18n/ui';
@@ -34,8 +36,8 @@ const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
 ---
 
 <Base lang={lang} subpath="about/" title={pageTitle} description={t('meta.about')}>
+  <PageHero lang={lang} en="About" label={pageTitle} index={1} />
   <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
-    <SectionHeading en="About" label={pageTitle} />
 
     <div class="grid gap-12 md:grid-cols-[1fr_minmax(16rem,24rem)]">
       <div class="space-y-6 leading-loose" data-reveal>
@@ -45,10 +47,21 @@ const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
             {lang === 'ja' ? SITE.artistNameDisplay : SITE.artistNameJa}
           </span>
         </p>
-        {profile[lang].map((paragraph) => <p>{paragraph}</p>)}
+        {/* 経歴を一文ずつ、左に細い罫線と番号を添えた年譜風に組む */}
+        <ol class="space-y-5 border-l border-line">
+          {profile[lang].map((paragraph, index) => (
+            <li class="relative pl-6">
+              <span class="absolute -left-[3px] top-[0.8em] h-[5px] w-[5px] rotate-45 bg-accent/60" aria-hidden="true" />
+              <span class="hud mr-3 text-muted">{String(index + 1).padStart(2, '0')}</span>
+              {paragraph}
+            </li>
+          ))}
+        </ol>
       </div>
 
-      <figure class="self-start" data-mask-reveal>
+      <figure class="relative m-3 self-start md:sticky md:top-24">
+        <span class="hud-corners text-accent/50" aria-hidden="true"></span>
+        <div data-mask-reveal>
         <Image
           src={portraitPhoto}
           alt={lang === 'ja' ? '長唄三味線方・菊池光峰のポートレート写真' : 'Portrait photograph of nagauta shamisen player KIKUCHI Mitsutaka'}
@@ -57,6 +70,11 @@ const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
           class="w-full object-cover"
           loading="eager"
         />
+        </div>
+        <figcaption class="hud mt-3 flex justify-between text-muted">
+          <span>Portrait</span>
+          <span>{lang === 'ja' ? SITE.artistNameDisplay : SITE.artistNameJa}</span>
+        </figcaption>
       </figure>
     </div>
 
@@ -64,13 +82,21 @@ const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
 
     <section class="mt-section">
       <SectionHeading en="Press Kit" label={lang === 'ja' ? 'プレス向け資料' : 'Press Kit'} />
-      <p class="leading-relaxed text-muted" data-reveal>
+      <div class="flex flex-col items-start gap-6 border border-line bg-white/50 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8" data-reveal>
+      <p class="max-w-2xl leading-relaxed text-ink/75">
         {
           lang === 'ja'
             ? '高解像度の宣材写真・プロフィール文（日英）をご用意しています。お問い合わせフォームよりご請求ください。'
             : 'High-resolution photos and an official biography (Japanese / English) are available upon request via the contact form.'
         }
       </p>
+      <a
+        href={`${localePath(lang, 'contact/')}?type=press#booking`}
+        class="btn-cta shrink-0 bg-accent px-6 py-3 text-xs tracking-[0.25em] text-white hover:bg-accent-dark"
+      >
+        {lang === 'ja' ? '資料を請求する' : 'Request press kit'}
+      </a>
+      </div>
     </section>
   </div>
 </Base>

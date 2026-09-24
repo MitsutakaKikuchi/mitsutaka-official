@@ -1,6 +1,6 @@
 /**
  * ヒーロー背景の WebGL パーティクル（Three.js + カスタムシェーダー）。
- * 墨を流したような藍色の粒子がゆっくり漂い、マウス／タッチに反応して逃げる。
+ * 夜の舞台の照明に浮かぶ塵のような藍の光の粒子（一部は朱の火の粉）がゆっくり漂い、マウス／タッチに反応して逃げる。
  * タップ・クリック時は uForce が一時的に高まり、波紋のように粒子が散る
  * （スマホでもポインタを持たずに「動き」を体感できる）。
  * 「静と動」のコンセプトを保つため、動きは控えめ・低彩度に抑える。
@@ -22,17 +22,23 @@ const FOV_DEG = 50;
 const PARTICLE_COUNT_DESKTOP = 1400;
 const PARTICLE_COUNT_MOBILE = 600;
 const MOBILE_BREAKPOINT_PX = 768;
-const ACCENT_COLOR = new Color('#1b3a5b');
+// 夜の舞台に浮かぶ塵: 藍の光を基調に、ごく一部だけ朱の火の粉を混ぜる
+const ACCENT_COLOR = new Color('#8fb3e0');
+const EMBER_COLOR = new Color('#e0735f');
+const EMBER_RATIO = 0.06;
 
 const vertexShader = /* glsl */ `
   attribute float aSeed;
+  attribute float aEmber;
   uniform float uTime;
   uniform vec2 uMouse;
   uniform float uForce;
   uniform float uPixelRatio;
   varying float vAlpha;
+  varying float vEmber;
 
   void main() {
+    vEmber = aEmber;
     vec3 pos = position;
     float t = uTime * 0.12 + aSeed * 6.2831;
 
@@ -50,18 +56,20 @@ const vertexShader = /* glsl */ `
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
     gl_PointSize = (1.5 + aSeed * 3.5) * uPixelRatio * (6.0 / -mvPosition.z);
-    vAlpha = 0.15 + 0.3 * aSeed;
+    vAlpha = 0.12 + 0.4 * aSeed;
   }
 `;
 
 const fragmentShader = /* glsl */ `
   uniform vec3 uColor;
+  uniform vec3 uEmber;
   varying float vAlpha;
+  varying float vEmber;
 
   void main() {
     float dist = length(gl_PointCoord - 0.5);
     float alpha = smoothstep(0.5, 0.05, dist) * vAlpha;
-    gl_FragColor = vec4(uColor, alpha);
+    gl_FragColor = vec4(mix(uColor, uEmber, vEmber), alpha);
   }
 `;
 
@@ -95,16 +103,19 @@ export function createHeroParticles(canvas: HTMLCanvasElement): () => void {
 
   const positions = new Float32Array(particleCount * 3);
   const seeds = new Float32Array(particleCount);
+  const embers = new Float32Array(particleCount);
   for (let i = 0; i < particleCount; i++) {
     positions[i * 3] = (Math.random() - 0.5) * 12;
     positions[i * 3 + 1] = (Math.random() - 0.5) * 7;
     positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
     seeds[i] = Math.random();
+    embers[i] = Math.random() < EMBER_RATIO ? 1 : 0;
   }
 
   const geometry = new BufferGeometry();
   geometry.setAttribute('position', new BufferAttribute(positions, 3));
   geometry.setAttribute('aSeed', new BufferAttribute(seeds, 1));
+  geometry.setAttribute('aEmber', new BufferAttribute(embers, 1));
 
   const material = new ShaderMaterial({
     vertexShader,
@@ -118,6 +129,7 @@ export function createHeroParticles(canvas: HTMLCanvasElement): () => void {
       uForce: { value: 0 },
       uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
       uColor: { value: ACCENT_COLOR },
+      uEmber: { value: EMBER_COLOR },
     },
   });
 

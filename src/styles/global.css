@@ -19,12 +19,22 @@
   --color-line: #dedad2;
 
   /*
+   * 夜の舞台（2026-09 昼夜ハイブリッド改修）:
+   * ヒーロー・ページ冒頭・出演依頼・フッターは「夜の舞台」、本文は「和紙（昼）」。
+   * night は藍を極限まで沈めた墨色。glow は暗転した舞台で光る弦（藍の光）。
+   */
+  --color-night: #0b0f16;
+  --color-night-soft: #131b28;
+  --color-glow: #8fb3e0;
+
+  /*
    * タイポグラフィ（仕様書②-3）: 和欧混植
    * - ディスプレイ: Italiana（欧文・ハイコントラスト）+ Yuji Syuku（和文・筆文字）
    *   → 名前・セクション見出しなど「顔」になる箇所のみに使用
    * - 見出し: Cormorant（欧文セリフ）+ しっぽり明朝B1（和文ディスプレイ明朝）
    * - 本文: Inter + Noto Sans JP
    */
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-display: 'Italiana', 'Yuji Syuku', 'Shippori Mincho B1', serif;
   --font-sans: 'Inter Variable', 'Noto Sans JP Variable', system-ui, sans-serif;
   --font-serif:
@@ -162,14 +172,15 @@ html.js .k-char {
   bottom: -4px;
   height: 1px;
   width: 100%;
-  background: var(--color-accent);
+  background: currentColor;
   transform: scaleX(0);
   transform-origin: right center;
   transition: transform 0.3s ease;
 }
 
 .nav-link:hover::after,
-.nav-link:focus-visible::after {
+.nav-link:focus-visible::after,
+.nav-link[aria-current='page']::after {
   transform: scaleX(1);
   transform-origin: left center;
 }
@@ -228,7 +239,7 @@ html.fx-cursor button {
 #cursor-ring {
   width: 34px;
   height: 34px;
-  border: 1px solid rgb(27 58 91 / 0.55); /* 藍 */
+  border: 1px solid rgb(95 134 179 / 0.7); /* 藍（昼夜どちらの地でも見える中間調） */
   transition:
     border-color 0.35s ease,
     background-color 0.35s ease;
@@ -256,13 +267,7 @@ html.fx-cursor button {
 }
 
 /* スクロール時のみヘッダーに浮遊感のある影を付ける（JS が .is-scrolled を付与） */
-#site-header {
-  transition: box-shadow 0.4s ease;
-}
-
-#site-header.is-scrolled {
-  box-shadow: 0 1px 24px rgb(26 26 26 / 0.08);
-}
+/* ヘッダーの昼夜切替は末尾「昼夜ハイブリッド」ブロックで定義 */
 
 /*
  * 一円相の「呼吸」: 一筆書きで描き終えた後、ごく僅かに拡大縮小・濃淡が揺らぎ、
@@ -527,12 +532,8 @@ html.menu-open #site-header {
   backdrop-filter: none;
 }
 
-html.menu-open #site-logo {
+html.menu-open #site-header {
   color: var(--color-paper);
-}
-
-html.menu-open #site-header .menu-bar {
-  background-color: var(--color-paper);
 }
 
 html.menu-open #header-lang {
@@ -928,4 +929,271 @@ html.js img[data-slide]:not(.is-loaded) {
   .thanks-seal {
     animation: none;
   }
+}
+
+/* =========================================================================
+ * 昼夜ハイブリッド（2026-09 改修）
+ * 「夜の舞台」: 暗転した舞台に弦の光が走る。ヒーロー・ページ冒頭・出演依頼・フッター。
+ * 「昼の和紙」: 読む・調べる本文。伝統の落ち着きを保つ。
+ * 境目には一筋の光（night-seam）を引き、幕が切り替わるように見せる。
+ * ========================================================================= */
+
+.theme-night {
+  background-color: var(--color-night);
+  color: var(--color-paper);
+  color-scheme: dark;
+}
+
+/* 夜の舞台の照明: 上手から差す藍のスポットと、下手に沈む朱の残光 */
+.night-sky {
+  background:
+    radial-gradient(60% 55% at 72% 38%, rgb(47 86 132 / 0.35), transparent 70%),
+    radial-gradient(40% 40% at 12% 92%, rgb(192 75 60 / 0.12), transparent 70%),
+    linear-gradient(180deg, #0b0f16 0%, #0d131d 60%, #0b0f16 100%);
+}
+
+/* 夜の地ではフォーカスリングを和紙色に */
+.theme-night :focus-visible {
+  outline-color: var(--color-paper);
+}
+
+/* 夜と昼の境目に引く光の筋 */
+.night-seam {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(143 179 224 / 0.55) 30%,
+    rgb(192 75 60 / 0.55) 70%,
+    transparent
+  );
+  box-shadow: 0 0 12px rgb(143 179 224 / 0.35);
+  pointer-events: none;
+}
+
+/* HUD 風のメタ情報（等幅・小さく・大文字） */
+.hud {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* 写真などに添える四隅のブラケット（照準・ファインダーのような近未来の額装） */
+.hud-corners {
+  position: absolute;
+  inset: -10px;
+  pointer-events: none;
+  --c: currentColor;
+  --l: 14px;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--l) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / 1px var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--l) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / 1px var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--l) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / 1px var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--l) 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / 1px var(--l) no-repeat;
+}
+
+/* ---------- 三本の弦（三の糸・二の糸・一の糸）---------- */
+.shamisen-string {
+  fill: none;
+  stroke: var(--color-glow);
+  stroke-linecap: round;
+  stroke-opacity: 0.28;
+  transition:
+    stroke-opacity 1.2s ease,
+    stroke 1.2s ease;
+}
+
+.shamisen-string.is-plucked {
+  stroke-opacity: 0.95;
+  transition-duration: 0.08s;
+}
+
+/* 一の糸（最も太い弦）は朱に鳴る */
+.shamisen-string[data-string='1'].is-plucked {
+  stroke: #e0735f;
+}
+
+.strings-glow {
+  filter: drop-shadow(0 0 3px rgb(143 179 224 / 0.5));
+}
+
+/* 弦インジケーター（HUD の三点）: 弾かれた弦に対応する点が灯る */
+.string-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  border: 1px solid rgb(143 179 224 / 0.6);
+  transition:
+    background-color 1s ease,
+    box-shadow 1s ease;
+}
+
+.string-dot.is-lit {
+  background-color: var(--color-glow);
+  box-shadow: 0 0 8px var(--color-glow);
+  transition-duration: 0.05s;
+}
+
+.string-dot[data-dot='1'].is-lit {
+  background-color: #e0735f;
+  box-shadow: 0 0 8px #e0735f;
+}
+
+/* ---------- ヘッダー: 夜の舞台の上では透過・和紙色文字、本文上では和紙の帯 ---------- */
+#site-header {
+  color: var(--color-ink);
+  background-color: rgb(247 245 240 / 0.88);
+  border-bottom: 1px solid var(--color-line);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    background-color 0.45s ease,
+    border-color 0.45s ease,
+    color 0.45s ease,
+    box-shadow 0.45s ease;
+}
+
+#site-header.is-scrolled {
+  box-shadow: 0 1px 24px rgb(26 26 26 / 0.08);
+}
+
+#site-header[data-header-theme='night'] {
+  color: var(--color-paper);
+  background-color: transparent;
+  border-bottom-color: rgb(247 245 240 / 0.08);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+#site-header[data-header-theme='night'].is-scrolled {
+  background-color: rgb(11 15 22 / 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ヘッダーの出演依頼ボタン: 昼は藍、夜は和紙色に反転 */
+.header-cta {
+  background-color: var(--color-accent);
+  color: #fff;
+}
+
+.header-cta:hover {
+  background-color: var(--color-accent-dark);
+}
+
+#site-header[data-header-theme='night'] .header-cta {
+  background-color: var(--color-paper);
+  color: var(--color-night);
+}
+
+#site-header[data-header-theme='night'] .header-cta:hover {
+  background-color: #fff;
+  box-shadow: 0 0 24px rgb(143 179 224 / 0.35);
+}
+
+/* ---------- ボタン（夜の舞台用）---------- */
+.btn-light {
+  background-color: var(--color-paper);
+  color: var(--color-night);
+}
+
+.btn-light:hover,
+.btn-light:focus-visible {
+  background-color: #fff;
+  box-shadow:
+    0 0 0 1px rgb(143 179 224 / 0.4),
+    0 10px 30px rgb(143 179 224 / 0.25);
+}
+
+.link-night {
+  border-bottom: 1px solid rgb(247 245 240 / 0.4);
+  color: rgb(247 245 240 / 0.9);
+  transition:
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.link-night:hover {
+  border-color: var(--color-glow);
+  color: #fff;
+}
+
+/* ---------- 矢印付きテキストリンク: ホバーで矢印が進む ---------- */
+.link-arrow .arrow {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.link-arrow:hover .arrow,
+.link-arrow:focus-visible .arrow {
+  transform: translateX(4px);
+}
+
+/* ---------- 公演カードの日付ブロック ---------- */
+.event-date-day {
+  font-family: 'Cormorant Variable', var(--font-serif);
+  font-weight: 400;
+  font-feature-settings: 'lnum' 1;
+}
+
+/* ---------- ギャラリーのキャプション: HUD 風に写真の上へ ---------- */
+.shot-meta {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+.group:hover .shot-meta,
+.group:focus-visible .shot-meta {
+  opacity: 1;
+  transform: none;
+}
+
+@media (hover: none) {
+  .shot-meta {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* トップへ戻るボタン */
+.to-top .to-top-line {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: bottom;
+}
+
+.to-top:hover .to-top-line {
+  transform: scaleY(1.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shamisen-string,
+  .string-dot,
+  .shot-meta {
+    transition: none;
+  }
+}
+
+/* メニュー展開中は昼夜・スクロール状態に関わらずヘッダーを透過させる
+ * （backdrop-filter が残ると固定配置のメニューがヘッダー内に閉じ込められるため必須） */
+html.menu-open #site-header[data-header-theme] {
+  color: var(--color-paper);
+  background-color: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }

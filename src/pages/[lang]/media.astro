@@ -1,7 +1,7 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
-import SectionHeading from '../../components/SectionHeading.astro';
+import PageHero from '../../components/PageHero.astro';
 import YouTubeEmbed from '../../components/YouTubeEmbed.astro';
 import performancePhoto from '../../assets/photos/performance.jpg';
 import concertPhoto from '../../assets/photos/concert-ensemble.jpg';
@@ -49,6 +49,12 @@ const photos = [
   },
 ] as const;
 
+// ライトボックス用の大きめの画像（WebP 1600px）
+const largeUrls = await Promise.all(
+  photos.map(async (photo) => (await getImage({ src: photo.src, width: 1600, format: 'webp' })).src)
+);
+const altList = photos.map((photo) => (lang === 'ja' ? photo.altJa : photo.altEn));
+
 // 動画IDが未登録（空文字のみ）の場合は動画セクションを表示しない
 const videoIds = SITE.youtubeVideoIds.filter(Boolean);
 
@@ -56,13 +62,13 @@ const pageTitle = lang === 'ja' ? 'メディア' : 'Media';
 ---
 
 <Base lang={lang} subpath="media/" title={pageTitle} description={t('meta.media')}>
+  <PageHero lang={lang} en="Media" label={pageTitle} index={3} />
   <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
-    <SectionHeading en="Media" label={pageTitle} />
 
     {
       videoIds.length > 0 && (
         <section>
-          <h2 class="mb-6 text-sm tracking-[0.3em] uppercase text-accent" data-reveal>
+          <h2 class="hud mb-6 text-accent" data-reveal>
             {t('media.videos')}
           </h2>
           <div class="grid gap-8 md:grid-cols-2" data-reveal>
@@ -75,14 +81,23 @@ const pageTitle = lang === 'ja' ? 'メディア' : 'Media';
     }
 
     <section class:list={[videoIds.length > 0 && 'mt-section']}>
-      <h2 class="mb-6 text-sm tracking-[0.3em] uppercase text-accent" data-reveal>
+      <h2 class="hud mb-6 text-accent" data-reveal>
         {t('media.gallery')}
       </h2>
       <div class="grid gap-4 sm:grid-cols-2">
         {
-          photos.map((photo) => (
+          photos.map((photo, index) => (
             <figure class="group" data-mask-reveal>
-              <div class="relative overflow-hidden">
+              {/* 写真をタップ／クリックすると拡大表示（← → / スワイプで前後の写真へ） */}
+              <button
+                type="button"
+                class="relative block w-full cursor-zoom-in overflow-hidden text-left"
+                data-lightbox
+                data-images={JSON.stringify(largeUrls)}
+                data-alts={JSON.stringify(altList)}
+                data-start={index}
+                aria-label={`${lang === 'ja' ? '拡大表示' : 'Enlarge'}: ${lang === 'ja' ? photo.ja : photo.en}`}
+              >
                 <Image
                   src={photo.src}
                   alt={lang === 'ja' ? photo.altJa : photo.altEn}
@@ -91,14 +106,23 @@ const pageTitle = lang === 'ja' ? 'メディア' : 'Media';
                   class="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   loading="lazy"
                 />
-                {/* ホバー時に内側へ朱の額縁が浮かび上がる（ヒーローの額装モチーフと呼応）。装飾のみ・即revert可 */}
+                {/* ホバー時に内側へ朱の額縁が浮かび上がる（ヒーローの額装モチーフと呼応） */}
                 <span
                   aria-hidden="true"
                   class="pointer-events-none absolute inset-2.5 border border-vermilion/0 transition-colors duration-500 group-hover:border-vermilion/50"
                 ></span>
-              </div>
-              <figcaption class="px-1 py-3 text-xs tracking-[0.2em] text-muted">
-                {lang === 'ja' ? photo.ja : photo.en}
+                <span
+                  aria-hidden="true"
+                  class="absolute right-3 bottom-3 flex h-8 w-8 items-center justify-center bg-ink/60 text-paper opacity-80 transition-opacity group-hover:opacity-100"
+                >
+                  <svg viewBox="0 0 16 16" class="h-3.5 w-3.5">
+                    <path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"></path>
+                  </svg>
+                </span>
+              </button>
+              <figcaption class="flex items-baseline justify-between gap-4 px-1 py-3">
+                <span class="text-xs tracking-[0.2em] text-ink/75">{lang === 'ja' ? photo.ja : photo.en}</span>
+                <span class="hud text-muted">Fig. {String(index + 1).padStart(2, '0')}</span>
               </figcaption>
             </figure>
           ))

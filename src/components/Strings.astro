@@ -1,0 +1,67 @@
+---
+/**
+ * 三味線の三本の弦（一の糸・二の糸・三の糸）を「光の線」として描く装飾。
+ * ポインタが弦を横切る／タップすると、その位置で弦が弾かれて振動し、光る（JS: scripts/strings.ts）。
+ * 伝統の楽器を、触れて鳴らせるインターフェースとして再解釈する「伝統 × 近未来」のモチーフ。
+ * reduced-motion 時は静止した光の線として表示される。
+ */
+interface Props {
+  /** 弦の傾き（度）。0 で水平 */
+  angle?: number;
+  /** viewBox(1200×800) 内での一本目の弦の y 座標 */
+  baseY?: number;
+  /** 弦と弦の間隔 */
+  gap?: number;
+  /** ページ読み込み時に弦を順に弾く「開演」演出を行うか */
+  intro?: boolean;
+  /** viewBox の高さ（幅は 1200 固定）。横長の帯では 400 などにする */
+  viewHeight?: number;
+  class?: string;
+}
+
+const {
+  angle = -22,
+  baseY = 560,
+  gap = 20,
+  intro = false,
+  viewHeight = 800,
+  class: className = '',
+} = Astro.props;
+
+// 上から 三の糸（細い・高音）→ 二の糸 → 一の糸（太い・低音）
+const strings = [
+  { id: '3', width: 0.8 },
+  { id: '2', width: 1.1 },
+  { id: '1', width: 1.6 },
+];
+const X_START = -500;
+const X_END = 1700;
+---
+
+<svg
+  class:list={['pointer-events-none absolute inset-0 h-full w-full', className]}
+  viewBox={`0 0 1200 ${viewHeight}`}
+  preserveAspectRatio="xMidYMid slice"
+  aria-hidden="true"
+  data-strings
+  data-strings-intro={intro ? '' : undefined}
+>
+  <g transform={`rotate(${angle} 600 ${viewHeight / 2})`} class="strings-glow">
+    {
+      strings.map((string, index) => {
+        const y = baseY + index * gap;
+        return (
+          <path
+            class="shamisen-string"
+            data-string={string.id}
+            data-y={y}
+            data-x0={X_START}
+            data-x1={X_END}
+            d={`M${X_START} ${y} Q600 ${y} ${X_END} ${y}`}
+            stroke-width={string.width}
+          />
+        );
+      })
+    }
+  </g>
+</svg>

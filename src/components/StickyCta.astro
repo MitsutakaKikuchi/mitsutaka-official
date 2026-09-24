@@ -21,19 +21,19 @@ const t = useTranslations(lang);
   aria-hidden="true"
 >
   <div
-    class="mx-3 mb-3 flex items-stretch gap-2 border border-line bg-paper/92 p-2 shadow-[0_10px_30px_rgb(26_26_26/0.14)] backdrop-blur"
+    class="theme-night mx-3 mb-3 flex items-stretch gap-2 border border-paper/10 !bg-night/85 p-2 shadow-[0_10px_30px_rgb(11_15_22/0.35)] backdrop-blur-md"
     style="margin-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));"
   >
     <a
       href={localePath(lang, 'schedule/')}
-      class="flex flex-1 items-center justify-center border border-line px-3 py-3 text-xs tracking-[0.25em] text-ink/85 transition-colors active:bg-line/40"
+      class="flex min-h-11 flex-1 items-center justify-center border border-paper/20 px-3 py-3 text-xs tracking-[0.25em] text-paper/85 transition-colors active:bg-paper/10"
       tabindex="-1"
     >
       {t('sticky.schedule')}
     </a>
     <a
       href={`${localePath(lang, 'contact/')}#booking`}
-      class="btn-cta relative flex flex-[1.4] items-center justify-center overflow-hidden bg-accent px-3 py-3 text-xs tracking-[0.25em] text-white"
+      class="btn-cta btn-light relative flex min-h-11 flex-[1.4] items-center justify-center overflow-hidden px-3 py-3 text-xs tracking-[0.25em]"
       tabindex="-1"
     >
       <span class="relative z-10">{t('sticky.cta')}</span>

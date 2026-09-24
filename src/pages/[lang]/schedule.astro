@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import SectionHeading from '../../components/SectionHeading.astro';
+import PageHero from '../../components/PageHero.astro';
 import EventCard from '../../components/EventCard.astro';
 import { localePath } from '../../i18n/utils';
 import { useTranslations, type Lang } from '../../i18n/ui';
@@ -51,22 +51,50 @@ const pageTitle = lang === 'ja' ? '出演スケジュール' : 'Schedule';
 <Base lang={lang} subpath="schedule/" title={pageTitle} description={t('meta.schedule')}>
   <script type="application/ld+json" set:html={JSON.stringify(eventsJsonLd)} />
 
-  <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
-    <SectionHeading en="Schedule" label={pageTitle} />
+  <PageHero lang={lang} en="Schedule" label={pageTitle} index={2} />
 
-    <section>
-      <h2 class="mb-2 text-sm tracking-[0.3em] uppercase text-accent" data-reveal>
+  <!-- 区分ジャンプ: 今後 / 過去 の件数を示すタブ風リンク（スクロール位置で固定） -->
+  <nav
+    class="sticky top-16 z-30 border-b border-line bg-paper/90 backdrop-blur"
+    aria-label={lang === 'ja' ? '出演の区分' : 'Schedule sections'}
+  >
+    <div class="mx-auto flex max-w-6xl gap-6 px-4 sm:px-6">
+      <a href="#upcoming" class="hud flex min-h-12 items-center gap-2 text-accent transition-colors hover:text-ink">
+        {t('schedule.upcoming')}
+        <span class="rounded-full bg-accent px-1.5 text-[9px] leading-4 text-white">{upcomingEvents.length}</span>
+      </a>
+      {
+        pastEvents.length > 0 && (
+          <a href="#past" class="hud flex min-h-12 items-center gap-2 text-muted transition-colors hover:text-ink">
+            {t('schedule.past')}
+            <span class="rounded-full bg-line px-1.5 text-[9px] leading-4 text-ink/70">{pastEvents.length}</span>
+          </a>
+        )
+      }
+    </div>
+  </nav>
+
+  <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
+    <section id="upcoming" class="scroll-mt-32">
+      <h2 class="hud mb-4 text-accent" data-reveal>
         {t('schedule.upcoming')}
       </h2>
       {
         upcomingEvents.length > 0 ? (
-          upcomingEvents.map((event) => <EventCard event={event} lang={lang} />)
+          <div class="border-t border-line">
+            {upcomingEvents.map((event, index) => (
+              <EventCard event={event} lang={lang} next={index === 0} />
+            ))}
+          </div>
         ) : (
-          <div class="space-y-3 py-6" data-reveal>
-            <p class="text-muted">{t('home.noUpcoming')}</p>
+          <div
+            class="flex flex-col items-start gap-4 border border-dashed border-accent/30 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"
+            data-reveal
+          >
+            <p class="text-ink/75">{t('home.noUpcoming')}</p>
             <a
               href={`${localePath(lang, 'contact/')}#booking`}
-              class="inline-block border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+              class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent transition-opacity hover:opacity-70"
             >
               {t('home.noUpcomingCta')}
             </a>
@@ -77,15 +105,17 @@ const pageTitle = lang === 'ja' ? '出演スケジュール' : 'Schedule';
 
     {
       pastEvents.length > 0 && (
-        <section class="mt-section" data-past-section>
-          <h2 class="mb-2 text-sm tracking-[0.3em] uppercase text-muted" data-reveal>
+        <section id="past" class="mt-section scroll-mt-32" data-past-section>
+          <h2 class="hud mb-4 text-muted" data-reveal>
             {t('schedule.past')}
           </h2>
+          <div class="border-t border-line">
           {pastEvents.map((event, index) => (
             <div data-past-item class:list={[index >= PAST_VISIBLE_COUNT && 'hidden']}>
               <EventCard event={event} lang={lang} past />
             </div>
           ))}
+          </div>
           {pastEvents.length > PAST_VISIBLE_COUNT && (
             <div class="mt-8 text-center" data-reveal>
               <button

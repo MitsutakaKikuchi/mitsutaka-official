@@ -1,6 +1,8 @@
 ---
 import { Image } from 'astro:assets';
 import performancePhoto from '../assets/photos/performance.jpg';
+import Strings from './Strings.astro';
+import StringsHud from './StringsHud.astro';
 import { SITE } from '../config/site';
 import { localePath } from '../i18n/utils';
 import { useTranslations, type Lang } from '../i18n/ui';
@@ -21,18 +23,24 @@ const photoAlt =
     : 'KIKUCHI Mitsutaka performing nagauta shamisen on stage';
 ---
 
+<!--
+  ヒーロー = 夜の舞台。
+  暗転した舞台に、三味線の三本の弦が光の線として走る（触れると鳴る）。
+  固定ヘッダーの下に潜り込むため pt-16 で内容を下げ、高さは 100svh。
+-->
 <section
   id="hero"
-  class="relative flex min-h-[calc(100svh-4rem)] items-center justify-center overflow-hidden"
+  class="theme-night night-sky relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-16"
+  data-theme="night"
+  data-strings-host
 >
-  <!-- WebGL パーティクル（墨を流したような藍の粒子・マウス／タッチ反応。reduced-motion 時は起動しない） -->
+  <!-- WebGL パーティクル（舞台の塵が照明に浮かぶように。reduced-motion 時は起動しない） -->
   <canvas
     id="hero-canvas"
     class="pointer-events-none absolute inset-0 h-full w-full"
     aria-hidden="true"></canvas>
 
-  <!-- 円相（禅画の一円相）をモチーフにした SVG ラインドローイング。
-       ページ表示時に筆で一筆書きされるように現れ、描き終えると静かに「呼吸」する。 -->
+  <!-- 一円相: 筆で一筆書きされ、描き終えると静かに呼吸する -->
   <svg
     class="pointer-events-none absolute inset-0 h-full w-full"
     viewBox="0 0 1200 800"
@@ -46,78 +54,70 @@ const photoAlt =
       cy="400"
       r="300"
       fill="none"
-      stroke="#1b3a5b"
-      stroke-opacity="0.16"
-      stroke-width="2"
+      stroke="#f7f5f0"
+      stroke-opacity="0.09"
+      stroke-width="1.5"
       stroke-linecap="round"></circle>
-    <!-- 界線（けいせん）: 一本の細い斜線を筆で引く -->
-    <line
-      data-draw
-      x1="150"
-      y1="700"
-      x2="1050"
-      y2="60"
-      stroke="#1a1a1a"
-      stroke-opacity="0.06"
-      stroke-width="1"></line>
   </svg>
 
-  <!-- タップ／クリック位置に朱の落款が捺されるように波紋が広がる（JS: initSealRipple） -->
+  <!-- 光の三本弦（一の糸・二の糸・三の糸）。ポインタで横切る／タップすると弾かれる -->
+  <Strings angle={-22} baseY={610} gap={22} intro />
+
+  <!-- タップ位置に朱の落款が捺される波紋 -->
   <div id="hero-ripples" class="pointer-events-none absolute inset-0" aria-hidden="true"></div>
 
-  <!-- pb はスクロールインジケーター（absolute bottom）との重なりを防ぐ余白 -->
-  <!-- hero-fade: スクロール退場時にフェード＋上昇する CSS スクロール駆動演出 -->
   <div
-    class="hero-fade relative mx-auto grid w-full max-w-6xl items-center justify-items-center gap-10 px-4 pt-8 pb-24 sm:px-6 sm:gap-12 sm:pt-10 sm:pb-32 md:grid-cols-[1fr_auto]"
+    class="hero-fade relative mx-auto grid w-full max-w-6xl items-center justify-items-center gap-10 px-4 pt-8 pb-28 sm:px-6 sm:gap-12 sm:pt-10 sm:pb-32 md:grid-cols-[1fr_auto]"
   >
     {
       lang === 'ja' ? (
         <div class="flex flex-col items-center gap-7 sm:gap-8">
           {/* 縦書き: 右のキャッチコピー → 左の名前 の順に読む */}
           <div class="flex flex-row-reverse items-start justify-center gap-7 sm:gap-12">
-            <h1 class="vertical-text max-h-[min(34rem,calc(100svh-20rem))] font-serif text-lead leading-loose tracking-[0.42em] text-ink/80">
+            <h1 class="vertical-text max-h-[min(34rem,calc(100svh-20rem))] font-serif text-lead leading-loose tracking-[0.42em] text-paper/80">
               {catchChars.map((char) => (
                 <span class="k-char">{char}</span>
               ))}
               <span class="sr-only">{SITE.artistNameJa}</span>
             </h1>
             <div class="flex flex-row-reverse items-start gap-4 sm:gap-5" data-reveal>
-              <p class="vertical-text text-xs tracking-[0.5em] text-accent sm:text-sm">
+              <p class="vertical-text text-xs tracking-[0.5em] text-glow sm:text-sm">
                 {t('hero.sub')}
               </p>
               <p
-                class="vertical-text font-display text-display tracking-[0.3em]"
+                class="vertical-text font-display text-display tracking-[0.3em] text-paper [text-shadow:0_0_40px_rgb(143_179_224/0.25)]"
                 aria-hidden="true"
               >
                 {SITE.artistNameJa}
               </p>
             </div>
           </div>
-          <p class="text-[10px] tracking-[0.5em] text-muted" data-reveal>
+          <p class="hud text-paper/50" data-reveal>
             {SITE.artistNameDisplay}
           </p>
-          <div class="hero-cta flex w-full flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-8" data-reveal>
+          <div
+            class="hero-cta flex w-full flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-8"
+            data-reveal
+          >
             <a
               href={`${localePath(lang, 'contact/')}#booking`}
-              class="btn-cta btn-ink bg-accent hover:bg-accent-dark w-full max-w-xs px-8 py-3.5 text-center text-sm tracking-[0.3em] text-white sm:w-auto"
+              class="btn-cta btn-light w-full max-w-xs px-8 py-3.5 text-center text-sm tracking-[0.3em] sm:w-auto"
               data-magnetic
             >
               {t('hero.ctaPrimary')}
             </a>
             <a
               href={localePath(lang, 'schedule/')}
-              class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
+              class="link-night link-arrow pb-1 text-sm tracking-[0.2em]"
             >
-              {t('hero.ctaSecondary')} →
+              {t('hero.ctaSecondary')} <span class="arrow" aria-hidden="true">→</span>
             </a>
           </div>
         </div>
       ) : (
         <div class="flex w-full flex-col gap-6">
-          {/* 単語ごとに inline-block + whitespace-nowrap で包み、単語間は実スペースで分かち書き。
-              これにより 1 文字ずつのアニメ（.k-char）を保ちつつ、語の途中で改行されず
-              スペースも潰れない（inline-block の連続で空白が消える問題を回避）。 */}
-          <h1 class="font-serif text-headline tracking-[0.1em]">
+          {/* 単語ごとに inline-block + whitespace-nowrap で包み、単語間は実スペースで分かち書き */}
+          <h1 class="font-serif text-headline tracking-[0.1em] text-paper">
             {t('hero.catchcopy')
               .split(' ')
               .map((word, wordIndex) => (
@@ -133,25 +133,28 @@ const photoAlt =
             <span class="sr-only">{SITE.artistNameEn}</span>
           </h1>
           <div class="flex flex-col gap-2" data-reveal>
-            <p class="text-xs tracking-[0.35em] text-accent">{t('hero.sub')}</p>
+            <p class="hud text-glow">{t('hero.sub')}</p>
             <p class="font-display text-title tracking-[0.15em]" aria-hidden="true">
               {SITE.artistNameDisplay}
             </p>
-            <p class="font-serif text-base tracking-[0.5em] text-muted">{SITE.artistNameJa}</p>
+            <p class="font-serif text-base tracking-[0.5em] text-paper/55">{SITE.artistNameJa}</p>
           </div>
-          <div class="hero-cta mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8" data-reveal>
+          <div
+            class="hero-cta mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8"
+            data-reveal
+          >
             <a
               href={`${localePath(lang, 'contact/')}#booking`}
-              class="btn-cta btn-ink bg-accent hover:bg-accent-dark w-full max-w-xs px-8 py-3.5 text-center text-sm tracking-[0.25em] text-white sm:w-auto"
+              class="btn-cta btn-light w-full max-w-xs px-8 py-3.5 text-center text-sm tracking-[0.25em] sm:w-auto"
               data-magnetic
             >
               {t('hero.ctaPrimary')}
             </a>
             <a
               href={localePath(lang, 'schedule/')}
-              class="self-start border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity sm:self-auto"
+              class="link-night link-arrow self-start pb-1 text-sm tracking-[0.2em] sm:self-auto"
             >
-              {t('hero.ctaSecondary')} →
+              {t('hero.ctaSecondary')} <span class="arrow" aria-hidden="true">→</span>
             </a>
           </div>
         </div>
@@ -159,17 +162,11 @@ const photoAlt =
     }
 
     <!--
-      演奏写真の額装:
-      - ずらした罫線（額の影のような藍のオフセットフレーム）
-      - マスク演出 + ズームリビール（data-zoom）+ 緩やかなパララックス
-      - スマホでは端末の傾きに応じて額縁が僅かに揺れる（data-tilt / JS: initTilt）
+      演奏写真: 四隅のブラケット（ファインダー）で額装する近未来の「額」。
+      マスク + ズームリビール + パララックス、スマホでは傾きで僅かに揺れる。
     -->
-    <figure class="relative mr-4 mb-4" data-reveal data-tilt>
-      <div
-        class="absolute inset-0 translate-x-4 translate-y-4 border border-accent/40"
-        aria-hidden="true"
-      >
-      </div>
+    <figure class="relative m-3" data-reveal data-tilt>
+      <span class="hud-corners text-glow/70" aria-hidden="true"></span>
       <div class="relative overflow-hidden" data-mask-reveal>
         <div data-parallax="0.05">
           <Image
@@ -177,21 +174,40 @@ const photoAlt =
             alt={photoAlt}
             widths={[420, 800]}
             sizes="(min-width: 768px) 24rem, 80vw"
-            class="aspect-[2/3] h-[40svh] w-auto object-cover sm:h-[44svh] md:h-[64svh]"
+            class="aspect-[2/3] h-[40svh] w-auto object-cover sm:h-[44svh] md:h-[62svh]"
             loading="eager"
             fetchpriority="high"
             data-zoom
           />
         </div>
+        <!-- 舞台照明の余韻: 写真の下端を夜に溶かす -->
+        <span
+          class="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-night/70 to-transparent"
+          aria-hidden="true"></span>
       </div>
+      <figcaption class="hud mt-3 flex justify-between gap-6 text-paper/45">
+        <span>Fig. 01</span>
+        <span>{lang === 'ja' ? '長唄三味線' : 'Nagauta shamisen'}</span>
+      </figcaption>
     </figure>
   </div>
 
-  <a
-    href="#content"
-    class="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-muted hover:text-accent transition-colors sm:bottom-6"
+  <!-- 下部 HUD: 弦インジケーター・音のトグル／スクロール誘導／所在地 -->
+  <div
+    class="absolute inset-x-0 bottom-0 mx-auto flex max-w-6xl items-end justify-between gap-4 px-4 pb-5 sm:px-6 sm:pb-6"
   >
-    <span class="text-[10px] tracking-[0.3em] uppercase">{t('hero.scroll')}</span>
-    <span class="scroll-hint-line block h-8 w-px bg-current sm:h-10"></span>
-  </a>
+    <StringsHud lang={lang} />
+    <a
+      href="#about"
+      class="absolute bottom-5 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-paper/50 transition-colors hover:text-paper sm:bottom-6 sm:flex"
+    >
+      <span class="hud">{t('hero.scroll')}</span>
+      <span class="scroll-hint-line block h-8 w-px bg-current sm:h-10"></span>
+    </a>
+    <p class="hud hidden text-right text-paper/40 md:block">
+      Tokyo<br />35.68°N 139.76°E
+    </p>
+  </div>
+
+  <span class="night-seam" aria-hidden="true"></span>
 </section>

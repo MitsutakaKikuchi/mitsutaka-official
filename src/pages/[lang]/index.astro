@@ -1,9 +1,14 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import EventCard from '../../components/EventCard.astro';
+import Strings from '../../components/Strings.astro';
+import concertPhoto from '../../assets/photos/concert-ensemble.jpg';
+import workshopPhoto from '../../assets/photos/workshop.jpg';
+import rehearsalPhoto from '../../assets/photos/rehearsal.jpg';
 import { localePath } from '../../i18n/utils';
 import { useTranslations, type Lang } from '../../i18n/ui';
 
@@ -20,78 +25,212 @@ const upcomingEvents = (await getCollection('schedule'))
   .filter((event) => event.data.date >= now)
   .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
   .slice(0, HOME_EVENT_COUNT);
+
+// 活動の三本柱（プロフィール本文の事実に基づく要約）
+const pillars = [
+  { en: 'Perform', title: t('home.pillar1Title'), body: t('home.pillar1Body') },
+  { en: 'Teach', title: t('home.pillar2Title'), body: t('home.pillar2Body') },
+  { en: 'Study', title: t('home.pillar3Title'), body: t('home.pillar3Body') },
+];
+
+// ギャラリーの抜粋（全体は Media ページ）
+const galleryPhotos = [
+  {
+    src: concertPhoto,
+    caption: lang === 'ja' ? '共演ステージ' : 'Collaborations',
+    alt:
+      lang === 'ja'
+        ? '共演者と並んで舞台で三味線を演奏する菊池光峰'
+        : 'KIKUCHI Mitsutaka performing shamisen on stage alongside fellow musicians',
+  },
+  {
+    src: workshopPhoto,
+    caption: lang === 'ja' ? 'ワークショップ' : 'Workshops',
+    alt:
+      lang === 'ja'
+        ? 'ワークショップで参加者に三味線の演奏を教える菊池光峰'
+        : 'KIKUCHI Mitsutaka teaching shamisen to participants at a workshop',
+  },
+  {
+    src: rehearsalPhoto,
+    caption: lang === 'ja' ? 'レコーディング' : 'Recording',
+    alt:
+      lang === 'ja'
+        ? 'レコーディングスタジオで三味線を演奏する菊池光峰'
+        : 'KIKUCHI Mitsutaka playing shamisen during a recording session',
+  },
+];
+
+const bookingTopics =
+  lang === 'ja'
+    ? ['コンサート', 'フェスティバル', '式典', 'メディア出演', 'レクチャー']
+    : ['Concerts', 'Festivals', 'Ceremonies', 'Media', 'Lectures'];
 ---
 
 <Base lang={lang}>
   <Hero lang={lang} />
 
-  <div id="content">
-    <!-- プロフィール導入 -->
-    <section class="mx-auto max-w-6xl px-4 py-section sm:px-6">
-      <SectionHeading en="About" label={t('home.aboutTitle')} />
-      <div class="grid gap-10 md:grid-cols-2 md:items-center" data-reveal>
-        <p class="font-serif text-lead tracking-wider">
-          {t('home.aboutLead')}
-        </p>
-        <div class="flex md:justify-end">
-          <a
-            href={localePath(lang, 'about/')}
-            class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
-          >
-            {t('home.aboutMore')} →
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- 直近の公演 -->
-    <section class="border-y border-line bg-white/50">
-      <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
-        <SectionHeading en="Schedule" label={t('home.scheduleTitle')} />
+  <!-- 01 プロフィール（昼の和紙） -->
+  <section id="about" class="mx-auto max-w-6xl scroll-mt-16 px-4 py-section sm:px-6">
+    <SectionHeading
+      en="About"
+      label={t('home.aboutTitle')}
+      index={1}
+      moreHref={localePath(lang, 'about/')}
+      moreLabel={t('home.aboutMore')}
+    />
+    <div class="grid gap-12 md:grid-cols-[1.1fr_1fr] md:gap-16">
+      <p class="font-serif text-lead tracking-wider" data-reveal>
+        {t('home.aboutLead')}
+      </p>
+      <ol class="grid gap-px self-start border border-line bg-line" data-reveal>
         {
-          upcomingEvents.length > 0 ? (
-            upcomingEvents.map((event) => <EventCard event={event} lang={lang} />)
-          ) : (
-            <div class="space-y-3" data-reveal>
-              <p class="text-muted">{t('home.noUpcoming')}</p>
-              <a
-                href={`${localePath(lang, 'contact/')}#booking`}
-                class="inline-block border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
-              >
-                {t('home.noUpcomingCta')}
-              </a>
-            </div>
-          )
+          pillars.map((pillar, index) => (
+            <li class="grid grid-cols-[3rem_1fr] gap-4 bg-paper p-5 transition-colors hover:bg-white sm:p-6">
+              <span class="hud pt-1 text-vermilion">{String(index + 1).padStart(2, '0')}</span>
+              <div>
+                <p class="flex items-baseline gap-3">
+                  <span class="font-serif text-lg tracking-[0.15em]">{pillar.title}</span>
+                  {lang === 'ja' && <span class="hud text-muted">{pillar.en}</span>}
+                </p>
+                <p class="mt-1.5 text-sm leading-relaxed text-ink/75">{pillar.body}</p>
+              </div>
+            </li>
+          ))
         }
-        <div class="mt-10" data-reveal>
-          <a
-            href={localePath(lang, 'schedule/')}
-            class="border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent hover:opacity-70 transition-opacity"
-          >
-            {t('home.scheduleMore')} →
-          </a>
-        </div>
-      </div>
-    </section>
+      </ol>
+    </div>
+    <a
+      href={localePath(lang, 'about/')}
+      class="link-arrow mt-10 inline-block border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent transition-opacity hover:opacity-70 sm:hidden"
+    >
+      {t('home.aboutMore')} <span class="arrow" aria-hidden="true">→</span>
+    </a>
+  </section>
 
-    <!-- 出演依頼 CTA（仕様書③: 全ページから Booking へ） -->
-    <section class="bg-ink text-paper">
-      <div class="mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 py-section text-center sm:px-6">
-        <h2 class="font-display text-title tracking-[0.2em]" data-reveal>
-          {t('home.bookingTitle')}
-        </h2>
-        <p class="max-w-xl leading-relaxed text-paper/80" data-reveal>
-          {t('home.bookingLead')}
-        </p>
-        <a
-          href={`${localePath(lang, 'contact/')}#booking`}
-          class="btn-cta bg-accent hover:bg-accent-dark px-10 py-4 text-sm tracking-[0.25em] text-white"
-          data-reveal
-          data-magnetic
-        >
-          {t('home.bookingCta')}
-        </a>
-      </div>
-    </section>
-  </div>
+  <!-- 02 出演情報 -->
+  <section class="border-y border-line bg-white/55">
+    <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
+      <SectionHeading
+        en="Schedule"
+        label={t('home.scheduleTitle')}
+        index={2}
+        moreHref={localePath(lang, 'schedule/')}
+        moreLabel={t('home.scheduleMore')}
+      />
+      {
+        upcomingEvents.length > 0 ? (
+          <div class="border-t border-line">
+            {upcomingEvents.map((event, index) => (
+              <EventCard event={event} lang={lang} next={index === 0} />
+            ))}
+          </div>
+        ) : (
+          <div
+            class="flex flex-col items-start gap-4 border border-dashed border-accent/30 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"
+            data-reveal
+          >
+            <div class="flex items-center gap-4">
+              <span class="hud text-muted">— / —</span>
+              <p class="text-ink/75">{t('home.noUpcoming')}</p>
+            </div>
+            <a
+              href={`${localePath(lang, 'contact/')}#booking`}
+              class="link-arrow border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent transition-opacity hover:opacity-70"
+            >
+              {t('home.noUpcomingCta').replace(' →', '').replace('→', '')}
+              <span class="arrow" aria-hidden="true">→</span>
+            </a>
+          </div>
+        )
+      }
+      <a
+        href={localePath(lang, 'schedule/')}
+        class="link-arrow mt-10 inline-block border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent transition-opacity hover:opacity-70 sm:hidden"
+      >
+        {t('home.scheduleMore')} <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 03 ギャラリー抜粋 -->
+  <section class="mx-auto max-w-6xl px-4 py-section sm:px-6">
+    <SectionHeading
+      en="Gallery"
+      label={t('home.galleryTitle')}
+      index={3}
+      moreHref={localePath(lang, 'media/')}
+      moreLabel={t('home.galleryMore')}
+    />
+    <!-- モバイルは横スクロールのカルーセル（スナップ）、PC は3列 -->
+    <ul
+      class="-mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0"
+      aria-label={t('home.galleryTitle')}
+    >
+      {
+        galleryPhotos.map((photo, index) => (
+          <li class="w-[78%] shrink-0 snap-start sm:w-auto">
+            <a href={localePath(lang, 'media/')} class="group block" data-mask-reveal>
+              <span class="relative block overflow-hidden">
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  widths={[400, 720]}
+                  sizes="(min-width: 640px) 33vw, 78vw"
+                  class="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                />
+                <span class="shot-meta hud absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-night/80 to-transparent px-4 pt-10 pb-3 text-paper">
+                  <span>Fig. {String(index + 2).padStart(2, '0')}</span>
+                  <span>{photo.caption}</span>
+                </span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <a
+      href={localePath(lang, 'media/')}
+      class="link-arrow mt-8 inline-block border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent transition-opacity hover:opacity-70 sm:hidden"
+    >
+      {t('home.galleryMore')} <span class="arrow" aria-hidden="true">→</span>
+    </a>
+  </section>
+
+  <!-- 出演依頼 CTA = 再び夜の舞台へ（フッターへと続く） -->
+  <section
+    class="theme-night night-sky relative overflow-hidden"
+    data-theme="night"
+    data-strings-host
+  >
+    <Strings angle={4} baseY={250} gap={16} viewHeight={500} />
+    <div class="relative mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 py-section text-center sm:px-6">
+      <p class="hud flex items-center gap-3 text-glow" data-reveal>
+        <span class="text-vermilion">04</span>
+        <span>Booking</span>
+      </p>
+      <h2 class="font-display text-title tracking-[0.2em]" data-reveal>
+        {t('home.bookingTitle')}
+      </h2>
+      <p class="max-w-xl leading-relaxed text-paper/75" data-reveal>
+        {t('home.bookingLead')}
+      </p>
+      <ul class="flex flex-wrap justify-center gap-2" data-reveal>
+        {
+          bookingTopics.map((topic) => (
+            <li class="hud border border-paper/15 px-3 py-1.5 text-paper/65">{topic}</li>
+          ))
+        }
+      </ul>
+      <a
+        href={`${localePath(lang, 'contact/')}#booking`}
+        class="btn-cta btn-light relative overflow-hidden px-10 py-4 text-sm tracking-[0.25em]"
+        data-reveal
+        data-magnetic
+      >
+        {t('home.bookingCta')}
+      </a>
+    </div>
+  </section>
 </Base>
