@@ -1,4 +1,4 @@
-export const LANGUAGES = {
+﻿export const LANGUAGES = {
   ja: '日本語',
   en: 'English',
 } as const;
@@ -110,12 +110,6 @@ export const ui = {
     'cookie.more': '詳しく見る',
     'loading.label': '読み込み中',
     'notfound.contact': 'お問い合わせ',
-    'hero.strings': '弦に触れる',
-    'hero.sound': '音',
-    'hero.soundOn': '入',
-    'hero.soundOff': '切',
-    'hero.soundLabel': '弦の音を鳴らす',
-    'hero.tuning': '本調子',
     'home.pillarsTitle': '活動',
     'home.pillar1Title': '演奏',
     'home.pillar1Body': '長唄の演奏会・舞踊会をはじめ、国内外の舞台やイベントに出演。',
@@ -234,12 +228,6 @@ export const ui = {
     'cookie.more': 'Learn more',
     'loading.label': 'Loading',
     'notfound.contact': 'Contact',
-    'hero.strings': 'Touch the strings',
-    'hero.sound': 'Sound',
-    'hero.soundOn': 'On',
-    'hero.soundOff': 'Off',
-    'hero.soundLabel': 'Play string sounds',
-    'hero.tuning': 'Honchōshi',
     'home.pillarsTitle': 'Activities',
     'home.pillar1Title': 'Performance',
     'home.pillar1Body': 'Nagauta concerts, dance recitals, and stages and events in Japan and abroad.',

@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+﻿@import 'tailwindcss';
 
 @theme {
   /*
@@ -1181,7 +1181,6 @@ html.js img[data-slide]:not(.is-loaded) {
 
 @media (prefers-reduced-motion: reduce) {
   .shamisen-string,
-  .string-dot,
   .shot-meta {
     transition: none;
   }

@@ -1,10 +1,7 @@
-/**
+﻿/**
  * 光の三本弦（components/Strings.astro）のインタラクション。
  * - ポインタが弦を横切ると、その位置・速さに応じて弦が弾かれ、減衰振動しながら光る
  * - タップ／クリックでも近くの弦が弾かれる（スクロール中のタッチ端末向け）
- * - [data-string-dot] の HUD インジケーターが対応する弦と同期して灯る
- * - [data-sound-toggle] で音を ON にすると、Web Audio（Karplus-Strong 法）で
- *   本調子に調弦した三味線風の撥音を合成して鳴らす（既定は OFF・ユーザー操作でのみ有効化）
  * すべて prefers-reduced-motion を尊重し、無効時は何もしない（静止した光の線のまま）。
  */
 import gsap from 'gsap';
@@ -32,76 +29,9 @@ const MAX_AMP = 22;
 const TAP_RADIUS = 36; // タップで弾ける弦との距離（viewBox 単位）
 const VISUAL_FREQ: Record<string, number> = { '1': 5.5, '2': 7, '3': 8.5 };
 
-/* 本調子（一の糸 B2 / 二の糸 E3 / 三の糸 B3）。一と三がオクターブ、二が四度上 */
-const PITCH_HZ: Record<string, number> = { '1': 123.47, '2': 164.81, '3': 246.94 };
-
 let states: StringState[] = [];
 let tickerBound = false;
 let cleanups: (() => void)[] = [];
-
-/* ---------- 音（Karplus-Strong 撥弦合成）---------- */
-let audioCtx: AudioContext | null = null;
-let soundOn = false;
-const bufferCache = new Map<string, AudioBuffer>();
-
-function getPluckBuffer(ctx: AudioContext, id: string): AudioBuffer {
-  const cached = bufferCache.get(id);
-  if (cached) return cached;
-  const freq = PITCH_HZ[id] ?? 164.81;
-  const duration = 2.2;
-  const length = Math.floor(ctx.sampleRate * duration);
-  const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  const period = Math.max(2, Math.round(ctx.sampleRate / freq));
-  const ring = new Float32Array(period);
-  // 撥で叩く鋭いアタック: ノイズを明るめに
-  for (let i = 0; i < period; i++) ring[i] = Math.random() * 2 - 1;
-  let idx = 0;
-  const decay = 0.996;
-  for (let i = 0; i < length; i++) {
-    const next = (idx + 1) % period;
-    const value = ring[idx] ?? 0;
-    // 平均化（ローパス）+ 減衰
-    ring[idx] = decay * 0.5 * (value + (ring[next] ?? 0));
-    // 「さわり」風の僅かなビリつき（ソフトクリップ）
-    data[i] = Math.tanh(value * 1.8) * 0.55;
-    idx = next;
-  }
-  bufferCache.set(id, buffer);
-  return buffer;
-}
-
-function playPluck(id: string, strength: number): void {
-  if (!soundOn || !audioCtx) return;
-  const source = audioCtx.createBufferSource();
-  source.buffer = getPluckBuffer(audioCtx, id);
-  const gain = audioCtx.createGain();
-  gain.gain.value = Math.min(0.5, 0.15 + strength * 0.02);
-  source.connect(gain).connect(audioCtx.destination);
-  source.start();
-}
-
-function setSound(on: boolean): void {
-  soundOn = on;
-  if (on) {
-    if (!audioCtx) {
-      const Ctor =
-        window.AudioContext ??
-        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (!Ctor) {
-        soundOn = false;
-        return;
-      }
-      audioCtx = new Ctor();
-    }
-    void audioCtx.resume();
-  }
-  document.querySelectorAll<HTMLButtonElement>('[data-sound-toggle]').forEach((button) => {
-    button.setAttribute('aria-pressed', String(soundOn));
-    const label = button.querySelector<HTMLElement>('[data-sound-label]');
-    if (label) label.textContent = soundOn ? button.dataset.labelOn ?? 'ON' : button.dataset.labelOff ?? 'OFF';
-  });
-}
 
 /* ---------- 弦の振動 ---------- */
 function drawString(state: StringState, displacement: number): void {
@@ -112,15 +42,8 @@ function drawString(state: StringState, displacement: number): void {
   );
 }
 
-function lightDot(host: HTMLElement, id: string): void {
-  host.querySelectorAll<HTMLElement>(`[data-string-dot][data-dot="${id}"]`).forEach((dot) => {
-    dot.classList.add('is-lit');
-    window.setTimeout(() => dot.classList.remove('is-lit'), 180);
-  });
-}
-
 function pluck(state: StringState, x: number, amp: number): void {
-  // 振動中の弦を弱く撫でただけでは弾き直さない（連続発火で音が濁るのを防ぐ）
+  // 振動中の弦を弱く撫でただけでは弾き直さない
   const now = performance.now();
   if (state.active && now - state.t0 < 90) return;
   state.px = gsap.utils.clamp(state.x0 + 200, state.x1 - 200, x);
@@ -129,8 +52,6 @@ function pluck(state: StringState, x: number, amp: number): void {
   state.active = true;
   state.el.classList.add('is-plucked');
   window.setTimeout(() => state.el.classList.remove('is-plucked'), 160);
-  lightDot(state.host, state.id);
-  playPluck(state.id, Math.abs(amp));
 }
 
 function tick(): void {
@@ -159,14 +80,6 @@ export function initStrings(): void {
   cleanups.forEach((fn) => fn());
   cleanups = [];
   states = [];
-
-  // 音のトグルは reduced-motion でも使えるようにする（視覚演出とは独立）
-  document.querySelectorAll<HTMLButtonElement>('[data-sound-toggle]').forEach((button) => {
-    const onClick = () => setSound(!soundOn);
-    button.addEventListener('click', onClick);
-    cleanups.push(() => button.removeEventListener('click', onClick));
-  });
-  setSound(soundOn);
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
