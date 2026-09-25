@@ -1,29 +1,31 @@
 ---
+/**
+ * 本文（昼の和紙）の節見出し。
+ * - 欧文ラベル: 文化譜の数字が走ってから文字に定まる「デコード」演出（未来）
+ * - 見出し本体: 筆で左から書かれていくように、墨の滲みを解きながら現れる（伝統）
+ * 演出は scripts/motion.ts（data-scramble / data-brush）。reduced-motion では静的表示。
+ */
 interface Props {
   /** 欧文の見出し（例: Schedule） */
   en: string;
   /** 表示言語での見出し（例: 公演情報） */
   label: string;
   id?: string;
-  /** 任意の索引番号（例: 1 → "01"）。縦のリズムを与える */
-  index?: number;
   /** 見出しの右側に置く補助リンク（「すべて見る」など） */
   moreHref?: string;
   moreLabel?: string;
 }
 
-const { en, label, id, index, moreHref, moreLabel } = Astro.props;
-const indexLabel = index !== undefined ? String(index).padStart(2, '0') : null;
+const { en, label, id, moreHref, moreLabel } = Astro.props;
 ---
 
 <div class="mb-12 flex flex-wrap items-end justify-between gap-x-8 gap-y-4" data-reveal id={id}>
   <div>
     <p class="hud flex items-center gap-3 text-accent">
-      {indexLabel && <span class="text-vermilion">{indexLabel}</span>}
-      {en !== label && <span>{en}</span>}
+      {en !== label && <span aria-hidden="true" data-scramble>{en}</span>}
       <span class="heading-rule h-px w-12 bg-accent/40" aria-hidden="true"></span>
     </p>
-    <h2 class="mt-3 font-display text-title tracking-[0.12em]">{label}</h2>
+    <h2 class="mt-3 font-display text-title tracking-[0.12em]" data-brush>{label}</h2>
   </div>
   {
     moreHref && moreLabel && (

@@ -6,6 +6,7 @@ import Hero from '../../components/Hero.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import EventCard from '../../components/EventCard.astro';
 import Strings from '../../components/Strings.astro';
+import Curtain from '../../components/Curtain.astro';
 import concertPhoto from '../../assets/photos/concert-ensemble.jpg';
 import workshopPhoto from '../../assets/photos/workshop.jpg';
 import rehearsalPhoto from '../../assets/photos/rehearsal.jpg';
@@ -67,15 +68,14 @@ const bookingTopics =
     : ['Concerts', 'Festivals', 'Ceremonies', 'Media', 'Lectures'];
 ---
 
-<Base lang={lang}>
+<Base lang={lang} intro>
   <Hero lang={lang} />
 
-  <!-- 01 プロフィール（昼の和紙） -->
+  <!-- プロフィール（昼の和紙） -->
   <section id="about" class="mx-auto max-w-6xl scroll-mt-16 px-4 py-section sm:px-6">
     <SectionHeading
       en="About"
       label={t('home.aboutTitle')}
-      index={1}
       moreHref={localePath(lang, 'about/')}
       moreLabel={t('home.aboutMore')}
     />
@@ -83,11 +83,12 @@ const bookingTopics =
       <p class="font-serif text-lead tracking-wider" data-reveal>
         {t('home.aboutLead')}
       </p>
-      <ol class="grid gap-px self-start border border-line bg-line" data-reveal>
+      <ul class="grid gap-px self-start border border-line bg-line" data-reveal>
         {
-          pillars.map((pillar, index) => (
-            <li class="grid grid-cols-[3rem_1fr] gap-4 bg-paper p-5 transition-colors hover:bg-white sm:p-6">
-              <span class="hud pt-1 text-vermilion">{String(index + 1).padStart(2, '0')}</span>
+          pillars.map((pillar) => (
+            <li class="grid grid-cols-[auto_1fr] gap-5 bg-paper p-5 transition-colors hover:bg-white sm:p-6">
+              {/* 番号の代わりに朱の縦罫（落款の朱を細く引いた印） */}
+              <span class="mt-1.5 block h-5 w-px bg-vermilion" aria-hidden="true" />
               <div>
                 <p class="flex items-baseline gap-3">
                   <span class="font-serif text-lg tracking-[0.15em]">{pillar.title}</span>
@@ -98,7 +99,7 @@ const bookingTopics =
             </li>
           ))
         }
-      </ol>
+      </ul>
     </div>
     <a
       href={localePath(lang, 'about/')}
@@ -108,13 +109,12 @@ const bookingTopics =
     </a>
   </section>
 
-  <!-- 02 出演情報 -->
+  <!-- 出演情報 -->
   <section class="border-y border-line bg-white/55">
     <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
       <SectionHeading
         en="Schedule"
         label={t('home.scheduleTitle')}
-        index={2}
         moreHref={localePath(lang, 'schedule/')}
         moreLabel={t('home.scheduleMore')}
       />
@@ -130,10 +130,7 @@ const bookingTopics =
             class="flex flex-col items-start gap-4 border border-dashed border-accent/30 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"
             data-reveal
           >
-            <div class="flex items-center gap-4">
-              <span class="hud text-muted">— / —</span>
-              <p class="text-ink/75">{t('home.noUpcoming')}</p>
-            </div>
+            <p class="text-ink/75">{t('home.noUpcoming')}</p>
             <a
               href={`${localePath(lang, 'contact/')}#booking`}
               class="link-arrow border-b border-accent pb-1 text-sm tracking-[0.2em] text-accent transition-opacity hover:opacity-70"
@@ -153,12 +150,11 @@ const bookingTopics =
     </div>
   </section>
 
-  <!-- 03 ギャラリー抜粋 -->
+  <!-- ギャラリー抜粋 -->
   <section class="mx-auto max-w-6xl px-4 py-section sm:px-6">
     <SectionHeading
       en="Gallery"
       label={t('home.galleryTitle')}
-      index={3}
       moreHref={localePath(lang, 'media/')}
       moreLabel={t('home.galleryMore')}
     />
@@ -168,10 +164,10 @@ const bookingTopics =
       aria-label={t('home.galleryTitle')}
     >
       {
-        galleryPhotos.map((photo, index) => (
+        galleryPhotos.map((photo) => (
           <li class="w-[78%] shrink-0 snap-start sm:w-auto">
             <a href={localePath(lang, 'media/')} class="group block" data-mask-reveal>
-              <span class="relative block overflow-hidden">
+              <span class="relative block overflow-hidden" data-scan>
                 <Image
                   src={photo.src}
                   alt={photo.alt}
@@ -180,8 +176,7 @@ const bookingTopics =
                   class="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   loading="lazy"
                 />
-                <span class="shot-meta hud absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-night/80 to-transparent px-4 pt-10 pb-3 text-paper">
-                  <span>Fig. {String(index + 2).padStart(2, '0')}</span>
+                <span class="shot-meta hud absolute inset-x-0 bottom-0 flex justify-end bg-gradient-to-t from-night/80 to-transparent px-4 pt-10 pb-3 text-paper">
                   <span>{photo.caption}</span>
                 </span>
               </span>
@@ -198,19 +193,24 @@ const bookingTopics =
     </a>
   </section>
 
-  <!-- 出演依頼 CTA = 再び夜の舞台へ（フッターへと続く） -->
+  <!--
+    出演依頼 CTA = 再び夜の舞台へ（フッターへと続く）。
+    画面に入ると定式幕が引かれて開く（開演演出と呼応する「あなたの舞台の幕開き」）。
+  -->
   <section
     class="theme-night night-sky relative overflow-hidden"
     data-theme="night"
     data-strings-host
+    data-curtain-host
   >
-    <Strings angle={4} baseY={250} gap={16} viewHeight={500} />
+    <Strings angle={4} baseY={250} gap={16} viewHeight={500} noteXs={[300, 560, 820, 1080]} />
     <div class="relative mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 py-section text-center sm:px-6">
-      <p class="hud flex items-center gap-3 text-glow" data-reveal>
-        <span class="text-vermilion">04</span>
-        <span>Booking</span>
+      <p class="hud flex items-center gap-3 text-glow" data-reveal aria-hidden="true">
+        <span class="h-px w-8 bg-glow/50"></span>
+        <span data-scramble>Booking</span>
+        <span class="h-px w-8 bg-glow/50"></span>
       </p>
-      <h2 class="font-display text-title tracking-[0.2em]" data-reveal>
+      <h2 class="font-display text-title tracking-[0.2em]" data-reveal data-brush>
         {t('home.bookingTitle')}
       </h2>
       <p class="max-w-xl leading-relaxed text-paper/75" data-reveal>
@@ -232,5 +232,7 @@ const bookingTopics =
         {t('home.bookingCta')}
       </a>
     </div>
+    <!-- 定式幕（JS が「まだ画面に入っていない」ときだけ表示し、入った瞬間に引いて開く） -->
+    <Curtain class="section-curtain" data-curtain />
   </section>
 </Base>

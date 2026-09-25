@@ -1,9 +1,9 @@
 ---
 /**
  * 下層ページの冒頭「夜の舞台」帯。
- * - ページの h1（下層ページには従来 h1 が無かったため、見出し構造の改善も兼ねる）
- * - パンくず（ホーム / 現在ページ）と、ページ番号の HUD
- * - 背景に大きな欧文の透かしと、触れると鳴る光の三本弦
+ * - ページの h1（筆で書かれるように現れる）と、パンくず（UI + 構造化データ BreadcrumbList）
+ * - 欧文ラベルは文化譜の数字からデコードされる
+ * - 背景に大きな欧文の透かし（スクロールでゆっくり流れる）と、触れると鳴る光の三本弦
  * 下端の光の筋（night-seam）を境に、本文の「昼の和紙」へ切り替わる。
  */
 import Strings from './Strings.astro';
@@ -16,19 +16,32 @@ interface Props {
   en: string;
   /** 表示言語での見出し（h1） */
   label: string;
-  /** ナビゲーション上の順番（01〜04）。省略時は非表示 */
-  index?: number;
   /** 見出し下のリード文（任意） */
   lead?: string;
 }
 
-const { lang, en, label, index, lead } = Astro.props;
+const { lang, en, label, lead } = Astro.props;
 const t = useTranslations(lang);
-const NAV_TOTAL = 4;
-const indexLabel =
-  index !== undefined
-    ? `${String(index).padStart(2, '0')} / ${String(NAV_TOTAL).padStart(2, '0')}`
-    : null;
+
+// 構造化データ: パンくずリスト（検索結果に階層が表示されやすくなる）
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: t('breadcrumb.home'),
+      item: new URL(localePath(lang), Astro.site).href,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: label,
+      item: new URL(Astro.url.pathname, Astro.site).href,
+    },
+  ],
+};
 ---
 
 <section
@@ -36,15 +49,18 @@ const indexLabel =
   data-theme="night"
   data-strings-host
 >
-  <!-- 背景の欧文透かし（装飾） -->
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+
+  <!-- 背景の欧文透かし（装飾）。スクロールに合わせてゆっくり横に流れる -->
   <p
     class="pointer-events-none absolute -bottom-[0.18em] right-[-0.04em] select-none font-display text-[clamp(5rem,2rem+14vw,15rem)] leading-none tracking-[0.04em] text-paper/[0.04]"
     aria-hidden="true"
+    data-drift
   >
     {en}
   </p>
 
-  <Strings angle={-6} baseY={300} gap={14} viewHeight={400} />
+  <Strings angle={-6} baseY={300} gap={14} viewHeight={400} noteXs={[260, 520, 780, 1040]} />
 
   <div class="relative mx-auto max-w-6xl px-4 pt-12 pb-16 sm:px-6 sm:pt-16 sm:pb-20">
     <nav aria-label={lang === 'ja' ? 'パンくずリスト' : 'Breadcrumb'} class="hud text-paper/45" data-reveal>
@@ -59,16 +75,17 @@ const indexLabel =
 
     <div class="mt-10 flex flex-col gap-4 sm:mt-14" data-reveal>
       <p class="hud flex items-center gap-3 text-glow">
-        {indexLabel && <span class="text-vermilion">{indexLabel}</span>}
-        {en !== label && <span>{en}</span>}
+        {en !== label && <span aria-hidden="true" data-scramble>{en}</span>}
         <span class="heading-rule h-px w-12 bg-glow/50" aria-hidden="true"></span>
       </p>
-      <h1 class="font-display text-[clamp(2.25rem,1.6rem+3vw,3.75rem)] leading-tight tracking-[0.14em] text-paper">
+      <h1
+        class="font-display text-[clamp(2.25rem,1.6rem+3vw,3.75rem)] leading-tight tracking-[0.14em] text-paper"
+        data-brush
+      >
         {label}
       </h1>
       {lead && <p class="max-w-2xl leading-relaxed text-paper/70">{lead}</p>}
     </div>
-
   </div>
 
   <span class="night-seam" aria-hidden="true"></span>

@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import performancePhoto from '../assets/photos/performance.jpg';
 import Strings from './Strings.astro';
+import InkEnsou from './InkEnsou.astro';
 import { SITE } from '../config/site';
 import { localePath } from '../i18n/utils';
 import { useTranslations, type Lang } from '../i18n/ui';
@@ -39,28 +40,23 @@ const photoAlt =
     class="pointer-events-none absolute inset-0 h-full w-full"
     aria-hidden="true"></canvas>
 
-  <!-- 一円相: 筆で一筆書きされ、描き終えると静かに呼吸する -->
-  <svg
-    class="pointer-events-none absolute inset-0 h-full w-full"
-    viewBox="0 0 1200 800"
+  <!--
+    一円相（伝統）: 穂先の毛まで描いた筆の円相が一筆で書かれ、描き終えると墨の濃淡が静かに呼吸する。
+    その上を WebGL の光の粒子（未来）が筆跡に沿ってなぞり、スクロールすると火の粉のように舞い上がる。
+  -->
+  <InkEnsou
+    name="hero"
+    cx={420}
+    cy={400}
+    r={300}
+    seed={7}
     preserveAspectRatio="xMidYMid slice"
-    aria-hidden="true"
-  >
-    <circle
-      class="hero-ensou"
-      data-draw
-      cx="420"
-      cy="400"
-      r="300"
-      fill="none"
-      stroke="#f7f5f0"
-      stroke-opacity="0.09"
-      stroke-width="1.5"
-      stroke-linecap="round"></circle>
-  </svg>
+    class="ensou-breath absolute inset-x-0 top-0 h-[100svh] w-full text-paper opacity-[0.17]"
+    frameClass="hero-ensou-frame"
+  />
 
   <!-- 光の三本弦（一の糸・二の糸・三の糸）。ポインタで横切る／タップすると弾かれる -->
-  <Strings angle={-22} baseY={610} gap={22} intro />
+  <Strings angle={-22} baseY={610} gap={22} intro noteXs={[420, 640, 860, 1080, 1300]} />
 
   <!-- タップ位置に朱の落款が捺される波紋 -->
   <div id="hero-ripples" class="pointer-events-none absolute inset-0" aria-hidden="true"></div>
@@ -91,7 +87,7 @@ const photoAlt =
               </p>
             </div>
           </div>
-          <p class="hud text-paper/50" data-reveal>
+          <p class="hud text-paper/50" data-reveal aria-hidden="true" data-scramble>
             {SITE.artistNameDisplay}
           </p>
           <div
@@ -132,7 +128,7 @@ const photoAlt =
             <span class="sr-only">{SITE.artistNameEn}</span>
           </h1>
           <div class="flex flex-col gap-2" data-reveal>
-            <p class="hud text-glow">{t('hero.sub')}</p>
+            <p class="hud text-glow" data-scramble>{t('hero.sub')}</p>
             <p class="font-display text-title tracking-[0.15em]" aria-hidden="true">
               {SITE.artistNameDisplay}
             </p>
@@ -166,7 +162,7 @@ const photoAlt =
     -->
     <figure class="relative m-3" data-reveal data-tilt>
       <span class="hud-corners text-glow/70" aria-hidden="true"></span>
-      <div class="relative overflow-hidden" data-mask-reveal>
+      <div class="relative overflow-hidden" data-mask-reveal data-scan>
         <div data-parallax="0.05">
           <Image
             src={performancePhoto}
@@ -184,8 +180,7 @@ const photoAlt =
           class="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-night/70 to-transparent"
           aria-hidden="true"></span>
       </div>
-      <figcaption class="hud mt-3 flex justify-between gap-6 text-paper/45">
-        <span>Fig. 01</span>
+      <figcaption class="hud mt-3 flex justify-end text-paper/45">
         <span>{lang === 'ja' ? '長唄三味線' : 'Nagauta shamisen'}</span>
       </figcaption>
     </figure>

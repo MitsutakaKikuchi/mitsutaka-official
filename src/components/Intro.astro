@@ -1,0 +1,23 @@
+---
+/**
+ * 開演演出（トップページ・セッション中の初回のみ）。
+ *
+ *   0.0s  暗転した客席に定式幕
+ *   0.2s  柝（き）が打たれる ― 音の代わりに、一点の光から波紋が二重に広がる
+ *   0.6s  幕が引かれ、縦縞が片側へ畳まれていく。幕の端には光の走査線
+ *   1.5s  畳まれた幕が走査線に溶けて消え、ヒーロー（夜の舞台）が現れる
+ *
+ * 表示の可否は Base.astro の <head> 内スクリプトが描画前に判定し、<html class="intro"> を付ける。
+ * 演出は CSS のみで完結し（JS が失敗しても必ず消える）、クリック等でスキップできる（scripts/intro.ts）。
+ */
+import Curtain from './Curtain.astro';
+---
+
+<div id="intro" aria-hidden="true">
+  <Curtain class="intro-curtain" />
+  <div class="intro-cue">
+    <span class="intro-cue-line"></span>
+    <span class="intro-cue-ring"></span>
+    <span class="intro-cue-ring intro-cue-ring--late"></span>
+  </div>
+</div>
