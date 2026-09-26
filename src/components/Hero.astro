@@ -70,8 +70,12 @@ const photoAlt =
           {/* 縦書き: 右のキャッチコピー → 左の名前 の順に読む */}
           <div class="flex flex-row-reverse items-start justify-center gap-7 sm:gap-12">
             <h1 class="vertical-text max-h-[min(34rem,calc(100svh-20rem))] font-serif text-lead leading-loose tracking-[0.42em] text-paper/80">
+              {/* スマホでは読点の後で改行し「伝統を弾き、／いまを鳴らす。」の2行にする */}
               {catchChars.map((char) => (
-                <span class="k-char">{char}</span>
+                <>
+                  <span class="k-char">{char}</span>
+                  {char === '、' && <br class="sm:hidden" />}
+                </>
               ))}
               <span class="sr-only">{SITE.artistNameJa}</span>
             </h1>
