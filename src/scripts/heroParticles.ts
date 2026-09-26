@@ -7,7 +7,8 @@
  *   以後は筆跡に沿って書き順の方向へ静かに流れ続ける（筆の軌跡を光が何度もなぞる）。
  *   筆の太い所には多く・明るく、抜き（細い所）では淡く集まる
  * スクロールでヒーローが退場し始めると、円相の粒子は火の粉のように舞い上がって散る。
- * マウス／タッチからは緩やかに逃げ、タップで波紋のように散る。
+ * マウス／タッチからは緩やかに逃げ、タップで波紋のように散る（位置・強さ・波紋を毎フレーム補間し、
+ * 指を離した後も波紋を最後まで再生してから、粒子がゆっくり元の位置へ戻る）。
  * ヒーローが画面外にある間は描画ループを止める。
  */
 import {
@@ -51,6 +52,7 @@ const vertexShader = /* glsl */ `
   uniform float uTime;
   uniform vec2 uMouse;
   uniform float uForce;
+  uniform float uPresence;
   uniform float uPixelRatio;
   uniform vec2 uCenter;
   uniform float uRadius;
@@ -106,7 +108,7 @@ const vertexShader = /* glsl */ `
     float dist = length(delta);
     float reach = 1.4 + uForce * 1.3;
     float force = smoothstep(reach, 0.0, dist);
-    pos.xy += normalize(delta + 0.0001) * force * (0.45 + uForce * 0.9);
+    pos.xy += normalize(delta + 0.0001) * force * (0.45 + uForce * 0.9) * uPresence;
 
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
@@ -213,6 +215,7 @@ export function createHeroParticles(
       uTime: { value: 0 },
       uMouse: { value: { x: 100, y: 100 } },
       uForce: { value: 0 },
+      uPresence: { value: 0 },
       uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
       uColor: { value: ACCENT_COLOR },
       uEmber: { value: EMBER_COLOR },
@@ -255,40 +258,68 @@ export function createHeroParticles(
     measureGuide();
   }
 
+  /*
+   * ポインタの影響は「位置」「強さ（presence）」「波紋（ripple）」の3つを毎フレーム滑らかに補間する。
+   * 目標値へ瞬間的に切り替えると、押しのけられていた粒子が一瞬で元に戻り
+   * 「急に切り替わった」ように見えるため（特にスマホのタップ）。
+   */
+  const pointer = { x: 100, y: 100 };
+  const pointerTarget = { x: 100, y: 100 };
+  let pointerPlaced = false;
+  let presence = 0;
+  let presenceTarget = 0;
+  let ripple = 0;
+  let rippleTarget = 0;
+
   function setPointerFromClient(clientX: number, clientY: number): void {
     const rect = canvas.getBoundingClientRect();
     const ndcX = ((clientX - rect.left) / rect.width) * 2 - 1;
     const ndcY = -(((clientY - rect.top) / rect.height) * 2 - 1);
-    material.uniforms.uMouse.value.x = ndcX * halfWidth;
-    material.uniforms.uMouse.value.y = ndcY * halfHeight;
+    pointerTarget.x = ndcX * halfWidth;
+    pointerTarget.y = ndcY * halfHeight;
+    // 影響が消えている間に位置が変わった場合は、補間せずその場から効き始める
+    if (!pointerPlaced || presence < 0.02) {
+      pointer.x = pointerTarget.x;
+      pointer.y = pointerTarget.y;
+      pointerPlaced = true;
+    }
   }
 
-  // ポインタ（マウス・タッチ・ペン共通）で反発点を追従させる
+  // マウス・ペン: 動かしている間は反発点を追従させる
   function onPointerMove(event: PointerEvent): void {
+    if (event.pointerType === 'touch') {
+      // 指でなぞっている間も追従（スクロールが始まると pointercancel で終わる）
+      if (presenceTarget > 0) setPointerFromClient(event.clientX, event.clientY);
+      return;
+    }
     setPointerFromClient(event.clientX, event.clientY);
+    presenceTarget = 1;
   }
 
-  // タップ／クリックで波紋のように粒子が一時的に大きく散る
-  let ripple = 0;
-  // タッチで指を離したあと、波紋が収まってから反発点を画面外へ戻すための保留フラグ
-  let touchPendingReset = false;
+  // タップ／クリック: その位置から波紋のように粒子が広がる
   function onPointerDown(event: PointerEvent): void {
     setPointerFromClient(event.clientX, event.clientY);
-    ripple = 1;
-    touchPendingReset = false;
+    presenceTarget = 1;
+    rippleTarget = 1.8; // 補間で立ち上がるため、ピークが従来（1.0）と同程度になるよう高めに置く
   }
 
-  function onPointerUp(event: PointerEvent): void {
-    if (event.pointerType === 'touch') {
-      touchPendingReset = true;
-    }
+  // 指を離した・スクロールに移った: 波紋は最後まで再生しつつ、影響をゆっくり引いていく
+  function onPointerEnd(event: PointerEvent): void {
+    if (event.pointerType === 'touch') presenceTarget = 0;
+  }
+
+  // マウスが画面外へ出たら、ゆっくり影響を引く
+  function onPointerOut(event: PointerEvent): void {
+    if (event.pointerType !== 'touch' && !event.relatedTarget) presenceTarget = 0;
   }
 
   resize();
   window.addEventListener('resize', resize);
   window.addEventListener('pointermove', onPointerMove, { passive: true });
   window.addEventListener('pointerdown', onPointerDown, { passive: true });
-  window.addEventListener('pointerup', onPointerUp, { passive: true });
+  window.addEventListener('pointerup', onPointerEnd, { passive: true });
+  window.addEventListener('pointercancel', onPointerEnd, { passive: true });
+  window.addEventListener('pointerout', onPointerOut, { passive: true });
   // Web フォントの読み込みで見出しの位置が変わっても、円相の位置を測り直す
   void document.fonts?.ready.then(measureGuide);
   const resizeObserver =
@@ -308,15 +339,20 @@ export function createHeroParticles(
     const exit = Math.min(1, Math.max(0, -rect.top / Math.max(rect.height, 1)));
     const scatter = Math.min(1, Math.max(0, (exit - 0.02) / 0.5));
     material.uniforms.uScatter.value = scatter * scatter * (3 - 2 * scatter);
-    // 波紋はフレームごとに減衰させ、タップ直後だけ強く反応する
-    ripple *= 0.94;
+    // 波紋: 目標値は減衰させつつ、実際の値は追いかけるように変化（立ち上がりも収まりも滑らか）
+    rippleTarget *= 0.95;
+    ripple += (rippleTarget - ripple) * 0.14;
     material.uniforms.uForce.value = ripple;
-    // タッチ後、波紋が十分収まったら反発点を画面外へ戻して粒子を落ち着かせる
-    if (touchPendingReset && ripple < 0.02) {
-      material.uniforms.uMouse.value.x = 100;
-      material.uniforms.uMouse.value.y = 100;
-      touchPendingReset = false;
-    }
+    // 影響の強さ: 指を離した後は約1秒かけてゆっくり 0 へ（粒子が元の位置へ漂って戻る）
+    // 指を離した直後に消えないよう、波紋が残っている間は強さを保つ
+    const presenceGoal = Math.max(presenceTarget, Math.min(1, ripple * 1.5));
+    presence += (presenceGoal - presence) * (presenceGoal > presence ? 0.2 : 0.035);
+    material.uniforms.uPresence.value = presence;
+    // 反発点の位置も滑らかに追従させる
+    pointer.x += (pointerTarget.x - pointer.x) * 0.2;
+    pointer.y += (pointerTarget.y - pointer.y) * 0.2;
+    material.uniforms.uMouse.value.x = pointer.x;
+    material.uniforms.uMouse.value.y = pointer.y;
     renderer.render(scene, camera);
   };
 
@@ -343,7 +379,9 @@ export function createHeroParticles(
     window.removeEventListener('resize', resize);
     window.removeEventListener('pointermove', onPointerMove);
     window.removeEventListener('pointerdown', onPointerDown);
-    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointerup', onPointerEnd);
+    window.removeEventListener('pointercancel', onPointerEnd);
+    window.removeEventListener('pointerout', onPointerOut);
     geometry.dispose();
     material.dispose();
     renderer.dispose();
