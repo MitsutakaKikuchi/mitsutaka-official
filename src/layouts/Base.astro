@@ -59,7 +59,7 @@ const siteTitle = lang === 'ja' ? SITE.titleJa : SITE.titleEn;
 // 下層ページのタイトル末尾には職名も添える（「長唄 三味線」での検索にも名前が結び付くように）
 const brand =
   lang === 'ja'
-    ? `${SITE.artistNameJa}（長唄三味線方）`
+    ? `${SITE.artistNameJa}（長唄三味線）`
     : `${SITE.artistNameEn}, Nagauta Shamisen Player`;
 const pageTitle = title ? `${title} | ${brand}` : siteTitle;
 const pageDescription =
@@ -71,7 +71,7 @@ const enUrl = new URL(localePath('en', subpath), Astro.site);
 const ogImageUrl = new URL(withBase(SITE.ogImage), Astro.site).href;
 const ogImageAlt =
   lang === 'ja'
-    ? `${SITE.artistNameJa} — 長唄三味線方 公式サイト`
+    ? `${SITE.artistNameJa} — 長唄三味線 公式サイト`
     : `${SITE.artistNameEn} — Nagauta Shamisen Player, Official Website`;
 
 // 構造化データ: アーティスト情報（仕様書④-2）。画像は OGP ではなく本人のポートレート

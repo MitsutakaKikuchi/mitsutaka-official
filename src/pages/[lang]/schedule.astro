@@ -49,7 +49,7 @@ const eventsJsonLd = {
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       description:
         lang === 'ja'
-          ? `${name}（${venue}・${city}）。長唄三味線方 ${SITE.artistNameJa} 出演。`
+          ? `${name}（${venue}・${city}）。長唄三味線 ${SITE.artistNameJa} 出演。`
           : `${name} at ${venue}, ${city}, featuring nagauta shamisen player ${SITE.artistNameEn}.`,
       url: data.websiteUrl ?? schedulePageUrl,
       ...(images.length > 0 ? { image: images } : {}),

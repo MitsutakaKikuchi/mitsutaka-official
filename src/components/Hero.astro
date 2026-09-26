@@ -56,7 +56,7 @@ const photoAlt =
   />
 
   <!-- 光の三本弦（一の糸・二の糸・三の糸）。ポインタで横切る／タップすると弾かれる -->
-  <Strings angle={-22} baseY={610} gap={22} intro noteXs={[420, 640, 860, 1080, 1300]} />
+  <Strings angle={-22} baseY={610} gap={22} intro />
 
   <!-- タップ位置に朱の落款が捺される波紋 -->
   <div id="hero-ripples" class="pointer-events-none absolute inset-0" aria-hidden="true"></div>
@@ -66,15 +66,17 @@ const photoAlt =
   >
     {
       lang === 'ja' ? (
-        <div class="flex flex-col items-center gap-7 sm:gap-8">
+        /* スマホでは「名前・キャッチコピー → 写真 → 欧文名・ボタン」の順に並べるため、
+           md 未満ではこの枠を解いて（display: contents）子要素を order で並べ替える */
+        <div class="contents md:flex md:flex-col md:items-center md:gap-8">
           {/* 縦書き: 右のキャッチコピー → 左の名前 の順に読む */}
-          <div class="flex flex-row-reverse items-start justify-center gap-7 sm:gap-12">
+          <div class="order-1 flex flex-row-reverse items-start justify-center gap-7 sm:gap-12 md:order-none">
             <h1 class="vertical-text max-h-[min(34rem,calc(100svh-20rem))] font-serif text-lead leading-loose tracking-[0.42em] text-paper/80">
-              {/* スマホでは読点の後で改行し「伝統を弾き、／いまを鳴らす。」の2行にする */}
+              {/* 読点の後で改行し「伝統を弾き、／いまを鳴らす。」の2行にする */}
               {catchChars.map((char) => (
                 <>
                   <span class="k-char">{char}</span>
-                  {char === '、' && <br class="sm:hidden" />}
+                  {char === '、' && <br />}
                 </>
               ))}
               <span class="sr-only">{SITE.artistNameJa}</span>
@@ -91,6 +93,7 @@ const photoAlt =
               </p>
             </div>
           </div>
+          <div class="order-3 flex w-full flex-col items-center gap-7 sm:gap-8 md:order-none">
           <p class="hud text-paper/50" data-reveal aria-hidden="true" data-scramble>
             {SITE.artistNameDisplay}
           </p>
@@ -112,9 +115,11 @@ const photoAlt =
               {t('hero.ctaSecondary')} <span class="arrow" aria-hidden="true">→</span>
             </a>
           </div>
+          </div>
         </div>
       ) : (
-        <div class="flex w-full flex-col gap-6">
+        <div class="contents md:flex md:w-full md:flex-col md:gap-6">
+          <div class="order-1 flex w-full flex-col gap-6 md:order-none">
           {/* 単語ごとに inline-block + whitespace-nowrap で包み、単語間は実スペースで分かち書き */}
           <h1 class="font-serif text-headline tracking-[0.1em] text-paper">
             {t('hero.catchcopy')
@@ -138,8 +143,9 @@ const photoAlt =
             </p>
             <p class="font-serif text-base tracking-[0.5em] text-paper/55">{SITE.artistNameJa}</p>
           </div>
+          </div>
           <div
-            class="hero-cta mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8"
+            class="hero-cta order-3 mt-2 flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:gap-8 md:order-none"
             data-reveal
           >
             <a
@@ -164,7 +170,7 @@ const photoAlt =
       演奏写真: 四隅のブラケット（ファインダー）で額装する近未来の「額」。
       マスク + ズームリビール + パララックス、スマホでは傾きで僅かに揺れる。
     -->
-    <figure class="relative m-3" data-reveal data-tilt>
+    <figure class="relative order-2 m-3 md:order-none" data-reveal data-tilt>
       <span class="hud-corners text-glow/70" aria-hidden="true"></span>
       <div class="relative overflow-hidden" data-mask-reveal data-scan>
         <div data-parallax="0.05">

@@ -12,13 +12,13 @@ export const SITE = {
   artistNameKana: 'きくち みつたか',
   /** 雅号など、本名以外の名義（構造化データの別名）。プロフィール本文と一致させること */
   stageNames: ['若柳歓峰', 'Wakayagi Yoshitaka'],
-  titleJa: '菊池光峰 | 長唄三味線方 公式サイト',
+  titleJa: '菊池光峰 | 長唄三味線 公式サイト',
   titleEn: 'KIKUCHI Mitsutaka | Nagauta Shamisen Player — Official Website',
   descriptionJa:
-    '歌舞伎とともに歩んできた長唄の伝統を受け継ぐ長唄三味線方・菊池光峰の公式サイト。国内外での演奏活動、プロフィール、公演スケジュール、コンサート・式典・メディアへの出演依頼の受付はこちら。',
+    '歌舞伎とともに歩んできた長唄の伝統を受け継ぐ長唄三味線・菊池光峰の公式サイト。国内外での演奏活動、プロフィール、公演スケジュール、コンサート・式典・メディアへの出演依頼の受付はこちら。',
   /** 構造化データ（Person）用の人物紹介。サイトの説明ではなく人物の説明にする（プロフィール本文と一致させること） */
   personDescriptionJa:
-    '東京都出身の長唄三味線方。幼少より日本舞踊を学び、若柳流にて若柳歓峰の名を許される。長唄三味線を成田涼子氏に師事し、演奏会・舞踊会への出演や学校での和楽器指導に取り組む。東京藝術大学音楽学部邦楽科在学中。',
+    '東京都出身。幼少より日本舞踊を学び、若柳流にて若柳歓峰の名を許される。長唄三味線を成田涼子氏に師事し、演奏会・舞踊会への出演や学校での和楽器指導に取り組む。東京藝術大学音楽学部邦楽科在学中。',
   personDescriptionEn:
     'Nagauta shamisen player from Tokyo. Trained in classical Japanese dance from childhood and granted the name Wakayagi Yoshitaka in the Wakayagi school, he studies nagauta shamisen under Narita Ryoko, performs in concerts and dance recitals, and teaches traditional instruments in schools. Currently studying at Tokyo University of the Arts.',
   descriptionEn:

@@ -16,15 +16,15 @@ export const ui = {
     'nav.contact': 'お問い合わせ',
     'nav.booking': '出演依頼',
     'meta.about':
-      '長唄三味線方・菊池光峰のプロフィール。歌舞伎とともに歩んできた長唄の伝統を受け継ぎ、演奏と教育に取り組む三味線奏者の経歴と活動をご紹介します。',
+      '長唄三味線・菊池光峰のプロフィール。歌舞伎とともに歩んできた長唄の伝統を受け継ぎ、演奏と教育に取り組む三味線奏者の経歴と活動をご紹介します。',
     'meta.schedule':
-      '長唄三味線方・菊池光峰の出演スケジュール。今後の演奏会・公演情報と過去の出演記録をご覧いただけます。',
+      '長唄三味線・菊池光峰の出演スケジュール。今後の演奏会・公演情報と過去の出演記録をご覧いただけます。',
     'meta.media':
-      '長唄三味線方・菊池光峰のフォトギャラリー。各種演奏会、共演ステージ、レクチャー・ワークショップ、レコーディングなどの活動の様子をご紹介します。',
+      '長唄三味線・菊池光峰のフォトギャラリー。各種演奏会、共演ステージ、レクチャー・ワークショップ、レコーディングなどの活動の様子をご紹介します。',
     'meta.contact':
-      '長唄三味線方・菊池光峰への出演依頼・取材・お問い合わせはこちら。コンサート・式典・メディア出演など国内外を問わずご相談を承ります。',
+      '長唄三味線・菊池光峰への出演依頼・取材・お問い合わせはこちら。コンサート・式典・メディア出演など国内外を問わずご相談を承ります。',
     'hero.catchcopy': '伝統を弾き、いまを鳴らす。',
-    'hero.sub': '長唄三味線方',
+    'hero.sub': '長唄三味線',
     'hero.scroll': 'スクロール',
     'home.aboutTitle': 'プロフィール',
     'home.aboutLead':
@@ -146,7 +146,7 @@ export const ui = {
     'hero.scroll': 'Scroll',
     'home.aboutTitle': 'About',
     'home.aboutLead':
-      'Carrying classical sound into the next era with skill and technology. Working from both nagauta shamisen and technology, he explores new forms for Japanese traditional music.',
+      'Carrying classical sound into the next era. Working across both nagauta shamisen and technology, he explores new forms for Japanese traditional music.',
     'home.aboutMore': 'Read full profile',
     'home.scheduleTitle': 'Upcoming Shows',
     'home.scheduleMore': 'View all shows',

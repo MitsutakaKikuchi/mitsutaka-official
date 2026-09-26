@@ -1,6 +1,6 @@
 # 菊池光峰（KIKUCHI Mitsutaka）公式ウェブサイト
 
-長唄三味線方・菊池光峰の公式サイト。日英2言語対応の静的サイトで、GitHub Pages で公開する。
+長唄三味線・菊池光峰の公式サイト。日英2言語対応の静的サイトで、GitHub Pages で公開する。
 
 - フレームワーク: [Astro](https://astro.build/)（静的出力）
 - スタイリング: Tailwind CSS v4
@@ -142,7 +142,7 @@ npm run images     # src/assets/photos, public/photos, public/flyers の画像�
 | 画像の alt | 写真ごとに日英の説明文を付与（`media.astro` の `altJa` / `altEn` 等） |
 | 画像圧縮 | `npm run images`。`public/` 配下は Astro の最適化対象外のため、追加時は必ず実行する |
 | 構造化データ | `src/lib/seo.ts` の人物（Person, `@id` で全ページ共通）を WebSite / ProfilePage（プロフィール）/ MusicEvent（出演予定）/ BreadcrumbList（下層ページ）から参照。別名（ローマ字・読み・雅号）と人物紹介は `src/config/site.ts` |
-| タイトル | 下層ページは「ページ名 \| 菊池光峰（長唄三味線方）」の形式で職名を含める |
+| タイトル | 下層ページは「ページ名 \| 菊池光峰（長唄三味線）」の形式で職名を含める |
 
 ## ディレクトリ構成
 

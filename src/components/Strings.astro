@@ -2,8 +2,7 @@
 /**
  * 三味線の三本の弦（一の糸・二の糸・三の糸）を「光の線」として描く装飾。
  * - ポインタが弦を横切る／タップすると、その位置で弦が弾かれて振動し、光る（JS: scripts/strings.ts）
- * - 弦の上を光の信号（パルス）が流れ星のように上端から下端へ周期的に走り、通過点に
- *   三味線の楽譜「文化譜」の勘所数字が灯っては消える（伝統の記譜 × データ伝送）
+ * - 弦の上を光の信号（パルス）が流れ星のように上端から下端へ周期的に走る
  * 伝統の楽器を、触れて鳴らせるインターフェースとして再解釈する「伝統 × 近未来」のモチーフ。
  * reduced-motion 時は静止した光の線のみを表示する。
  */
@@ -18,10 +17,8 @@ interface Props {
   intro?: boolean;
   /** viewBox の高さ（幅は 1200 固定）。横長の帯では 400 などにする */
   viewHeight?: number;
-  /** 光の信号と文化譜の数字を流すか */
+  /** 光の信号を流すか */
   signal?: boolean;
-  /** 文化譜の数字を置く x 座標（弦のローカル座標）。見える範囲に合わせて指定する */
-  noteXs?: number[];
   class?: string;
 }
 
@@ -32,7 +29,6 @@ const {
   intro = false,
   viewHeight = 800,
   signal = true,
-  noteXs = [380, 620, 860, 1100],
   class: className = '',
 } = Astro.props;
 
@@ -51,11 +47,6 @@ const strings = [
   { id: '1', width: 1.6, period: 12.1, delay: 6.4 },
 ];
 
-/*
- * 文化譜（三味線の数字譜）の勘所の数字。0 は開放弦。
- * 弦ごと・位置ごとに決まった数字を置き、信号が通過した瞬間だけ灯る。
- */
-const NOTE_SEQUENCE = ['0', '3', '5', '7', '2', '10', '4', '12', '6', '9', '1', '8'];
 ---
 
 <svg
@@ -87,7 +78,7 @@ const NOTE_SEQUENCE = ['0', '3', '5', '7', '2', '10', '4', '12', '6', '9', '1', 
   </g>
   {
     /*
-     * 光の信号と文化譜の数字（常に動くため、重い発光フィルターの外に置く。
+     * 光の信号（常に動くため、重い発光フィルターの外に置く。
      * 発光は太く淡い下敷きの線で代用し、再描画の負荷を抑える）
      */
     signal && (
@@ -95,7 +86,6 @@ const NOTE_SEQUENCE = ['0', '3', '5', '7', '2', '10', '4', '12', '6', '9', '1', 
         {strings.map((string, index) => {
           const y = baseY + index * gap;
           const d = `M${X_START} ${y} Q600 ${y} ${X_END} ${y}`;
-          const travel = string.period * TRAVEL;
           const timing = `--pulse-period:${string.period}s;--pulse-delay:${string.delay}s`;
           return (
             <g>
@@ -115,23 +105,6 @@ const NOTE_SEQUENCE = ['0', '3', '5', '7', '2', '10', '4', '12', '6', '9', '1', 
                 stroke-width={string.width + 0.9}
                 style={timing}
               />
-              {noteXs.map((x, noteIndex) => {
-                const fraction = (x - X_START) / (X_END - X_START);
-                // 信号は右（上端）から左（下端）へ流れ星のように走るため、右にある数字ほど先に灯る
-                const noteDelay = string.delay + travel * (1 - fraction);
-                const value =
-                  NOTE_SEQUENCE[(noteIndex * 3 + index * 5) % NOTE_SEQUENCE.length] ?? '0';
-                return (
-                  <text
-                    class="string-note"
-                    x={x}
-                    y={y - 9}
-                    style={`--pulse-period:${string.period}s;--note-delay:${noteDelay.toFixed(2)}s`}
-                  >
-                    {value}
-                  </text>
-                );
-              })}
             </g>
           );
         })}

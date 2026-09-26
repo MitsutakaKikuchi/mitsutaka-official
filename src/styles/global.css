@@ -1349,38 +1349,8 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
   }
 }
 
-.string-note {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  fill: #dce7f4;
-  text-anchor: middle;
-  pointer-events: none;
-}
-
-.string-note {
-  opacity: 0;
-  animation: string-note var(--pulse-period) linear var(--note-delay) infinite;
-}
-
-@keyframes string-note {
-  0% {
-    opacity: 0;
-  }
-  1.2% {
-    opacity: 0.8;
-  }
-  9% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
 /* 画面外の弦はアニメーションを止める（JS: strings.ts が .is-offscreen を付与） */
-.strings-svg.is-offscreen .shamisen-pulse,
-.strings-svg.is-offscreen .string-note {
+.strings-svg.is-offscreen .shamisen-pulse {
   animation-play-state: paused;
 }
 
@@ -1388,7 +1358,6 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
 @media (prefers-reduced-motion: reduce) {
   .section-curtain,
   .shamisen-pulse,
-  .string-note,
   .scan-veil,
   .scan-line {
     display: none !important;

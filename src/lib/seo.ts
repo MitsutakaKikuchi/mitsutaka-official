@@ -39,10 +39,10 @@ export function buildPerson(lang: Lang, site: URL | undefined, imageUrl: string)
     ],
     familyName: isJa ? '菊池' : 'Kikuchi',
     givenName: isJa ? '光峰' : 'Mitsutaka',
-    jobTitle: isJa ? '長唄三味線方' : 'Nagauta Shamisen Player',
+    jobTitle: isJa ? '長唄三味線' : 'Nagauta Shamisen Player',
     hasOccupation: {
       '@type': 'Occupation',
-      name: isJa ? '長唄三味線方' : 'Nagauta shamisen player',
+      name: isJa ? '長唄三味線' : 'Nagauta shamisen player',
     },
     description: isJa ? SITE.personDescriptionJa : SITE.personDescriptionEn,
     url: siteRootUrl(site),
