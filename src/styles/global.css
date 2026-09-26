@@ -1312,15 +1312,16 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
   fill: none;
   stroke: #eef4fb;
   stroke-linecap: round;
-  stroke-dasharray: 46 2000;
-  stroke-dashoffset: 46;
+  stroke-dasharray: 34 2000;
+  stroke-dashoffset: -1000;
   opacity: 0.85;
   animation: string-pulse var(--pulse-period) linear var(--pulse-delay) infinite;
 }
 
-/* 信号の発光（フィルターを使わず、太く淡い線を下に敷く） */
+/* 信号の尾と発光（フィルターを使わず、長く淡い線を下に敷く＝流れ星の尾） */
 .shamisen-pulse--halo {
   stroke: #8fb3e0;
+  stroke-dasharray: 150 2000;
   opacity: 0.22;
 }
 
@@ -1333,14 +1334,18 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
   stroke: #e0735f;
 }
 
-/* 周期の 35% で弦の端から端まで走り、残りは静かに待つ（Strings.astro の TRAVEL と一致） */
+/*
+ * 周期の 35% で弦の端から端まで走り、残りは静かに待つ（Strings.astro の TRAVEL と一致）。
+ * 流れ星のように、弦の上端（右）から下端（左）へ走る。
+ * 頭（進行方向側）は細く明るい芯、その後ろに淡く長い尾（halo）を引く。
+ */
 @keyframes string-pulse {
   0% {
-    stroke-dashoffset: 46;
+    stroke-dashoffset: -1000;
   }
   35%,
   100% {
-    stroke-dashoffset: -1000;
+    stroke-dashoffset: 150;
   }
 }
 
