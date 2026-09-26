@@ -2,7 +2,6 @@
  * 「伝統 × 未来」のモーショングラフィック（2026-09 改修）。
  *
  * どの演出も「伝統の素材が、未来の媒体へ移り変わる瞬間」を一つずつ見せる。
- * - 開演（Intro.astro / intro.ts）: 定式幕が引かれ、光の走査線に溶ける
  * - 筆の一円相（[data-ensou]）: 穂先の毛まで描いた円相が一筆で書かれる（WebGL の光がそれをなぞる）
  * - 墨 → 色（[data-scan]）: 写真は墨一色で現れ、光の走査線が通った所から色づく
  * - 見出し（[data-brush]）: 筆で左から書かれるように、墨の滲みを解きながら現れる
@@ -15,14 +14,13 @@
  */
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { initIntro, introDelay } from './intro';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const prefersReducedMotion = (): boolean =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const heroDelay = (el: Element): number => (el.closest('#hero') ? introDelay() : 0);
+const heroDelay = (_el: Element): number => 0;
 
 /* ---------- 筆の一円相 ---------- */
 const ENSOU_DRAW_S = 2.1;
@@ -228,16 +226,16 @@ function initCurtains(reduced: boolean): void {
       paused: true,
       onComplete: () => veil.classList.remove('is-armed'),
     });
-    // 引幕: 幕の端（右）から先に動き、縦縞が左端へ畳まれていく
+    // 引幕: 幕の端（左）から先に動き、縦縞が右端へ畳まれていく（左から右へ開く）
     timeline
       .to(
         stripes,
         {
-          xPercent: (index: number) => -100 * index,
+          xPercent: (index: number) => 100 * (stripes.length - 1 - index),
           scaleX: 0.06,
           duration: 1.2,
           ease: 'power3.inOut',
-          stagger: { each: 0.05, from: 'end' },
+          stagger: { each: 0.05, from: 'start' },
         },
         0
       )
@@ -278,7 +276,6 @@ function initDrift(reduced: boolean): void {
 /* ---------- ページごとの初期化 ---------- */
 function initMotion(): void {
   const reduced = prefersReducedMotion();
-  initIntro();
   initInkEnsou(reduced);
   initScanReveal(reduced);
   initBrushHeadings(reduced);

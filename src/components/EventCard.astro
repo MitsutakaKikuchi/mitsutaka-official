@@ -81,7 +81,7 @@ const weekday = new Intl.DateTimeFormat(lang === 'ja' ? 'ja-JP' : 'en-US', {
     >
       <span class="hud text-muted" aria-hidden="true">{year}</span>
       <span class="event-date-day text-[2rem] leading-none tracking-[0.04em] text-ink sm:text-[2.5rem]" aria-hidden="true">
-        {month}.{day}
+        {Number(month)}/{day}
       </span>
       <span class="hud text-accent" aria-hidden="true">{weekday}</span>
     </time>

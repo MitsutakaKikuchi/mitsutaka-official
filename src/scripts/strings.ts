@@ -2,13 +2,11 @@
  * 光の三本弦（components/Strings.astro）のインタラクション。
  * - ポインタが弦を横切ると、その位置・速さに応じて弦が弾かれ、減衰振動しながら光る
  * - タップ／クリックでも近くの弦が弾かれる（スクロール中のタッチ端末向け）
- * - 弾いた位置に、その勘所を示す文化譜（三味線の数字譜）の数字が一瞬浮かんで消える
  * - 弦を走る光の信号（.shamisen-pulse）も振動に合わせて同じ形に追従する
  * - 画面外にある弦の CSS アニメーション（信号・数字）は一時停止して負荷を抑える
  * すべて prefers-reduced-motion を尊重し、無効時は何もしない（静止した光の線のまま）。
  */
 import gsap from 'gsap';
-import { introDelay } from './intro';
 
 interface StringState {
   el: SVGPathElement;
@@ -36,13 +34,6 @@ const MAX_AMP = 22;
 const TAP_RADIUS = 36; // タップで弾ける弦との距離（viewBox 単位）
 const VISUAL_FREQ: Record<string, number> = { '1': 5.5, '2': 7, '3': 8.5 };
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
-/** 勘所の数字の範囲（弦のローカル x 座標をこの範囲で 0〜12 に対応させる） */
-const NOTE_X_MIN = 150;
-const NOTE_X_MAX = 1350;
-const NOTE_MAX = 12;
-const NOTE_LIFETIME_MS = 1300;
-
 let states: StringState[] = [];
 let tickerBound = false;
 let cleanups: (() => void)[] = [];
@@ -55,20 +46,6 @@ function drawString(state: StringState, displacement: number): void {
   state.pulses.forEach((pulse) => pulse.setAttribute('d', d));
 }
 
-/** 弾いた位置に文化譜の勘所の数字を浮かべる（数字は位置から決まる: 左ほど開放に近い） */
-function spawnNote(state: StringState, x: number): void {
-  const ratio = (x - NOTE_X_MIN) / (NOTE_X_MAX - NOTE_X_MIN);
-  const value = Math.round(gsap.utils.clamp(0, NOTE_MAX, ratio * NOTE_MAX));
-  const text = document.createElementNS(SVG_NS, 'text');
-  text.setAttribute('x', x.toFixed(1));
-  text.setAttribute('y', String(state.y - 12));
-  text.setAttribute('class', 'string-note-live');
-  text.dataset.string = state.id;
-  text.textContent = String(value);
-  state.group.appendChild(text);
-  window.setTimeout(() => text.remove(), NOTE_LIFETIME_MS);
-}
-
 function pluck(state: StringState, x: number, amp: number): void {
   // 振動中の弦を弱く撫でただけでは弾き直さない
   const now = performance.now();
@@ -79,7 +56,6 @@ function pluck(state: StringState, x: number, amp: number): void {
   state.active = true;
   state.el.classList.add('is-plucked');
   window.setTimeout(() => state.el.classList.remove('is-plucked'), 160);
-  if (Math.abs(amp) >= 8) spawnNote(state, state.px);
 }
 
 function tick(): void {
@@ -137,8 +113,7 @@ export function initStrings(): void {
       return {
         el,
         pulses: Array.from(svg.querySelectorAll<SVGPathElement>(`[data-pulse-for="${id}"]`)),
-        // 弾いた時の数字は、発光フィルターの無い信号側のグループに置く（再描画を軽く）
-        group: svg.querySelector<SVGGElement>('[data-strings-signal]') ?? group,
+        group,
         id,
         y: Number(el.dataset.y),
         x0: Number(el.dataset.x0),
@@ -204,7 +179,7 @@ export function initStrings(): void {
       const timers = [...local].map((state, index) =>
         window.setTimeout(
           () => pluck(state, 600 + index * 40, 9),
-          1400 + introDelay() * 1000 + index * 180
+          1400 + index * 180
         )
       );
       cleanups.push(() => timers.forEach((timer) => window.clearTimeout(timer)));

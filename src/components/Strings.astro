@@ -2,8 +2,7 @@
 /**
  * 三味線の三本の弦（一の糸・二の糸・三の糸）を「光の線」として描く装飾。
  * - ポインタが弦を横切る／タップすると、その位置で弦が弾かれて振動し、光る（JS: scripts/strings.ts）
- *   弾いた位置には、その勘所を示す文化譜の数字が一瞬浮かぶ
- * - 弦の上を光の信号（パルス）が光ファイバーのように周期的に走り、通過点に
+ * - 弦の上を光の信号（パルス）が流れ星のように上端から下端へ周期的に走り、通過点に
  *   三味線の楽譜「文化譜」の勘所数字が灯っては消える（伝統の記譜 × データ伝送）
  * 伝統の楽器を、触れて鳴らせるインターフェースとして再解釈する「伝統 × 近未来」のモチーフ。
  * reduced-motion 時は静止した光の線のみを表示する。
@@ -118,7 +117,8 @@ const NOTE_SEQUENCE = ['0', '3', '5', '7', '2', '10', '4', '12', '6', '9', '1', 
               />
               {noteXs.map((x, noteIndex) => {
                 const fraction = (x - X_START) / (X_END - X_START);
-                const noteDelay = string.delay + travel * fraction;
+                // 信号は右（上端）から左（下端）へ流れ星のように走るため、右にある数字ほど先に灯る
+                const noteDelay = string.delay + travel * (1 - fraction);
                 const value =
                   NOTE_SEQUENCE[(noteIndex * 3 + index * 5) % NOTE_SEQUENCE.length] ?? '0';
                 return (

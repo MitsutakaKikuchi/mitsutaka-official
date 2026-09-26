@@ -28,7 +28,7 @@ export const ui = {
     'hero.scroll': 'スクロール',
     'home.aboutTitle': 'プロフィール',
     'home.aboutLead':
-      '古典に根ざし、未来に響かせる。長唄三味線の伝統を背負い、現代技術や世界と交わる新たな一歩。',
+      '古典の音を、確かな技術で次の時代へ。長唄三味線とテクノロジーの両面から、邦楽の新しいかたちを探っています。',
     'home.aboutMore': 'プロフィールを見る',
     'home.scheduleTitle': '出演情報',
     'home.scheduleMore': 'すべての出演を見る',
@@ -146,7 +146,7 @@ export const ui = {
     'hero.scroll': 'Scroll',
     'home.aboutTitle': 'About',
     'home.aboutLead':
-      'Rooted in the classics, resonating into the future. Carrying the nagauta shamisen tradition forward to where it meets modern technology and the wider world.',
+      'Carrying classical sound into the next era with skill and technology. Working from both nagauta shamisen and technology, he explores new forms for Japanese traditional music.',
     'home.aboutMore': 'Read full profile',
     'home.scheduleTitle': 'Upcoming Shows',
     'home.scheduleMore': 'View all shows',

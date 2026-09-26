@@ -234,12 +234,18 @@ html.fx-cursor button {
   width: 6px;
   height: 6px;
   background: var(--color-vermilion);
+  /* 写真や暗い地の上でも見失わないよう、細い白の縁取り */
+  box-shadow: 0 0 0 1.5px rgb(255 255 255 / 0.85);
 }
 
 #cursor-ring {
   width: 34px;
   height: 34px;
-  border: 1px solid rgb(95 134 179 / 0.7); /* 藍（昼夜どちらの地でも見える中間調） */
+  border: 1px solid rgb(95 134 179 / 0.8); /* 藍（昼夜どちらの地でも見える中間調） */
+  /* 写真の上でも輪郭が埋もれないよう、内外に淡い白の縁 */
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.35),
+    inset 0 0 0 1px rgb(255 255 255 / 0.25);
   transition:
     border-color 0.35s ease,
     background-color 0.35s ease;
@@ -1190,7 +1196,7 @@ html.menu-open #site-header[data-header-theme] {
   position: relative;
   flex: 1 1 0;
   background-color: var(--c);
-  transform-origin: left center;
+  transform-origin: right center;
   will-change: transform;
 }
 
@@ -1219,146 +1225,11 @@ html.menu-open #site-header[data-header-theme] {
     linear-gradient(90deg, rgb(143 179 224 / 0.25), rgb(143 179 224 / 0.6));
 }
 
-/* 幕の端（最後に動き出す縦縞の右端）に、開いていく境目を示す光の線 */
-.curtain-stripe:last-child {
+/* 幕の端（最初に動き出す左端の縦縞）に、開いていく境目を示す光の線 */
+.curtain-stripe:first-child {
   box-shadow:
-    1px 0 0 rgb(143 179 224 / 0.9),
-    6px 0 22px rgb(143 179 224 / 0.45);
-}
-
-/* ---------- 開演演出（Intro.astro）---------- */
-#intro {
-  display: none;
-}
-
-html.intro #intro {
-  display: block;
-  position: fixed;
-  inset: 0;
-  z-index: 95;
-  /* 背景は持たない: 幕が引かれた所から、その奥の夜の舞台（ヒーロー）がそのまま見える */
-  animation: intro-out 0.4s ease 1.72s forwards;
-}
-
-html.intro.intro-skip #intro {
-  animation: intro-out 0.28s ease forwards;
-}
-
-html.intro #intro .intro-curtain {
-  animation: intro-cue-flash 0.6s ease 0.34s both;
-}
-
-html.intro #intro .curtain-stripe {
-  /* 引幕: 端（右）の縦縞から先に動き、左端へ畳まれていく */
-  animation: intro-stripe 1s cubic-bezier(0.76, 0, 0.24, 1) calc(0.6s + (var(--n) - 1 - var(--i)) * 0.045s)
-    forwards;
-}
-
-html.intro #intro .curtain-stripe::after {
-  animation: intro-scan 0.7s linear 1.05s forwards;
-}
-
-@keyframes intro-stripe {
-  to {
-    transform: translateX(calc(var(--i) * -100%)) scaleX(0.06);
-  }
-}
-
-@keyframes intro-scan {
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes intro-cue-flash {
-  0% {
-    filter: brightness(1);
-  }
-  18% {
-    filter: brightness(1.35);
-  }
-  100% {
-    filter: brightness(1);
-  }
-}
-
-@keyframes intro-out {
-  to {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-
-/* 柝（き）の一打: 音の代わりに、一点の光から波紋が二重に広がる */
-.intro-cue {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-}
-
-.intro-cue-line {
-  position: absolute;
-  left: -0.5px;
-  top: -22px;
-  width: 1px;
-  height: 44px;
-  background: linear-gradient(180deg, transparent, #fff, transparent);
-  box-shadow: 0 0 12px rgb(143 179 224 / 0.9);
-  opacity: 0;
-  transform: scaleY(0);
-}
-
-.intro-cue-ring {
-  position: absolute;
-  left: -40px;
-  top: -40px;
-  width: 80px;
-  height: 80px;
-  border-radius: 9999px;
-  border: 1px solid rgb(143 179 224 / 0.9);
-  box-shadow: 0 0 18px rgb(143 179 224 / 0.35);
-  opacity: 0;
-}
-
-html.intro .intro-cue-line {
-  animation: intro-cue-line 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
-}
-
-html.intro .intro-cue-ring {
-  animation: intro-cue-ring 1s cubic-bezier(0.22, 1, 0.36, 1) 0.34s forwards;
-}
-
-html.intro .intro-cue-ring--late {
-  border-color: rgb(192 75 60 / 0.8);
-  animation-delay: 0.46s;
-}
-
-@keyframes intro-cue-line {
-  0% {
-    opacity: 0;
-    transform: scaleY(0);
-  }
-  40% {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scaleY(1.6);
-  }
-}
-
-@keyframes intro-cue-ring {
-  0% {
-    opacity: 0.9;
-    transform: scale(0.1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(5.5);
-  }
+    -1px 0 0 rgb(143 179 224 / 0.9),
+    -6px 0 22px rgb(143 179 224 / 0.45);
 }
 
 /* ---------- 出演依頼の幕開き（JS が「未表示」のときだけ is-armed を付ける）---------- */
@@ -1441,15 +1312,16 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
   fill: none;
   stroke: #eef4fb;
   stroke-linecap: round;
-  stroke-dasharray: 46 2000;
-  stroke-dashoffset: 46;
+  stroke-dasharray: 34 2000;
+  stroke-dashoffset: -1000;
   opacity: 0.85;
   animation: string-pulse var(--pulse-period) linear var(--pulse-delay) infinite;
 }
 
-/* 信号の発光（フィルターを使わず、太く淡い線を下に敷く） */
+/* 信号の尾と発光（フィルターを使わず、長く淡い線を下に敷く＝流れ星の尾） */
 .shamisen-pulse--halo {
   stroke: #8fb3e0;
+  stroke-dasharray: 150 2000;
   opacity: 0.22;
 }
 
@@ -1462,19 +1334,22 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
   stroke: #e0735f;
 }
 
-/* 周期の 35% で弦の端から端まで走り、残りは静かに待つ（Strings.astro の TRAVEL と一致） */
+/*
+ * 周期の 35% で弦の端から端まで走り、残りは静かに待つ（Strings.astro の TRAVEL と一致）。
+ * 流れ星のように、弦の上端（右）から下端（左）へ走る。
+ * 頭（進行方向側）は細く明るい芯、その後ろに淡く長い尾（halo）を引く。
+ */
 @keyframes string-pulse {
   0% {
-    stroke-dashoffset: 46;
+    stroke-dashoffset: -1000;
   }
   35%,
   100% {
-    stroke-dashoffset: -1000;
+    stroke-dashoffset: 150;
   }
 }
 
-.string-note,
-.string-note-live {
+.string-note {
   font-family: var(--font-mono);
   font-size: 13px;
   letter-spacing: 0.05em;
@@ -1503,30 +1378,6 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
   }
 }
 
-/* 弾いた位置に浮かぶ数字: ふわりと上がって消える */
-.string-note-live {
-  font-size: 15px;
-  animation: string-note-live 1.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.string-note-live[data-string='1'] {
-  fill: #f09a86;
-}
-
-@keyframes string-note-live {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  18% {
-    opacity: 0.95;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-14px);
-  }
-}
-
 /* 画面外の弦はアニメーションを止める（JS: strings.ts が .is-offscreen を付与） */
 .strings-svg.is-offscreen .shamisen-pulse,
 .strings-svg.is-offscreen .string-note {
@@ -1535,11 +1386,9 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
 
 /* reduced-motion: 追加演出はすべて止め、完成形のみ */
 @media (prefers-reduced-motion: reduce) {
-  #intro,
   .section-curtain,
   .shamisen-pulse,
   .string-note,
-  .string-note-live,
   .scan-veil,
   .scan-line {
     display: none !important;
@@ -1548,4 +1397,29 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
   html.js svg[data-ensou] [data-ensou-spine] {
     stroke-dashoffset: 0;
   }
+}
+
+/* ライトボックス表示中: ダイアログ内でも標準カーソルを隠し、カスタムカーソルを最前面に */
+html.fx-cursor #lightbox,
+html.fx-cursor #lightbox * {
+  cursor: none;
+}
+
+#lightbox #cursor-dot,
+#lightbox #cursor-ring {
+  z-index: 2147483647;
+}
+
+/* 拡大写真の上ではカーソルを白く・影付きにして、明暗どちらの写真でも見えるようにする */
+#lightbox #cursor-ring {
+  border-color: rgb(255 255 255 / 0.95);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.35),
+    0 0 14px rgb(0 0 0 / 0.35);
+}
+
+#lightbox #cursor-dot {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 6px rgb(0 0 0 / 0.5);
 }
