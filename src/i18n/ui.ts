@@ -28,7 +28,7 @@ export const ui = {
     'hero.scroll': 'スクロール',
     'home.aboutTitle': 'プロフィール',
     'home.aboutLead':
-      '撥（ばち）と、コードと。長唄三味線の古典を受け継ぎながら、エンジニアとしての視点も生かし、邦楽の新しい響かせ方を探っています。',
+      '古典の音を、確かな技術で次の時代へ。長唄三味線とテクノロジーの両面から、邦楽の新しいかたちを探っています。',
     'home.aboutMore': 'プロフィールを見る',
     'home.scheduleTitle': '出演情報',
     'home.scheduleMore': 'すべての出演を見る',
@@ -146,7 +146,7 @@ export const ui = {
     'hero.scroll': 'Scroll',
     'home.aboutTitle': 'About',
     'home.aboutLead':
-      'The bachi and the code. Carrying on the classics of nagauta shamisen, he draws on an engineer’s perspective to explore new ways for Japanese traditional music to resonate.',
+      'Carrying classical sound into the next era with skill and technology. Working from both nagauta shamisen and technology, he explores new forms for Japanese traditional music.',
     'home.aboutMore': 'Read full profile',
     'home.scheduleTitle': 'Upcoming Shows',
     'home.scheduleMore': 'View all shows',
