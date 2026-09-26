@@ -1,0 +1,86 @@
+---
+/**
+ * 筆の一円相。穂先の毛を束ねた可変幅の線で描き、かすれ・抜き・入りの溜まりを持つ（lib/brush.ts）。
+ * 描画は「筆の中心線」をマスクとして伸ばすことで、一筆で書かれていくように見せる（scripts/motion.ts）。
+ *
+ * mode:
+ * - load   … 表示時に一筆で書かれる（ヒーロー）
+ * - scroll … スクロール量に応じて筆が進む（フッター）
+ * - static … 最初から書かれた状態
+ *
+ * JS が無効でも完成形が表示される（非表示にするのは html.js のときだけ）。
+ */
+import { createEnsou } from '../lib/brush';
+
+interface Props {
+  /** マスク ID の衝突を避けるための一意な名前 */
+  name: string;
+  viewWidth?: number;
+  viewHeight?: number;
+  cx: number;
+  cy: number;
+  r: number;
+  seed?: number;
+  bristles?: number;
+  steps?: number;
+  mode?: 'load' | 'scroll' | 'static';
+  preserveAspectRatio?: string;
+  class?: string;
+  /** 内側の <g>（位置調整用）に付けるクラス */
+  frameClass?: string;
+}
+
+const {
+  name,
+  viewWidth = 1200,
+  viewHeight = 800,
+  cx,
+  cy,
+  r,
+  seed = 7,
+  bristles = 16,
+  steps = 96,
+  mode = 'load',
+  preserveAspectRatio = 'xMidYMid meet',
+  class: className = '',
+  frameClass = '',
+} = Astro.props;
+
+const ensou = createEnsou({ cx, cy, r, seed, bristles, steps });
+const maskId = `ensou-mask-${name}`;
+---
+
+<svg
+  class:list={['ink-ensou pointer-events-none', className]}
+  viewBox={`0 0 ${viewWidth} ${viewHeight}`}
+  preserveAspectRatio={preserveAspectRatio}
+  aria-hidden="true"
+  data-ensou={mode}
+>
+  <defs>
+    <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width={viewWidth} height={viewHeight}>
+      <path
+        d={ensou.spine}
+        fill="none"
+        stroke="#fff"
+        stroke-width={ensou.spineWidth}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        pathLength="1"
+        data-ensou-spine
+      />
+    </mask>
+  </defs>
+  <g class:list={['ensou-frame', frameClass]}>
+    <!-- 粒子の円相を筆に重ねるための基準円（描画しない） -->
+    <circle cx={cx} cy={cy} r={r} fill="none" stroke="none" data-ensou-guide />
+    <g mask={`url(#${maskId})`} fill="currentColor">
+      {ensou.bristles.map((bristle) => <path d={bristle.d} fill-opacity={bristle.opacity} />)}
+      {
+        ensou.dots.map((dot) => (
+          <circle cx={dot.cx} cy={dot.cy} r={dot.r} fill-opacity={dot.opacity} />
+        ))
+      }
+    </g>
+  </g>
+</svg>

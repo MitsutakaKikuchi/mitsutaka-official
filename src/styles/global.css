@@ -270,13 +270,11 @@ html.fx-cursor button {
 /* ヘッダーの昼夜切替は末尾「昼夜ハイブリッド」ブロックで定義 */
 
 /*
- * 一円相の「呼吸」: 一筆書きで描き終えた後、ごく僅かに拡大縮小・濃淡が揺らぎ、
- * 静止画ではなく生きた墨のように佇む（回転はしない）。
+ * 一円相の「呼吸」: 一筆で書き終えた後、墨の濃淡がごく僅かに揺らぎ、
+ * 静止画ではなく生きた墨のように佇む（SVG 全体の opacity のみ＝GPU 合成で軽量）。
  */
 @media (prefers-reduced-motion: no-preference) {
-  .hero-ensou {
-    transform-box: fill-box;
-    transform-origin: center;
+  .ensou-breath.is-drawn {
     animation: ensou-breath 9s ease-in-out infinite;
   }
 }
@@ -284,12 +282,10 @@ html.fx-cursor button {
 @keyframes ensou-breath {
   0%,
   100% {
-    transform: scale(1);
-    opacity: 1;
+    opacity: 0.17;
   }
   50% {
-    transform: scale(1.02);
-    opacity: 0.78;
+    opacity: 0.12;
   }
 }
 
@@ -1172,4 +1168,384 @@ html.menu-open #site-header[data-header-theme] {
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+}
+
+/* =========================================================================
+ * 伝統 × 未来のモーショングラフィック（2026-09 改修 第2弾）
+ * 伝統の素材（幕・筆・墨・楽譜）が、未来の媒体（光・走査線・信号・デコード）へ
+ * 移り変わる瞬間を、一つの演出につき一つずつ見せる。JS 側は src/scripts/motion.ts。
+ * ========================================================================= */
+
+/* ---------- 定式幕（Curtain.astro 共通）---------- */
+.curtain {
+  --scan: 0;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.curtain-stripe {
+  position: relative;
+  flex: 1 1 0;
+  background-color: var(--c);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* 布の襞: 縦縞ごとに中央を明るく、端を沈ませる */
+.curtain-stripe::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 0.28),
+    rgb(255 255 255 / 0.05) 35%,
+    rgb(255 255 255 / 0.05) 65%,
+    rgb(0 0 0 / 0.3)
+  );
+}
+
+/* 走査線: 幕が畳まれるにつれて布が光の横縞（ディスプレイの走査線）に置き換わる */
+.curtain-stripe::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: var(--scan);
+  background:
+    repeating-linear-gradient(0deg, rgb(11 15 22 / 0.85) 0 2px, rgb(143 179 224 / 0.35) 2px 3px),
+    linear-gradient(90deg, rgb(143 179 224 / 0.25), rgb(143 179 224 / 0.6));
+}
+
+/* 幕の端（最後に動き出す縦縞の右端）に、開いていく境目を示す光の線 */
+.curtain-stripe:last-child {
+  box-shadow:
+    1px 0 0 rgb(143 179 224 / 0.9),
+    6px 0 22px rgb(143 179 224 / 0.45);
+}
+
+/* ---------- 開演演出（Intro.astro）---------- */
+#intro {
+  display: none;
+}
+
+html.intro #intro {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  /* 背景は持たない: 幕が引かれた所から、その奥の夜の舞台（ヒーロー）がそのまま見える */
+  animation: intro-out 0.4s ease 1.72s forwards;
+}
+
+html.intro.intro-skip #intro {
+  animation: intro-out 0.28s ease forwards;
+}
+
+html.intro #intro .intro-curtain {
+  animation: intro-cue-flash 0.6s ease 0.34s both;
+}
+
+html.intro #intro .curtain-stripe {
+  /* 引幕: 端（右）の縦縞から先に動き、左端へ畳まれていく */
+  animation: intro-stripe 1s cubic-bezier(0.76, 0, 0.24, 1) calc(0.6s + (var(--n) - 1 - var(--i)) * 0.045s)
+    forwards;
+}
+
+html.intro #intro .curtain-stripe::after {
+  animation: intro-scan 0.7s linear 1.05s forwards;
+}
+
+@keyframes intro-stripe {
+  to {
+    transform: translateX(calc(var(--i) * -100%)) scaleX(0.06);
+  }
+}
+
+@keyframes intro-scan {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes intro-cue-flash {
+  0% {
+    filter: brightness(1);
+  }
+  18% {
+    filter: brightness(1.35);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@keyframes intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* 柝（き）の一打: 音の代わりに、一点の光から波紋が二重に広がる */
+.intro-cue {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+.intro-cue-line {
+  position: absolute;
+  left: -0.5px;
+  top: -22px;
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(180deg, transparent, #fff, transparent);
+  box-shadow: 0 0 12px rgb(143 179 224 / 0.9);
+  opacity: 0;
+  transform: scaleY(0);
+}
+
+.intro-cue-ring {
+  position: absolute;
+  left: -40px;
+  top: -40px;
+  width: 80px;
+  height: 80px;
+  border-radius: 9999px;
+  border: 1px solid rgb(143 179 224 / 0.9);
+  box-shadow: 0 0 18px rgb(143 179 224 / 0.35);
+  opacity: 0;
+}
+
+html.intro .intro-cue-line {
+  animation: intro-cue-line 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
+}
+
+html.intro .intro-cue-ring {
+  animation: intro-cue-ring 1s cubic-bezier(0.22, 1, 0.36, 1) 0.34s forwards;
+}
+
+html.intro .intro-cue-ring--late {
+  border-color: rgb(192 75 60 / 0.8);
+  animation-delay: 0.46s;
+}
+
+@keyframes intro-cue-line {
+  0% {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1.6);
+  }
+}
+
+@keyframes intro-cue-ring {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(5.5);
+  }
+}
+
+/* ---------- 出演依頼の幕開き（JS が「未表示」のときだけ is-armed を付ける）---------- */
+.section-curtain {
+  z-index: 5;
+  display: none;
+}
+
+.section-curtain.is-armed {
+  display: flex;
+}
+
+/* ---------- 筆の一円相（InkEnsou.astro）---------- */
+/* JS 有効時は「未だ書かれていない」状態から始める（JS 無効時は完成形のまま） */
+html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+/* スマホ縦画面: 円相を名前の背後（画面中央上寄り）へ寄せ、画面に収まる大きさにする */
+@media (max-width: 767px) and (max-aspect-ratio: 1/1) {
+  .hero-ensou-frame {
+    transform-box: view-box;
+    transform-origin: 0 0;
+    transform: translate(356px, 98px) scale(0.58);
+  }
+}
+
+/* ---------- 墨 → 色（写真の走査リビール）---------- */
+.scan-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  -webkit-backdrop-filter: grayscale(1) contrast(1.12) brightness(0.92);
+  backdrop-filter: grayscale(1) contrast(1.12) brightness(0.92);
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 1px;
+  margin-top: -1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgb(222 233 246 / 0.95) 20%, #fff 50%, rgb(222 233 246 / 0.95) 80%, transparent);
+  box-shadow:
+    0 0 10px rgb(143 179 224 / 0.9),
+    0 -18px 28px rgb(143 179 224 / 0.18);
+}
+
+/* ---------- 見出し: 筆で左から書かれる ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-brush] {
+    -webkit-mask-image: linear-gradient(90deg, #000 0 42%, transparent 58% 100%);
+    mask-image: linear-gradient(90deg, #000 0 42%, transparent 58% 100%);
+    -webkit-mask-size: 260% 100%;
+    mask-size: 260% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+    filter: blur(5px);
+    transition:
+      -webkit-mask-position 1.35s cubic-bezier(0.65, 0, 0.35, 1),
+      mask-position 1.35s cubic-bezier(0.65, 0, 0.35, 1),
+      filter 1s ease 0.2s;
+  }
+
+  html.js [data-brush].is-written {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+    filter: blur(0);
+  }
+}
+
+/* ---------- 光の三本弦: 信号パルスと文化譜の数字 ---------- */
+.shamisen-pulse {
+  fill: none;
+  stroke: #eef4fb;
+  stroke-linecap: round;
+  stroke-dasharray: 46 2000;
+  stroke-dashoffset: 46;
+  opacity: 0.85;
+  animation: string-pulse var(--pulse-period) linear var(--pulse-delay) infinite;
+}
+
+/* 信号の発光（フィルターを使わず、太く淡い線を下に敷く） */
+.shamisen-pulse--halo {
+  stroke: #8fb3e0;
+  opacity: 0.22;
+}
+
+/* 一の糸（太い弦）の信号は朱に灯る */
+.shamisen-pulse[data-pulse-for='1'] {
+  stroke: #f09a86;
+}
+
+.shamisen-pulse--halo[data-pulse-for='1'] {
+  stroke: #e0735f;
+}
+
+/* 周期の 35% で弦の端から端まで走り、残りは静かに待つ（Strings.astro の TRAVEL と一致） */
+@keyframes string-pulse {
+  0% {
+    stroke-dashoffset: 46;
+  }
+  35%,
+  100% {
+    stroke-dashoffset: -1000;
+  }
+}
+
+.string-note,
+.string-note-live {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  fill: #dce7f4;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.string-note {
+  opacity: 0;
+  animation: string-note var(--pulse-period) linear var(--note-delay) infinite;
+}
+
+@keyframes string-note {
+  0% {
+    opacity: 0;
+  }
+  1.2% {
+    opacity: 0.8;
+  }
+  9% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 弾いた位置に浮かぶ数字: ふわりと上がって消える */
+.string-note-live {
+  font-size: 15px;
+  animation: string-note-live 1.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.string-note-live[data-string='1'] {
+  fill: #f09a86;
+}
+
+@keyframes string-note-live {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  18% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+
+/* 画面外の弦はアニメーションを止める（JS: strings.ts が .is-offscreen を付与） */
+.strings-svg.is-offscreen .shamisen-pulse,
+.strings-svg.is-offscreen .string-note {
+  animation-play-state: paused;
+}
+
+/* reduced-motion: 追加演出はすべて止め、完成形のみ */
+@media (prefers-reduced-motion: reduce) {
+  #intro,
+  .section-curtain,
+  .shamisen-pulse,
+  .string-note,
+  .string-note-live,
+  .scan-veil,
+  .scan-line {
+    display: none !important;
+  }
+
+  html.js svg[data-ensou] [data-ensou-spine] {
+    stroke-dashoffset: 0;
+  }
 }

@@ -1,9 +1,10 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import PageHero from '../../components/PageHero.astro';
 import { localePath } from '../../i18n/utils';
+import { buildPerson, websiteId } from '../../lib/seo';
 import portraitPhoto from '../../assets/photos/portrait.jpg';
 import { SITE } from '../../config/site';
 import { useTranslations, type Lang } from '../../i18n/ui';
@@ -33,10 +34,23 @@ const profile = {
 } as const;
 
 const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
+
+// 構造化データ: プロフィールページ（ProfilePage）。主題となる人物を明示する
+const portraitImage = await getImage({ src: portraitPhoto, width: 800, format: 'jpg' });
+const profilePageJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  name: `${pageTitle} | ${lang === 'ja' ? SITE.artistNameJa : SITE.artistNameEn}`,
+  url: new URL(localePath(lang, 'about/'), Astro.site).href,
+  inLanguage: lang,
+  isPartOf: { '@id': websiteId(Astro.site) },
+  mainEntity: buildPerson(lang, Astro.site, new URL(portraitImage.src, Astro.site).href),
+};
 ---
 
 <Base lang={lang} subpath="about/" title={pageTitle} description={t('meta.about')}>
-  <PageHero lang={lang} en="About" label={pageTitle} index={1} />
+  <script type="application/ld+json" set:html={JSON.stringify(profilePageJsonLd)} />
+  <PageHero lang={lang} en="About" label={pageTitle} />
   <div class="mx-auto max-w-6xl px-4 py-section sm:px-6">
 
     <div class="grid gap-12 md:grid-cols-[1fr_minmax(16rem,24rem)]">
@@ -47,21 +61,15 @@ const pageTitle = lang === 'ja' ? 'プロフィール' : 'About';
             {lang === 'ja' ? SITE.artistNameDisplay : SITE.artistNameJa}
           </span>
         </p>
-        {/* 経歴を一文ずつ、左に細い罫線と番号を添えた年譜風に組む */}
-        <ol class="space-y-5 border-l border-line">
-          {profile[lang].map((paragraph, index) => (
-            <li class="relative pl-6">
-              <span class="absolute -left-[3px] top-[0.8em] h-[5px] w-[5px] rotate-45 bg-accent/60" aria-hidden="true" />
-              <span class="hud mr-3 text-muted">{String(index + 1).padStart(2, '0')}</span>
-              {paragraph}
-            </li>
-          ))}
-        </ol>
+        {/* 経歴は番号を付けず、左に一本の縦罫を添えた散文として組む */}
+        <div class="space-y-5 border-l border-line pl-6">
+          {profile[lang].map((paragraph) => <p>{paragraph}</p>)}
+        </div>
       </div>
 
       <figure class="relative m-3 self-start md:sticky md:top-24">
         <span class="hud-corners text-accent/50" aria-hidden="true"></span>
-        <div data-mask-reveal>
+        <div class="relative overflow-hidden" data-mask-reveal data-scan>
         <Image
           src={portraitPhoto}
           alt={lang === 'ja' ? '長唄三味線方・菊池光峰のポートレート写真' : 'Portrait photograph of nagauta shamisen player KIKUCHI Mitsutaka'}

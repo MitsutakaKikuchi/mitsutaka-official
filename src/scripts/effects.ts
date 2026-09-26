@@ -21,6 +21,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
+import { introDelay } from './intro';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -60,6 +61,8 @@ function initReveals(): void {
         y: 0,
         duration: 1.1,
         ease: 'power3.out',
+        // 開演演出の最中は、幕が開くまでヒーローの登場を待つ
+        delay: el.closest('#hero') ? introDelay() : 0,
         scrollTrigger: { trigger: el, start: 'top 88%', once: true },
       }
     );
@@ -79,6 +82,7 @@ function initMaskReveals(): void {
       if (zoomTarget) gsap.set(zoomTarget, { scale: ZOOM_REVEAL_TO });
       return;
     }
+    const heroDelay = el.closest('#hero') ? introDelay() : 0;
     gsap.fromTo(
       el,
       { clipPath: 'inset(0% 0% 100% 0%)' },
@@ -86,6 +90,7 @@ function initMaskReveals(): void {
         clipPath: 'inset(0% 0% 0% 0%)',
         duration: 1.4,
         ease: 'power3.inOut',
+        delay: heroDelay,
         scrollTrigger: { trigger: el, start: 'top 85%', once: true },
       }
     );
@@ -98,6 +103,7 @@ function initMaskReveals(): void {
           scale: ZOOM_REVEAL_TO,
           duration: 1.8,
           ease: 'power3.out',
+          delay: heroDelay,
           scrollTrigger: { trigger: el, start: 'top 85%', once: true },
         }
       );
@@ -143,7 +149,7 @@ function initKineticType(): void {
       duration: 1.1,
       ease: 'power3.out',
       stagger: 0.09,
-      delay: 0.35,
+      delay: 0.35 + introDelay(),
     }
   );
 }
@@ -429,7 +435,11 @@ async function initParticles(): Promise<void> {
   if (!canvas || prefersReducedMotion()) return;
   // Three.js はホームページでのみ動的読込（他ページのバンドルを軽量に保つ）
   const { createHeroParticles } = await import('./heroParticles');
-  destroyParticles = createHeroParticles(canvas);
+  // 筆の円相が書かれ始めるのに合わせて、光の粒子が筆跡をなぞって集まる
+  destroyParticles = createHeroParticles(canvas, {
+    delay: 0.35 + introDelay(),
+    guide: document.querySelector<SVGGraphicsElement>('#hero [data-ensou-guide]'),
+  });
 }
 
 /* ---------- 「過去の出演をもっと見る」展開 ---------- */

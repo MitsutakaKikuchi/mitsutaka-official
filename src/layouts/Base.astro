@@ -10,6 +10,10 @@ import '@fontsource/shippori-mincho-b1/500.css';
 import '@fontsource/shippori-mincho-b1/700.css';
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import { getImage } from 'astro:assets';
+import portraitPhoto from '../assets/photos/portrait.jpg';
+import Intro from '../components/Intro.astro';
+import { buildPerson, personId, websiteId } from '../lib/seo';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Lightbox from '../components/Lightbox.astro';
@@ -38,6 +42,8 @@ interface Props {
    * false のページ（ありがとう・404）はヘッダーを和紙色で表示し、余白を確保する
    */
   nightTop?: boolean;
+  /** 開演演出（定式幕）を出すページか。トップページのみ true */
+  intro?: boolean;
 }
 
 const {
@@ -49,11 +55,16 @@ const {
   hideStickyCta = false,
   ogType = 'website',
   nightTop = true,
+  intro = false,
 } = Astro.props;
 const t = useTranslations(lang);
 
 const siteTitle = lang === 'ja' ? SITE.titleJa : SITE.titleEn;
-const brand = lang === 'ja' ? SITE.artistNameJa : SITE.artistNameEn;
+// 下層ページのタイトル末尾には職名も添える（「長唄 三味線」での検索にも名前が結び付くように）
+const brand =
+  lang === 'ja'
+    ? `${SITE.artistNameJa}（長唄三味線方）`
+    : `${SITE.artistNameEn}, Nagauta Shamisen Player`;
 const pageTitle = title ? `${title} | ${brand}` : siteTitle;
 const pageDescription =
   description ?? (lang === 'ja' ? SITE.descriptionJa : SITE.descriptionEn);
@@ -67,36 +78,29 @@ const ogImageAlt =
     ? `${SITE.artistNameJa} — 長唄三味線方 公式サイト`
     : `${SITE.artistNameEn} — Nagauta Shamisen Player, Official Website`;
 
-// 構造化データ: アーティスト情報（仕様書④-2）
+// 構造化データ: アーティスト情報（仕様書④-2）。画像は OGP ではなく本人のポートレート
+const portraitImage = await getImage({ src: portraitPhoto, width: 800, format: 'jpg' });
+const portraitUrl = new URL(portraitImage.src, Astro.site).href;
 const personJsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: SITE.artistNameEn,
-  alternateName: SITE.artistNameJa,
-  jobTitle: lang === 'ja' ? '長唄三味線方' : 'Nagauta Shamisen Player',
-  description: lang === 'ja' ? SITE.descriptionJa : SITE.descriptionEn,
-  url: new URL(withBase('/'), Astro.site).href,
-  image: ogImageUrl,
-  nationality: lang === 'ja' ? '日本' : 'Japanese',
-  knowsAbout:
-    lang === 'ja'
-      ? ['長唄', '三味線', '歌舞伎音楽', '日本の伝統音楽']
-      : ['Nagauta', 'Shamisen', 'Kabuki music', 'Japanese traditional music'],
-  sameAs: Object.values(SITE.sns).filter(Boolean),
+  ...buildPerson(lang, Astro.site, portraitUrl),
 };
 
-// 構造化データ: サイト自体（言語別 URL を明示）
+// 構造化データ: サイト自体（言語別 URL を明示し、運営者＝人物に結び付ける）
 const websiteJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
+  '@id': websiteId(Astro.site),
   name: siteTitle,
   url: new URL(localePath(lang), Astro.site).href,
   inLanguage: lang,
+  publisher: { '@id': personId(Astro.site) },
+  about: { '@id': personId(Astro.site) },
 };
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang={lang} data-intro-page={intro ? '' : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -143,6 +147,29 @@ const websiteJsonLd = {
     <script is:inline>
       // JS 有効時のみフェードイン演出を適用するためのフラグ
       document.documentElement.classList.add('js');
+      // 開演演出（定式幕）: トップページへの初回訪問時のみ、描画前に判定して <html class="intro"> を付ける。
+      // reduced-motion・クローラー・自動操作・ページ内遷移では出さない（?intro=1 で強制表示）
+      (function () {
+        try {
+          var d = document.documentElement;
+          if (!d.hasAttribute('data-intro-page') || document.readyState !== 'loading') return;
+          var force = /[?&]intro=1(&|$)/.test(location.search);
+          if (!force) {
+            if (sessionStorage.getItem('mk-intro')) return;
+            if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            if (navigator.webdriver) return;
+            if (/bot|crawl|spider|slurp|lighthouse|headless|preview|facebookexternalhit/i.test(navigator.userAgent)) return;
+          }
+          sessionStorage.setItem('mk-intro', '1');
+          window.__mkIntroT0 = performance.now();
+          d.classList.add('intro');
+          setTimeout(function () {
+            d.classList.remove('intro', 'intro-skip');
+          }, 2600);
+        } catch (e) {
+          /* sessionStorage が使えない環境では演出を出さない */
+        }
+      })();
     </script>
     <ClientRouter />
   </head>
@@ -153,6 +180,7 @@ const websiteJsonLd = {
     >
       {lang === 'ja' ? '本文へスキップ' : 'Skip to content'}
     </a>
+    {intro && <Intro />}
     <div id="scroll-progress" aria-hidden="true"></div>
     <!-- ページ遷移中の読み込みインジケーター（上部の藍→朱の線 + 右上の一円相） -->
     <div id="page-loader" aria-live="polite" aria-label={t('loading.label')} hidden>
@@ -172,9 +200,11 @@ const websiteJsonLd = {
     <script>
       // モーション演出一式（Lenis / GSAP / カーソル / WebGL パーティクル）
       import '../scripts/effects';
-      // 光の三本弦（触れると弾かれる弦・音のトグル）
+      // 光の三本弦（触れると弾かれる弦・光の信号・文化譜の数字）
       import { initStrings } from '../scripts/strings';
       document.addEventListener('astro:page-load', initStrings);
+      // 伝統 × 未来のモーショングラフィック（開演・筆の円相・墨→色・見出し・幕開き）
+      import '../scripts/motion';
       // クッキー同意 + GA4（測定IDは <head> の meta から読む。View Transitions でも head は差し替わるため確実）
       import { initConsent } from '../scripts/consent';
       document.addEventListener('astro:page-load', () => {

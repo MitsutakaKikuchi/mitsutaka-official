@@ -1,0 +1,35 @@
+---
+/**
+ * 歌舞伎の定式幕（じょうしきまく）を想起させる三色の縦縞の幕。
+ * 長唄は歌舞伎とともに育った音楽であり、「幕が開く」ことを演出の基調にする。
+ * 引幕のように縦縞が片側へ寄せられて畳まれ、畳まれた幕は光の走査線に溶けて消える
+ * （開演演出 Intro.astro と、出演依頼セクションの幕開きで共用）。
+ * 装飾のみ（aria-hidden・pointer-events: none）。
+ */
+interface Props {
+  class?: string;
+  /** 縦縞の本数（3 の倍数） */
+  stripes?: number;
+  [key: `data-${string}`]: string | boolean | undefined;
+}
+
+const { class: className = '', stripes = 9, ...rest } = Astro.props;
+
+// 黒・柿・萌葱（色味はサイトの藍・朱・和紙の地に馴染むよう、わずかに沈めている）
+const COLORS = ['#101318', '#a9542f', '#1f5446'];
+const items = Array.from({ length: stripes }, (_, index) => ({
+  index,
+  color: COLORS[index % COLORS.length],
+}));
+---
+
+<div class:list={['curtain', className]} aria-hidden="true" {...rest}>
+  {
+    items.map((item) => (
+      <span
+        class="curtain-stripe"
+        style={`--i:${item.index};--n:${stripes};--c:${item.color}`}
+      />
+    ))
+  }
+</div>

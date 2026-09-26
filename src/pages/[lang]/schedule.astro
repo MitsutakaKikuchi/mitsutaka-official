@@ -4,6 +4,9 @@ import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import EventCard from '../../components/EventCard.astro';
 import { localePath } from '../../i18n/utils';
+import { resolveImageUrl } from '../../lib/images';
+import { personId } from '../../lib/seo';
+import { SITE } from '../../config/site';
 import { useTranslations, type Lang } from '../../i18n/ui';
 
 export function getStaticPaths() {
@@ -25,33 +28,71 @@ const pastEvents = allEvents
   .filter((event) => event.data.date < now)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-// 構造化データ: 公演イベント（仕様書④-2）
+// 構造化データ: 公演イベント（仕様書④-2）。Google のイベントのリッチリザルトの推奨項目まで埋める
+const schedulePageUrl = new URL(localePath(lang, 'schedule/'), Astro.site).href;
 const eventsJsonLd = {
   '@context': 'https://schema.org',
-  '@graph': upcomingEvents.map((event) => ({
-    '@type': 'MusicEvent',
-    name: lang === 'ja' ? event.data.titleJa : event.data.titleEn,
-    startDate: event.data.date.toISOString().slice(0, 10),
-    location: {
-      '@type': 'Place',
-      name: lang === 'ja' ? event.data.venueJa : event.data.venueEn,
-      address: {
-        '@type': 'PostalAddress',
-        addressLocality: lang === 'ja' ? event.data.cityJa : event.data.cityEn,
-        addressCountry: event.data.country,
+  '@graph': upcomingEvents.map((event) => {
+    const data = event.data;
+    const name = lang === 'ja' ? data.titleJa : data.titleEn;
+    const venue = lang === 'ja' ? data.venueJa : data.venueEn;
+    const city = lang === 'ja' ? data.cityJa : data.cityEn;
+    const images = [...data.flyerUrls, ...data.photoUrls].map(
+      (url) => new URL(resolveImageUrl(url), Astro.site).href
+    );
+    const offerUrl = data.ticketUrl ?? data.websiteUrl;
+    return {
+      '@type': 'MusicEvent',
+      name,
+      startDate: data.date.toISOString().slice(0, 10),
+      eventStatus: 'https://schema.org/EventScheduled',
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      description:
+        lang === 'ja'
+          ? `${name}（${venue}・${city}）。長唄三味線方 ${SITE.artistNameJa} 出演。`
+          : `${name} at ${venue}, ${city}, featuring nagauta shamisen player ${SITE.artistNameEn}.`,
+      url: data.websiteUrl ?? schedulePageUrl,
+      ...(images.length > 0 ? { image: images } : {}),
+      location: {
+        '@type': 'Place',
+        name: venue,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: city,
+          addressCountry: data.country,
+        },
       },
-    },
-    ...(event.data.ticketUrl ? { offers: { '@type': 'Offer', url: event.data.ticketUrl } } : {}),
-  })),
+      performer: {
+        '@type': 'Person',
+        '@id': personId(Astro.site),
+        name: lang === 'ja' ? SITE.artistNameJa : SITE.artistNameEn,
+      },
+      ...(offerUrl || data.soldOut
+        ? {
+            offers: {
+              '@type': 'Offer',
+              ...(offerUrl ? { url: offerUrl } : {}),
+              availability: data.soldOut
+                ? 'https://schema.org/SoldOut'
+                : 'https://schema.org/InStock',
+            },
+          }
+        : {}),
+    };
+  }),
 };
 
 const pageTitle = lang === 'ja' ? '出演スケジュール' : 'Schedule';
 ---
 
 <Base lang={lang} subpath="schedule/" title={pageTitle} description={t('meta.schedule')}>
-  <script type="application/ld+json" set:html={JSON.stringify(eventsJsonLd)} />
+  {
+    upcomingEvents.length > 0 && (
+      <script type="application/ld+json" set:html={JSON.stringify(eventsJsonLd)} />
+    )
+  }
 
-  <PageHero lang={lang} en="Schedule" label={pageTitle} index={2} />
+  <PageHero lang={lang} en="Schedule" label={pageTitle} />
 
   <!-- 区分ジャンプ: 今後 / 過去 の件数を示すタブ風リンク（スクロール位置で固定） -->
   <nav
