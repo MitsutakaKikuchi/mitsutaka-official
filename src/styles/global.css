@@ -1272,13 +1272,11 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
 }
 
 /* ---------- 墨 → 色（写真の走査リビール）---------- */
-.scan-veil {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  -webkit-backdrop-filter: grayscale(1) contrast(1.12) brightness(0.92);
-  backdrop-filter: grayscale(1) contrast(1.12) brightness(0.92);
+/* 走査前の写真は墨一色（JS 有効・motion 許可時のみ。描画前から適用して色の写真を見せない） */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-scan]:not(.is-scanned) img {
+    filter: grayscale(1) contrast(1.12) brightness(0.92);
+  }
 }
 
 .scan-line {
@@ -1371,7 +1369,6 @@ html.js svg[data-ensou]:not([data-ensou='static']) [data-ensou-spine] {
 @media (prefers-reduced-motion: reduce) {
   .section-curtain,
   .shamisen-pulse,
-  .scan-veil,
   .scan-line {
     display: none !important;
   }

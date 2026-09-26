@@ -71,23 +71,23 @@ function initInkEnsou(reduced: boolean): void {
 /* ---------- 墨 → 色（光の走査線が通った所から色づく）---------- */
 const SCAN_DURATION_S = 1.35;
 
-const supportsBackdrop = (): boolean =>
-  typeof CSS !== 'undefined' &&
-  (CSS.supports('backdrop-filter', 'grayscale(1)') ||
-    CSS.supports('-webkit-backdrop-filter', 'grayscale(1)'));
-
+/*
+ * 写真は CSS で最初から墨一色（グレースケール）で描画しておき（色の写真が一瞬見えるのを防ぐ）、
+ * 光の走査線が上から下へ通るのに合わせて、写真自体のフィルターを色へ戻す。
+ * 背景をぼかし・加工する backdrop-filter は重いため使わない（写真1枚のフィルターのみ）。
+ */
 function initScanReveal(reduced: boolean): void {
-  if (reduced || !supportsBackdrop()) return;
   document.querySelectorAll<HTMLElement>('[data-scan]').forEach((box) => {
-    if (box.querySelector('.scan-veil')) return;
-    // 墨色の膜（背後の写真をグレースケールにする）と、それを払っていく光の走査線
-    const veil = document.createElement('span');
-    veil.className = 'scan-veil';
-    veil.setAttribute('aria-hidden', 'true');
+    const image = box.querySelector<HTMLImageElement>('img');
+    if (!image || box.classList.contains('is-scanned')) return;
+    if (reduced) {
+      box.classList.add('is-scanned');
+      return;
+    }
     const line = document.createElement('span');
     line.className = 'scan-line';
     line.setAttribute('aria-hidden', 'true');
-    box.append(veil, line);
+    box.append(line);
 
     // マスクで現れる写真は、マスクが半分ほど開いてから走査を始める
     const masked = box.hasAttribute('data-mask-reveal') || box.closest('[data-mask-reveal]');
@@ -96,15 +96,20 @@ function initScanReveal(reduced: boolean): void {
     const timeline = gsap.timeline({
       paused: true,
       onComplete: () => {
-        veil.remove();
         line.remove();
+        box.classList.add('is-scanned');
+        gsap.set(image, { clearProps: 'filter' });
       },
     });
     timeline
       .fromTo(
-        veil,
-        { clipPath: 'inset(0% 0% 0% 0%)' },
-        { clipPath: 'inset(100% 0% 0% 0%)', duration: SCAN_DURATION_S, ease: 'power2.inOut' },
+        image,
+        { filter: 'grayscale(1) contrast(1.12) brightness(0.92)' },
+        {
+          filter: 'grayscale(0) contrast(1) brightness(1)',
+          duration: SCAN_DURATION_S,
+          ease: 'power2.inOut',
+        },
         0
       )
       .fromTo(
