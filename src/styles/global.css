@@ -586,34 +586,46 @@ html.menu-open #header-lang {
  * ========================================================================= */
 
 /*
- * View Transitions のページ遷移を「巻物を上から広げる」ような墨のワイプにする。
- * 旧ページは静かに沈み、新ページは上端から下へ現れる。reduced-motion では既定のフェードのまま。
+ * View Transitions のページ遷移: 墨を落としたように、新しいページが画面中央からにじんで広がる。
+ * 縁が不規則な墨の滴（SVG のフラクタルノイズで揺らした円）をマスクにして拡大する。
+ * 旧ページは静かに沈んで消える。reduced-motion では既定のフェードのまま。
  */
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(root) {
-    animation: vt-sink 0.45s cubic-bezier(0.76, 0, 0.24, 1) both;
+    animation: vt-sink 0.5s cubic-bezier(0.76, 0, 0.24, 1) both;
   }
 
   ::view-transition-new(root) {
-    animation: vt-unroll 0.7s cubic-bezier(0.76, 0, 0.24, 1) both;
+    -webkit-mask-image: var(--ink-drop);
+    mask-image: var(--ink-drop);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    animation: vt-ink 0.85s cubic-bezier(0.65, 0, 0.35, 1) both;
   }
+}
+
+:root {
+  --ink-drop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='f' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.035' numOctaves='3' seed='7'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='26'/%3E%3CfeGaussianBlur stdDeviation='1.6'/%3E%3C/filter%3E%3Ccircle cx='100' cy='100' r='62' fill='%23000' filter='url(%23f)'/%3E%3C/svg%3E");
 }
 
 @keyframes vt-sink {
   to {
     opacity: 0;
-    transform: translateY(1.5%);
+    transform: translateY(1%);
   }
 }
 
-@keyframes vt-unroll {
+@keyframes vt-ink {
   from {
-    clip-path: inset(0 0 100% 0);
-    transform: translateY(-1%);
+    -webkit-mask-size: 0% 0%;
+    mask-size: 0% 0%;
   }
   to {
-    clip-path: inset(0 0 0 0);
-    transform: none;
+    /* 画面の対角線を覆い切る大きさまで（縦長のスマホでも角が残らないよう余裕を持たせる） */
+    -webkit-mask-size: 420vmax 420vmax;
+    mask-size: 420vmax 420vmax;
   }
 }
 
@@ -1123,6 +1135,7 @@ html.js img[data-slide]:not(.is-loaded) {
 .event-date-day {
   font-family: 'Cormorant Variable', var(--font-serif);
   font-weight: 400;
+  font-variant-numeric: tabular-nums;
   font-feature-settings: 'lnum' 1;
 }
 
@@ -1391,4 +1404,51 @@ html.fx-cursor #lightbox * {
   box-shadow:
     0 0 0 2px #fff,
     0 0 6px rgb(0 0 0 / 0.5);
+}
+
+/* ---------- ライトボックス: 四隅の額装が伸びてから写真が現れる ---------- */
+.lb-frame {
+  position: relative;
+  display: block;
+  line-height: 0;
+}
+
+.lb-corners {
+  --l: 22px;
+  color: rgb(247 245 240 / 0.85);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #lightbox[open] .lb-corners {
+    animation: lb-corners 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  #lightbox[open] [data-lightbox-image] {
+    animation: lb-photo 0.5s ease 0.28s both;
+  }
+}
+
+@keyframes lb-corners {
+  from {
+    inset: 38%;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    inset: -10px;
+    opacity: 1;
+  }
+}
+
+@keyframes lb-photo {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }

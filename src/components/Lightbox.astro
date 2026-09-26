@@ -39,11 +39,15 @@ const t = useTranslations(lang);
   >
     <span aria-hidden="true" class="text-lg leading-none">›</span>
   </button>
-  <img
-    data-lightbox-image
-    alt=""
-    class="block max-h-[88dvh] max-w-[92vw] select-none object-contain"
-  />
+  <!-- 四隅の額装（開くと中央から写真の縁まで伸び、そのあと写真が現れる） -->
+  <span class="lb-frame">
+    <span class="hud-corners lb-corners" aria-hidden="true"></span>
+    <img
+      data-lightbox-image
+      alt=""
+      class="block max-h-[88dvh] max-w-[92vw] select-none object-contain"
+    />
+  </span>
   <p
     data-lightbox-counter
     class="fixed bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-ink/60 px-3 py-1 text-xs tracking-widest text-paper backdrop-blur"

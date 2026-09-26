@@ -8,6 +8,7 @@
  * - 欧文ラベル（[data-scramble]）: 文化譜の数字が走ってから文字に定まる（デコード）
  * - 幕開き（[data-curtain]）: 出演依頼の舞台に入ると、定式幕が片側へ畳まれて開く
  * - 透かし（[data-drift]）: 下層ページの大きな欧文がスクロールでゆっくり流れる
+ * - 公演日付（.event-date-day）: カードにマウスを乗せると数字が一瞬ほどけて定まる
  *
  * すべて prefers-reduced-motion を尊重し、その場合は完成形を静的に表示する。
  * Astro View Transitions（astro:page-load / astro:before-swap / astro:after-swap）に対応。
@@ -273,6 +274,48 @@ function initDrift(reduced: boolean): void {
   });
 }
 
+/* ---------- 公演カード: マウスを乗せると日付が一瞬ほどけて定まる ---------- */
+const DATE_SCRAMBLE_MS = 520;
+
+function scrambleDate(el: HTMLElement): void {
+  const finalText = el.dataset.dateText ?? el.textContent?.trim() ?? '';
+  if (!finalText || el.dataset.scrambling) return;
+  el.dataset.dateText = finalText;
+  el.dataset.scrambling = '1';
+  const chars = [...finalText];
+  const start = performance.now();
+  let lastSwap = 0;
+  const step = (now: number) => {
+    const progress = (now - start) / DATE_SCRAMBLE_MS;
+    if (progress >= 1) {
+      el.textContent = finalText;
+      delete el.dataset.scrambling;
+      return;
+    }
+    if (now - lastSwap >= SCRAMBLE_FRAME_MS) {
+      lastSwap = now;
+      // 数字だけを入れ替え、「/」は動かさない。左の桁から順に定まる
+      el.textContent = chars
+        .map((char, index) =>
+          /\d/.test(char) && progress < 0.35 + (index / chars.length) * 0.6
+            ? String(Math.floor(Math.random() * 10))
+            : char
+        )
+        .join('');
+    }
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function initDateHover(reduced: boolean): void {
+  if (reduced || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  document.querySelectorAll<HTMLElement>('.event-date-day').forEach((date) => {
+    const card = date.closest<HTMLElement>('article') ?? date;
+    card.addEventListener('mouseenter', () => scrambleDate(date));
+  });
+}
+
 /* ---------- ページごとの初期化 ---------- */
 function initMotion(): void {
   const reduced = prefersReducedMotion();
@@ -282,6 +325,7 @@ function initMotion(): void {
   initScramble(reduced);
   initCurtains(reduced);
   initDrift(reduced);
+  initDateHover(reduced);
 }
 
 // View Transitions は <html> の属性を新しいページのものに入れ替えるため、
