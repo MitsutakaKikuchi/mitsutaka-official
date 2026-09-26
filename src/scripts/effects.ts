@@ -21,7 +21,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import { introDelay } from './intro';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -61,8 +60,6 @@ function initReveals(): void {
         y: 0,
         duration: 1.1,
         ease: 'power3.out',
-        // 開演演出の最中は、幕が開くまでヒーローの登場を待つ
-        delay: el.closest('#hero') ? introDelay() : 0,
         scrollTrigger: { trigger: el, start: 'top 88%', once: true },
       }
     );
@@ -82,7 +79,6 @@ function initMaskReveals(): void {
       if (zoomTarget) gsap.set(zoomTarget, { scale: ZOOM_REVEAL_TO });
       return;
     }
-    const heroDelay = el.closest('#hero') ? introDelay() : 0;
     gsap.fromTo(
       el,
       { clipPath: 'inset(0% 0% 100% 0%)' },
@@ -90,7 +86,6 @@ function initMaskReveals(): void {
         clipPath: 'inset(0% 0% 0% 0%)',
         duration: 1.4,
         ease: 'power3.inOut',
-        delay: heroDelay,
         scrollTrigger: { trigger: el, start: 'top 85%', once: true },
       }
     );
@@ -103,8 +98,7 @@ function initMaskReveals(): void {
           scale: ZOOM_REVEAL_TO,
           duration: 1.8,
           ease: 'power3.out',
-          delay: heroDelay,
-          scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+            scrollTrigger: { trigger: el, start: 'top 85%', once: true },
         }
       );
     }
@@ -149,7 +143,7 @@ function initKineticType(): void {
       duration: 1.1,
       ease: 'power3.out',
       stagger: 0.09,
-      delay: 0.35 + introDelay(),
+      delay: 0.35,
     }
   );
 }
@@ -217,6 +211,14 @@ function ensureCursorElements(): void {
     ring.setAttribute('aria-hidden', 'true');
     document.body.appendChild(ring);
   }
+}
+
+/** カーソル要素を指定の親へ移す（ライトボックス表示中はダイアログ内＝最前面に置く） */
+function moveCursorInto(parent: HTMLElement): void {
+  ['cursor-dot', 'cursor-ring'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && el.parentElement !== parent) parent.appendChild(el);
+  });
 }
 
 function initCursor(): void {
@@ -358,6 +360,8 @@ function initLightbox(): void {
       index = showLightboxImage(dialog, event.detail.start ?? 0, images);
       updateAlt();
       dialog.showModal();
+      // モーダル（トップレイヤー）の上にもカスタムカーソルが出るよう、ダイアログ内へ移す
+      moveCursorInto(dialog);
       // 背景ページのスクロールを止める（Lenis慣性スクロール + ネイティブ両方）
       lenis?.stop();
       document.documentElement.classList.add('lightbox-open');
@@ -365,6 +369,7 @@ function initLightbox(): void {
 
     // 閉じたとき（×ボタン / 背景クリック / Escキー いずれも）に背景スクロールを復帰
     dialog.addEventListener('close', () => {
+      moveCursorInto(document.body);
       document.documentElement.classList.remove('lightbox-open');
       lenis?.start();
     });
@@ -437,7 +442,7 @@ async function initParticles(): Promise<void> {
   const { createHeroParticles } = await import('./heroParticles');
   // 筆の円相が書かれ始めるのに合わせて、光の粒子が筆跡をなぞって集まる
   destroyParticles = createHeroParticles(canvas, {
-    delay: 0.35 + introDelay(),
+    delay: 0.35,
     guide: document.querySelector<SVGGraphicsElement>('#hero [data-ensou-guide]'),
   });
 }
