@@ -6,7 +6,8 @@
  * - 円相（ring）: 筆の一円相（InkEnsou）が書かれていくのを追いかけるように集まり、
  *   以後は筆跡に沿って書き順の方向へ静かに流れ続ける（筆の軌跡を光が何度もなぞる）。
  *   筆の太い所には多く・明るく、抜き（細い所）では淡く集まる
- * スクロールでヒーローが退場し始めると、円相の粒子は火の粉のように舞い上がって散る。
+ * スクロールでヒーローが退場し始めると、円相の粒子は火の粉のように舞い上がって散る（PC のみ。
+ * スマホではスクロールには反応せず、タップした時だけ波紋のように散る）。
  * マウス／タッチからは緩やかに逃げ、タップで波紋のように散る（位置・強さ・波紋を毎フレーム補間し、
  * 指を離した後も波紋を最後まで再生してから、粒子がゆっくり元の位置へ戻る）。
  * ヒーローが画面外にある間は描画ループを止める。
@@ -285,27 +286,61 @@ export function createHeroParticles(
     }
   }
 
+  /*
+   * タッチ操作は「タップ」だけに反応させる（スクロールのために指を置いた・動かしただけでは反応しない）。
+   * 指を置いた位置・時刻を記録し、ほとんど動かさずに短時間で離した場合のみ、その位置から波紋を広げる。
+   */
+  const TAP_MAX_MOVE_PX = 10;
+  const TAP_MAX_DURATION_MS = 450;
+  let touchStart: { id: number; x: number; y: number; t: number } | null = null;
+
+  const startRipple = (clientX: number, clientY: number) => {
+    setPointerFromClient(clientX, clientY);
+    presenceTarget = 1;
+    rippleTarget = 1.8; // 補間で立ち上がるため、ピークが従来（1.0）と同程度になるよう高めに置く
+  };
+
   // マウス・ペン: 動かしている間は反発点を追従させる
   function onPointerMove(event: PointerEvent): void {
     if (event.pointerType === 'touch') {
-      // 指でなぞっている間も追従（スクロールが始まると pointercancel で終わる）
-      if (presenceTarget > 0) setPointerFromClient(event.clientX, event.clientY);
+      // 指が動いたらスクロールとみなし、タップ扱いをやめる
+      if (
+        touchStart &&
+        event.pointerId === touchStart.id &&
+        Math.hypot(event.clientX - touchStart.x, event.clientY - touchStart.y) > TAP_MAX_MOVE_PX
+      ) {
+        touchStart = null;
+      }
       return;
     }
     setPointerFromClient(event.clientX, event.clientY);
     presenceTarget = 1;
   }
 
-  // タップ／クリック: その位置から波紋のように粒子が広がる
+  // クリック: その位置から波紋のように粒子が広がる。タッチは離した時にタップか判定する
   function onPointerDown(event: PointerEvent): void {
-    setPointerFromClient(event.clientX, event.clientY);
-    presenceTarget = 1;
-    rippleTarget = 1.8; // 補間で立ち上がるため、ピークが従来（1.0）と同程度になるよう高めに置く
+    if (event.pointerType === 'touch') {
+      touchStart = { id: event.pointerId, x: event.clientX, y: event.clientY, t: performance.now() };
+      return;
+    }
+    startRipple(event.clientX, event.clientY);
   }
 
-  // 指を離した・スクロールに移った: 波紋は最後まで再生しつつ、影響をゆっくり引いていく
+  // 指を離した: タップなら波紋を再生し、影響は波紋が収まるにつれてゆっくり引いていく
   function onPointerEnd(event: PointerEvent): void {
-    if (event.pointerType === 'touch') presenceTarget = 0;
+    if (event.pointerType !== 'touch') return;
+    const tap = touchStart;
+    touchStart = null;
+    if (
+      event.type === 'pointerup' &&
+      tap &&
+      event.pointerId === tap.id &&
+      performance.now() - tap.t <= TAP_MAX_DURATION_MS &&
+      Math.hypot(event.clientX - tap.x, event.clientY - tap.y) <= TAP_MAX_MOVE_PX
+    ) {
+      startRipple(event.clientX, event.clientY);
+    }
+    presenceTarget = 0;
   }
 
   // マウスが画面外へ出たら、ゆっくり影響を引く
@@ -326,6 +361,8 @@ export function createHeroParticles(
     'ResizeObserver' in window ? new ResizeObserver(() => resize()) : null;
   resizeObserver?.observe(canvas);
 
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+
   const startTime = performance.now();
   const gatherStart = startTime + delay * 1000;
 
@@ -337,7 +374,8 @@ export function createHeroParticles(
     // ヒーローの退場具合（0 = 画面上端にぴったり, 1 = 完全に退場）で円相を散らす
     const rect = canvas.getBoundingClientRect();
     const exit = Math.min(1, Math.max(0, -rect.top / Math.max(rect.height, 1)));
-    const scatter = Math.min(1, Math.max(0, (exit - 0.02) / 0.5));
+    // スマホ（タッチ主体の端末）ではスクロールで粒子を散らさない（反応はタップ時のみ）
+    const scatter = isCoarsePointer ? 0 : Math.min(1, Math.max(0, (exit - 0.02) / 0.5));
     material.uniforms.uScatter.value = scatter * scatter * (3 - 2 * scatter);
     // 波紋: 目標値は減衰させつつ、実際の値は追いかけるように変化（立ち上がりも収まりも滑らか）
     rippleTarget *= 0.95;
